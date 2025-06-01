@@ -38,5 +38,4 @@ out/
 
 ### Others ###
 *.http
-*.md
 .env
