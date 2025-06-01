@@ -33,7 +33,7 @@ jobs:
 
       - name: Build with Gradle
         if: ${{github.event_name == 'push'}}
-        run: ./gradlew build -x text
+        run: ./gradlew build -x test
 
       - name: Test with Gradle
         run: ./gradlew test
