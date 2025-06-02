@@ -5,6 +5,9 @@ import com.theokanning.openai.completion.chat.ChatCompletionResult;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
 import com.theokanning.openai.service.OpenAiService;
+import com.zb.jogakjogak.global.exception.CustomJDErrorCode;
+import com.zb.jogakjogak.global.exception.CustomJDException;
+import okhttp3.internal.http2.ErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,7 +64,7 @@ public class OpenAIResponseService {
             if (result != null && !result.getChoices().isEmpty()) {
                 return result.getChoices().get(0).getMessage().getContent().trim();
             } else {
-                return "요청 처리에 실패했습니다. 다시 시도해 주세요.";
+                throw new CustomJDException(CustomJDErrorCode.FAILED_ANALYSIS_REQUEST);
             }
         } catch (Exception e) {
             logger.error("OpenAI API 호출 중 오류 발생: {}", e.getMessage());
