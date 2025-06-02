@@ -29,7 +29,6 @@ public class OpenAIResponseServiceTest {
 
     private OpenAIResponseService openAIResponseService;
 
-    private final Logger logger = LoggerFactory.getLogger(OpenAIResponseServiceTest.class);
 
     private static final String MOCK_RESUME = "5년차 백엔드 개발 경험. Java, Spring Boot 능숙. RESTful API 설계 및 개발 경험 다수. MSA 환경 경험.";
     private static final String MOCK_JOB_DESCRIPTION = "백엔드 개발자 채용. Java/Spring Boot 필수. RESTful API 개발 경험 우대. MSA 경험 우대. 적극적인 문제 해결 능력.";
