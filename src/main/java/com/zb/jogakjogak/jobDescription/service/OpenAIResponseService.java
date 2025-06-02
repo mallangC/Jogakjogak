@@ -36,7 +36,8 @@ public class OpenAIResponseService {
 
         String systemContent = ""
                 + "당신은 제공된 이력서와 채용 공고를 보고 To do List를 작성해 주는 AI입니다.\n"
-                + "제공된 내용을 바탕으로 To do List를 작성해 주세요.";
+                + "1. 구조적 보완 계획, 2.내용 강조/ 재구성 재안(표현 및 피드백 기반), 3.취업 일정 관련 \n"
+                + "이 세가지로 나누어 To do List를 작성해 주세요. 만약 정보가 제공되지 않으면 작성하지 않으셔도 됩니다.";
 
         ChatMessage systemMessage = new ChatMessage(ChatMessageRole.SYSTEM.value(), systemContent);
         ChatMessage resumeMessage = new ChatMessage(ChatMessageRole.USER.value(), "<이력서>\n" + resume + "\n</이력서>");
