@@ -35,7 +35,7 @@ public class OpenAIResponseService {
     }
 
     public String sendRequest(String resume, String jobDescription, Integer maxTokens) {
-
+        //TODO: PROMPT 좋은 걸로 수정해야 함.
         String systemContent = """
                 당신은 제공된 이력서와 채용 공고를 보고 To do List를 작성해 주는 AI입니다.
                 1. 구조적 보완 계획, 2.내용 강조/ 재구성 재안(표현 및 피드백 기반), 3.취업 일정 관련\s
