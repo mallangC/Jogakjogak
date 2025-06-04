@@ -1,7 +1,7 @@
 package com.zb.jogakjogak.resume.controller;
 
 import com.zb.jogakjogak.global.HttpApiResponse;
-import com.zb.jogakjogak.resume.domain.ResumeRequestDto;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
 import com.zb.jogakjogak.resume.service.ResumeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

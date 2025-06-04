@@ -1,4 +1,4 @@
-package com.zb.jogakjogak.resume.domain;
+package com.zb.jogakjogak.resume.domain.responseDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

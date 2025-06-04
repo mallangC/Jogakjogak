@@ -1,4 +1,4 @@
-package com.zb.jogakjogak.resume.domain;
+package com.zb.jogakjogak.resume.domain.requestDto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
