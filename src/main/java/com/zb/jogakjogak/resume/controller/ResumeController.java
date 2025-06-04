@@ -7,10 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,6 +29,18 @@ public class ResumeController {
                                 resumeService.register(requestDto),
                                 "이력서 등록 완료",
                                 HttpStatus.CREATED)
+                );
+    }
+
+    @PatchMapping("/{resume_id")
+    public ResponseEntity modify(@PathVariable Long resume_id, @Valid @RequestBody ResumeRequestDto requestDto) {
+        return ResponseEntity.ok()
+                .body(
+                        new HttpApiResponse(
+                                resumeService.modify(resume_id, requestDto),
+                                "이력서 수정 완료",
+                                HttpStatus.OK
+                        )
                 );
     }
 }
