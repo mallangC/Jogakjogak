@@ -13,6 +13,11 @@ public class ResumeService {
 
     private final ResumeRepository resumeRepository;
 
+    /**
+     * 이력서 등록을 위한 서비스 레이어 메서드
+     * @param requestDto 이력서 이름, 이력서 내용
+     * @return 이력서 id, 이력서 이름, 이력서 번호
+     */
     public ResumeResponseDto register(ResumeRequestDto requestDto) {
         Resume saveResume = Resume.builder()
                 .name(requestDto.getName())
