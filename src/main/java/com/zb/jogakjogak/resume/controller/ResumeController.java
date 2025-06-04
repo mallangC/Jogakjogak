@@ -32,6 +32,12 @@ public class ResumeController {
                 );
     }
 
+    /**
+     * 이력서 수정을 위한 컨트롤러 메서드
+     * @param resume_id 수정하려는 이력서의 id
+     * @param requestDto 수정할 이력서 이름, 수정할 이력서 내용
+     * @return data(수정한 이력서 id, 수정된 이력서 이름, 수정된 이력서 내용), 성공 여부 메세지, 상태코드
+     */
     @PatchMapping("/{resume_id}")
     public ResponseEntity modify(@PathVariable Long resume_id, @Valid @RequestBody ResumeRequestDto requestDto) {
         return ResponseEntity.ok()

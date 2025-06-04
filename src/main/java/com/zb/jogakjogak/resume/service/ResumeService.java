@@ -38,6 +38,12 @@ public class ResumeService {
                 .build();
     }
 
+    /**
+     *
+     * @param resumeId
+     * @param requestDto
+     * @return
+     */
     @Transactional
     public ResumeResponseDto modify(Long resumeId, @Valid ResumeRequestDto requestDto) {
         Resume resume = resumeRepository.findById(resumeId)

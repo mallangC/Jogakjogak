@@ -24,7 +24,10 @@ public class Resume extends BaseEntity {
     private String content;
     private boolean isBookMark;
 
-
+    /**
+     * 사용자가 이력서를 수정할 때 사용하는 메서드
+     * @param requestDto 수정할 이력서 이름, 수정할 이력서 내용
+     */
     public void modify(ResumeRequestDto requestDto) {
         this.name = requestDto.getName();
         this.content = requestDto.getContent();
