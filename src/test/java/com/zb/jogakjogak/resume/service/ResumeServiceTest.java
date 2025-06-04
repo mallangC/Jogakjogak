@@ -124,4 +124,41 @@ class ResumeServiceTest {
         // findById 메소드가 호출되었는지 확인
         verify(resumeRepository, times(1)).findById(nonExistentResumeId);
     }
+
+    @Test
+    @DisplayName("이력서 조회 성공 테스트 - 200 OK 예상")
+    void get_success() {
+        //Given
+        when(resumeRepository.findById(1L)).thenReturn(Optional.of(sampleResume));
+
+        //When
+        ResumeResponseDto result = resumeService.get(1L);
+
+        //Then
+        verify(resumeRepository, times(1)).findById(1L);
+
+        assertNotNull(result);
+        assertEquals(sampleResume.getId(), result.getResumeId());
+        assertEquals(sampleResume.getName(), result.getName());
+        assertEquals(sampleResume.getContent(), result.getContent());
+    }
+
+    @Test
+    @DisplayName("이력서 조회 실패 테스트 - 이력서를 찾을 수 없음")
+    void get_fail_notFoundResume() {
+        //Given
+        Long nonExistentResumeId = 99L;
+        when(resumeRepository.findById(nonExistentResumeId)).thenReturn(Optional.empty());
+
+        // When & Then
+        ResumeException exception = assertThrows(ResumeException.class, () -> {
+            resumeService.get(nonExistentResumeId);
+        });
+
+        // 예외 메시지 또는 에러 코드 검증
+        assertEquals(ResumeErrorCode.NOT_FOUND_RESUME, exception.getErrorCode());
+
+        // findById 메소드가 호출되었는지 확인
+        verify(resumeRepository, times(1)).findById(nonExistentResumeId);
+    }
 }
