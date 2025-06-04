@@ -66,4 +66,16 @@ public class ResumeController {
                         )
                 );
     }
+
+    @DeleteMapping("/{resume_id}")
+    public ResponseEntity delete(@PathVariable Long resume_id) {
+        return ResponseEntity.ok()
+                .body(
+                        new HttpApiResponse(
+                                resumeService.delete(resume_id),
+                                "이력서 삭제 성공",
+                                HttpStatus.OK
+                        )
+                );
+    }
 }
