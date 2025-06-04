@@ -32,7 +32,7 @@ public class ResumeController {
                 );
     }
 
-    @PatchMapping("/{resume_id")
+    @PatchMapping("/{resume_id}")
     public ResponseEntity modify(@PathVariable Long resume_id, @Valid @RequestBody ResumeRequestDto requestDto) {
         return ResponseEntity.ok()
                 .body(
