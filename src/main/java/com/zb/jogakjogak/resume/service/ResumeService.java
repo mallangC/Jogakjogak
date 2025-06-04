@@ -1,11 +1,16 @@
 package com.zb.jogakjogak.resume.service;
 
+import com.zb.jogakjogak.global.exception.ResumeException;
 import com.zb.jogakjogak.resume.domain.ResumeRequestDto;
 import com.zb.jogakjogak.resume.domain.ResumeResponseDto;
 import com.zb.jogakjogak.resume.entity.Resume;
 import com.zb.jogakjogak.resume.repository.ResumeRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import static com.zb.jogakjogak.global.exception.ResumeErrorCode.NOT_FOUND_RESUME;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +31,20 @@ public class ResumeService {
                 .build();
 
         Resume resume = resumeRepository.save(saveResume);
+        return ResumeResponseDto.builder()
+                .resumeId(resume.getId())
+                .name(resume.getName())
+                .content(resume.getContent())
+                .build();
+    }
+
+    @Transactional
+    public ResumeResponseDto modify(Long resumeId, @Valid ResumeRequestDto requestDto) {
+        Resume resume = resumeRepository.findById(resumeId)
+                        .orElseThrow(
+                                () -> new ResumeException(NOT_FOUND_RESUME)
+                        );
+        resume.modify(requestDto);
         return ResumeResponseDto.builder()
                 .resumeId(resume.getId())
                 .name(resume.getName())
