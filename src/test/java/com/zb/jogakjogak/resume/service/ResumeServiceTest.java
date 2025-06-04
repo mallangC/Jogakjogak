@@ -1,9 +1,12 @@
 package com.zb.jogakjogak.resume.service;
 
+import com.zb.jogakjogak.global.exception.ResumeErrorCode;
+import com.zb.jogakjogak.global.exception.ResumeException;
 import com.zb.jogakjogak.resume.domain.ResumeRequestDto;
 import com.zb.jogakjogak.resume.domain.ResumeResponseDto;
 import com.zb.jogakjogak.resume.entity.Resume;
 import com.zb.jogakjogak.resume.repository.ResumeRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,13 +14,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
+import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -29,9 +33,28 @@ class ResumeServiceTest {
     @InjectMocks
     private ResumeService resumeService;
 
+    private Resume sampleResume;
+    private ResumeRequestDto sampleRequestDto;
+
+
+    @BeforeEach
+    void setUp() {
+        sampleResume = Resume.builder()
+                .id(1L)
+                .name("기존 이름")
+                .content("기존 내용")
+                .isBookMark(false)
+                .build();
+
+        sampleRequestDto = ResumeRequestDto.builder()
+                .name("새로운 이름")
+                .content("새로운 내용")
+                .build();
+    }
+
     @DisplayName("이력서 등록 테스트")
     @Test
-    void testRegisterResume() {
+    void createResume_success() {
         //Given
         String testName = "테스트 이력서";
         String testContent = "이것은 테스트 내용입니다.";
@@ -58,20 +81,47 @@ class ResumeServiceTest {
         assertThat(responseDto.getName()).isEqualTo(testName);
         assertThat(responseDto.getContent()).isEqualTo(testContent);
 
-        verify(resumeRepository).save(any(Resume.class));
+        verify(resumeRepository, times(1)).save(any(Resume.class));
     }
 
-    @DisplayName("이력서 등록 실패 - 필수 값 누락 시")
+
     @Test
-    void testRegisterResumeFailure_MissingRequiredFields() {
-        // Given
-        ResumeRequestDto requestDto = ResumeRequestDto.builder()
-                .name(null) // 이름 누락
-                .content("내용은 있습니다.")
-                .build();
+    @DisplayName("이력서 수정 성공 테스트 - 200 OK 예상")
+    void modify_success() {
+        //Given
+        when(resumeRepository.findById(1L)).thenReturn(Optional.of(sampleResume));
+
+        //When
+        ResumeResponseDto result = resumeService.modify(1L, sampleRequestDto);
+
+        //Then
+        verify(resumeRepository, times(1)).findById(1L);
+
+        assertEquals(sampleRequestDto.getName(), sampleResume.getName());
+        assertEquals(sampleRequestDto.getContent(), sampleResume.getContent());
+
+        assertNotNull(result);
+        assertEquals(sampleResume.getId(), result.getResumeId());
+        assertEquals(sampleRequestDto.getName(), result.getName());
+        assertEquals(sampleRequestDto.getContent(), result.getContent());
+    }
+
+    @Test
+    @DisplayName("이력서 수정 실패 테스트 - 이력서를 찾을 수 없음")
+    void modify_fail_notFoundResume() {
+        //Given
+        Long nonExistentResumeId = 99L;
+        when(resumeRepository.findById(nonExistentResumeId)).thenReturn(Optional.empty());
 
         // When & Then
-        assertThatThrownBy(() -> resumeService.register(requestDto))
-                .isInstanceOf(NullPointerException.class);
+        ResumeException exception = assertThrows(ResumeException.class, () -> {
+            resumeService.modify(nonExistentResumeId, sampleRequestDto);
+        });
+
+        // 예외 메시지 또는 에러 코드 검증
+        assertEquals(ResumeErrorCode.NOT_FOUND_RESUME, exception.getErrorCode());
+
+        // findById 메소드가 호출되었는지 확인
+        verify(resumeRepository, times(1)).findById(nonExistentResumeId);
     }
 }
