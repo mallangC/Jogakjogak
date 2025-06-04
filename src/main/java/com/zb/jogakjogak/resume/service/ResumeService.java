@@ -39,10 +39,10 @@ public class ResumeService {
     }
 
     /**
-     *
-     * @param resumeId
-     * @param requestDto
-     * @return
+     * 사용자가 이력서를 수정할 떄 찾으려는 서비스 메서드
+     * @param resumeId 수정하려는 이력서의 id
+     * @param requestDto 수정할 이력서의 내용, 수정할 이력서의 이름
+     * @return 수정된 이력서의 id, 수정된 이력서의 이름, 수정된 이력서의 내용
      */
     @Transactional
     public ResumeResponseDto modify(Long resumeId, @Valid ResumeRequestDto requestDto) {
@@ -55,6 +55,11 @@ public class ResumeService {
                 .build();
     }
 
+    /**
+     * 사용자가 이력서를 조회할 떄 사용하는 서비스 메서드
+     * @param resumeId 찾으련느 이력서의 id
+     * @return 사용자가 찾으려는 이력서의 정보
+     */
     public ResumeResponseDto get(Long resumeId) {
         Resume resume = findResume(resumeId);
         return ResumeResponseDto.builder()
@@ -64,6 +69,11 @@ public class ResumeService {
                 .build();
     }
 
+    /**
+     * 이력서의 id로 이력서를 찾는 메서드
+     * @param resumeId 찾으려는 이력서의 id
+     * @return 찾는 이력서의 정보가 담긴 Resume 객체
+     */
     private Resume findResume(Long resumeId) {
         return resumeRepository.findById(resumeId)
                 .orElseThrow(
