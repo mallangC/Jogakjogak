@@ -49,4 +49,16 @@ public class ResumeController {
                         )
                 );
     }
+
+    @GetMapping("/{resume_id}")
+    public ResponseEntity get(@PathVariable Long resume_id) {
+        return ResponseEntity.ok()
+                .body(
+                        new HttpApiResponse(
+                                resumeService.get(resume_id),
+                                "이력서 조회 성공",
+                                HttpStatus.OK
+                        )
+                );
+    }
 }
