@@ -46,15 +46,28 @@ public class ResumeService {
      */
     @Transactional
     public ResumeResponseDto modify(Long resumeId, @Valid ResumeRequestDto requestDto) {
-        Resume resume = resumeRepository.findById(resumeId)
-                        .orElseThrow(
-                                () -> new ResumeException(NOT_FOUND_RESUME)
-                        );
+        Resume resume = findResume(resumeId);
         resume.modify(requestDto);
         return ResumeResponseDto.builder()
                 .resumeId(resume.getId())
                 .name(resume.getName())
                 .content(resume.getContent())
                 .build();
+    }
+
+    public ResumeResponseDto get(Long resumeId) {
+        Resume resume = findResume(resumeId);
+        return ResumeResponseDto.builder()
+                .resumeId(resume.getId())
+                .name(resume.getName())
+                .content(resume.getContent())
+                .build();
+    }
+
+    private Resume findResume(Long resumeId) {
+        return resumeRepository.findById(resumeId)
+                .orElseThrow(
+                        () -> new ResumeException(NOT_FOUND_RESUME)
+                );
     }
 }
