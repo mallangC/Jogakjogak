@@ -81,4 +81,12 @@ public class ResumeService {
                         () -> new ResumeException(NOT_FOUND_RESUME)
                 );
     }
+
+    public ResumeDeleteResponseDto delete(Long resumeId) {
+        Resume resume = findResume(resumeId);
+        resumeRepository.delete(resume);
+        return ResumeDeleteResponseDto.builder()
+                .resumeId(resume.getId())
+                .build();
+    }
 }
