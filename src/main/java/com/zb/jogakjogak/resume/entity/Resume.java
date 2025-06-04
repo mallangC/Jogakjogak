@@ -1,6 +1,7 @@
 package com.zb.jogakjogak.resume.entity;
 
 import com.zb.jogakjogak.global.BaseEntity;
+import com.zb.jogakjogak.resume.domain.ResumeRequestDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,4 +24,9 @@ public class Resume extends BaseEntity {
     private String content;
     private boolean isBookMark;
 
+
+    public void modify(ResumeRequestDto requestDto) {
+        this.name = requestDto.getName();
+        this.content = requestDto.getContent();
+    }
 }
