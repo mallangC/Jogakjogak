@@ -44,13 +44,6 @@ jobs:
       - name: Test with Gradle
         run: ./gradlew test
 
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-report
-          path: build/reports/tests/test
-
       - name: Generate JaCoCo Report
         run: ./gradlew jacocoTestReport
 
