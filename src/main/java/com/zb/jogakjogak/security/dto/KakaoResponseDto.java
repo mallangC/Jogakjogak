@@ -5,10 +5,9 @@ import lombok.AllArgsConstructor;
 import java.util.Map;
 
 @AllArgsConstructor
-public class KakaoResponse {
+public class KakaoResponseDto {
 
     private final Map<String, Object> attribute;
-
 
     public String getProvider() {
         return "kakao";
