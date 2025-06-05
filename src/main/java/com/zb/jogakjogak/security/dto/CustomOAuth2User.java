@@ -1,6 +1,7 @@
-package com.zb.jogakjogak.security.oauth2.dto;
+package com.zb.jogakjogak.security.dto;
 
-import com.zb.jogakjogak.security.oauth2.entity.Member;
+import com.zb.jogakjogak.security.entity.Member;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -10,19 +11,18 @@ import java.util.Collection;
 import java.util.Map;
 
 
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class CustomOAuth2User implements OAuth2User {
 
     private final Member member;
 
     @Override
     public Map<String, Object> getAttributes() {
-        return null;
+        return Map.of();
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-
         Collection<GrantedAuthority> collection = new ArrayList<>();
         collection.add(new GrantedAuthority() {
             @Override
@@ -33,15 +33,12 @@ public class CustomOAuth2User implements OAuth2User {
         return collection;
     }
 
-    public String getEmail() {
-
-        return member.getEmail();
-    }
-
     @Override
     public String getName() {
-        return null;
+        return member.getUserName();
     }
 
-
+    public String getEmail() {
+        return member.getEmail();
+    }
 }
