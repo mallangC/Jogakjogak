@@ -39,13 +39,10 @@ public class ReissueController {
         String refreshToken = extractRefreshTokenFromCookie(request.getCookies());
         
         ReissueResultDto reissueResultDto = reissueService.reissue(refreshToken);
-        System.out.println();
+
         // 헤더와 쿠키에 토큰을 담아서 반환
         response.setHeader("Authorization", reissueResultDto.getNewAccessToken());
-        System.out.println("액세스 " + reissueResultDto.getNewAccessToken());
         response.addCookie(createCookie("refresh", reissueResultDto.getNewRefreshToken()));
-        System.out.println("리프레쉬 " + reissueResultDto.getNewRefreshToken());
-
         return new HttpApiResponse<>(null, "refresh token 재발급 완료", HttpStatus.OK);
     }
 
