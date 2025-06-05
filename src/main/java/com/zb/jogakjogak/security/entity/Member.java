@@ -1,20 +1,18 @@
-package com.zb.jogakjogak.security.oauth2.entity;
+package com.zb.jogakjogak.security.entity;
 
 
-import com.zb.jogakjogak.security.oauth2.MemberRole;
+import com.zb.jogakjogak.security.Role;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -26,10 +24,8 @@ public class Member {
 
     private String userName;
 
-    @Email
     private String email;
 
-    @NotNull
     private String password;
 
     private String name;
@@ -38,7 +34,7 @@ public class Member {
 
     private String phoneNumber;
 
-    private MemberRole role;
+    private Role role;
 
     private String provider;
 }
