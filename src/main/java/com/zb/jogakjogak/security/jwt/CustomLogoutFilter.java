@@ -1,5 +1,7 @@
 package com.zb.jogakjogak.security.jwt;
 
+import com.zb.jogakjogak.global.exception.CustomException;
+import com.zb.jogakjogak.global.exception.ErrorCode;
 import com.zb.jogakjogak.security.Token;
 import com.zb.jogakjogak.security.repository.RefreshTokenRepository;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -45,22 +47,19 @@ public class CustomLogoutFilter extends GenericFilter {
         }
 
         if (refresh == null) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+            throw new CustomException(ErrorCode.NOT_FOUND_TOKEN);
         }
 
         try {
             jwtUtil.isExpired(refresh);
         } catch (ExpiredJwtException e) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+            throw new CustomException(ErrorCode.TOKEN_EXPIRED);
         }
 
         // 토큰이 refresh인지 확인 (발급시 페이로드에 명시)
         String token = jwtUtil.getToken(refresh);
         if (!token.equals(Token.REFRESH_TOKEN.name())) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+            throw new CustomException(ErrorCode.NOT_REFRESH_TOKEN);
         }
 
         //DB에 저장되어 있는지 확인
@@ -69,8 +68,8 @@ public class CustomLogoutFilter extends GenericFilter {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
+
         //로그아웃 진행
-        //Refresh 토큰 DB에서 제거
         refreshEntityRepository.deleteByRefreshToken(refresh);
 
         //Refresh 토큰 Cookie 값 0

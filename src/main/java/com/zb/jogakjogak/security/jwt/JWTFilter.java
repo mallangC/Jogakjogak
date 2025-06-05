@@ -46,7 +46,6 @@ public class JWTFilter extends OncePerRequestFilter {
 
         // Authorization 헤더가 비어있거나 "Bearer " 로 시작하지 않은 경우
         if (authorization == null || !authorization.startsWith("Bearer ")) {
-            System.out.println("token 이 존재하지않습니다.");
             filterChain.doFilter(request, response);
             return;
         }
@@ -55,7 +54,6 @@ public class JWTFilter extends OncePerRequestFilter {
 
         // token 소멸 시간 검증
         if (jwtUtil.isExpired(token)) {
-            System.out.println("token expired");
             filterChain.doFilter(request, response);
             return;
         }
