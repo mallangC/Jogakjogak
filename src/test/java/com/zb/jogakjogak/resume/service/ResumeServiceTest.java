@@ -1,5 +1,6 @@
 package com.zb.jogakjogak.resume.service;
 
+import com.github.javafaker.Faker;
 import com.zb.jogakjogak.global.exception.ResumeErrorCode;
 import com.zb.jogakjogak.global.exception.ResumeException;
 import com.zb.jogakjogak.resume.domain.ResumeRequestDto;
@@ -35,19 +36,22 @@ class ResumeServiceTest {
 
     private Resume sampleResume;
     private ResumeRequestDto sampleRequestDto;
+    private Faker faker;
 
 
     @BeforeEach
     void setUp() {
+        faker = new Faker();
+
         sampleResume = Resume.builder()
                 .id(1L)
-                .name("기존 이름")
+                .name(faker.job().title())
                 .content("기존 내용")
                 .isBookMark(false)
                 .build();
 
         sampleRequestDto = ResumeRequestDto.builder()
-                .name("새로운 이름")
+                .name(faker.job().title())
                 .content("새로운 내용")
                 .build();
     }
@@ -56,7 +60,7 @@ class ResumeServiceTest {
     @Test
     void createResume_success() {
         //Given
-        String testName = "테스트 이력서";
+        String testName = faker.job().title();
         String testContent = "이것은 테스트 내용입니다.";
         ResumeRequestDto requestDto = ResumeRequestDto.builder()
                 .name(testName)
