@@ -51,10 +51,6 @@ public class ResumeService {
                                 () -> new ResumeException(NOT_FOUND_RESUME)
                         );
         resume.modify(requestDto);
-        return ResumeResponseDto.builder()
-                .resumeId(resume.getId())
-                .name(resume.getName())
-                .content(resume.getContent())
-                .build();
+        return new ResumeResponseDto(resume);
     }
 }
