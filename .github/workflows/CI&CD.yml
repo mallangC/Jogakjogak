@@ -44,22 +44,22 @@ jobs:
         with:
           name: test-report
           path: build/reports/tests/test
-# 테스트 코드 작성 후 주석 제거할 예정(JaCoCo 연결)
-#      - name: Generate JaCoCo Report
-#        run: ./gradlew jacocoTestReport
-#
-#      - name: JaCoCo Report to PR
-#        uses: madrapps/jacoco-report@v1.7.1
-#        with:
-#          paths: ${{ github.workspace }}/build/reports/jacoco/test/jacocoTestReport.xml
-#          token: ${{ secrets.GITHUB_TOKEN }}
-#          title: 'Code Coverage'
-#          update-comment: true
-#
-#      - name: Upload JaCoCo coverage report
-#        uses: codecov/codecov-action@v3
-#        if: ${{ success() }}
-#        with:
-#          files: build/reports/jacoco/test/jacocoTestReport.xml
-#          flags: unittests
-#          name: codecov-unit
+
+      - name: Generate JaCoCo Report
+        run: ./gradlew jacocoTestReport
+
+      - name: JaCoCo Report to PR
+        uses: madrapps/jacoco-report@v1.7.1
+        with:
+          paths: ${{ github.workspace }}/build/reports/jacoco/test/jacocoTestReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: 'Code Coverage'
+          update-comment: true
+
+      - name: Upload JaCoCo coverage report
+        uses: codecov/codecov-action@v3
+        if: ${{ success() }}
+        with:
+          files: build/reports/jacoco/test/jacocoTestReport.xml
+          flags: unittests
+          name: codecov-unit
