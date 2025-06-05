@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 public class JDResponseDto {
     private String title;
     private String jdUrl;
-    private String analysisResult;
+    private List<ToDoItemDto> analysisResult;
     private String memo;
     private LocalDateTime endedAt;
 }
