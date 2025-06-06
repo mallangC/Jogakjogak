@@ -26,18 +26,15 @@ public class ReissueService {
         if (refreshToken == null) {
             throw new CustomException(ErrorCode.NOT_FOUND_TOKEN);
         }
-
         try {
             jwtUtil.isExpired(refreshToken);
         } catch (ExpiredJwtException e) {
             throw new CustomException(ErrorCode.TOKEN_EXPIRED);
         }
-
         // 토큰이 refresh인지 확인 (발급시 페이로드에 명시)
         if (!jwtUtil.getToken(refreshToken).equals(Token.REFRESH_TOKEN.name())) {
             throw new CustomException(ErrorCode.NOT_REFRESH_TOKEN);
         }
-
         // DB에 저장되어 있는지 확인
         if (!refreshTokenRepository.existsByRefreshToken(refreshToken)) {
             throw new CustomException(ErrorCode.NOT_FOUND_TOKEN);
@@ -59,7 +56,7 @@ public class ReissueService {
             refreshTokenRepository.save(existingToken);
         } else {
             // 새로 생성
-            saveNewRefreshToken(userName, newRefresh, 604800000L);
+            saveNewRefreshTokenEntity(userName, newRefresh, 604800000L);
         }
 
         return ReissueResultDto.builder()
@@ -68,7 +65,7 @@ public class ReissueService {
                 .build();
     }
 
-    private void saveNewRefreshToken(String userName, String newRefresh, Long expiredMs) {
+    private void saveNewRefreshTokenEntity(String userName, String newRefresh, Long expiredMs) {
         Date date = new Date(System.currentTimeMillis() + expiredMs);
         RefreshToken refreshToken = RefreshToken.builder()
                 .userName(userName)
