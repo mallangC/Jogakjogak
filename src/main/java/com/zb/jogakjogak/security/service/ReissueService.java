@@ -47,7 +47,7 @@ public class ReissueService {
         String role = jwtUtil.getRole(refreshToken);
 
         // 새로운 jwt발급
-        String newAccess = jwtUtil.createJwt(userName, role, 600000L, Token.ACCESS_TOKEN);
+        String newAccess = jwtUtil.createJwt(userName, role, 3600000L, Token.ACCESS_TOKEN);
         String newRefresh = jwtUtil.createJwt(userName, role, 604800000L, Token.REFRESH_TOKEN);
 
         // refresh 토큰 저장 db에 기존의 refresh토큰 삭제후 새 refresh토큰 저장
