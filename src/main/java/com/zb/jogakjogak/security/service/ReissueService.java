@@ -48,18 +48,18 @@ public class ReissueService {
 
         // 새로운 jwt발급
         String newAccess = jwtUtil.createJwt(userName, role, 600000L, Token.ACCESS_TOKEN);
-        String newRefresh = jwtUtil.createJwt(userName, role, 86400000L, Token.REFRESH_TOKEN);
+        String newRefresh = jwtUtil.createJwt(userName, role, 604800000L, Token.REFRESH_TOKEN);
 
         // refresh 토큰 저장 db에 기존의 refresh토큰 삭제후 새 refresh토큰 저장
         RefreshToken existingToken = refreshTokenRepository.findByRefreshToken(refreshToken);
         if (existingToken != null) {
             // 기존 엔티티 업데이트
             existingToken.setRefreshToken(newRefresh);
-            existingToken.setExpiration(new Date(System.currentTimeMillis() + 86400000L).toString());
+            existingToken.setExpiration(new Date(System.currentTimeMillis() + 604800000L).toString());
             refreshTokenRepository.save(existingToken);
         } else {
             // 새로 생성
-            saveNewRefreshToken(userName, newRefresh, 86400000L);
+            saveNewRefreshToken(userName, newRefresh, 604800000L);
         }
 
         return ReissueResultDto.builder()
