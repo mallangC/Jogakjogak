@@ -28,12 +28,10 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
         OAuth2User oAuth2User = super.loadUser(userRequest);
-
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
-
         KakaoResponseDto kakaoResponseDto = new KakaoResponseDto(oAuth2User.getAttributes());
 
-        String userName = kakaoResponseDto.getProvider() + " " + kakaoResponseDto.getProviderId();
+        String userName = kakaoResponseDto.getProvider() + "_" + kakaoResponseDto.getProviderId();
 
         Member existMember = memberRepository.findByUserName(userName);
         Member member;

@@ -24,6 +24,7 @@ public class Member {
 
     private String userName;
 
+    @Email
     private String email;
 
     private String password;

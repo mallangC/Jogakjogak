@@ -47,7 +47,7 @@ public class CustomLogoutFilter extends GenericFilter {
     }
 
     private boolean isLogoutRequest(HttpServletRequest request) {
-        return "^\\/member/logout$".equals(request.getRequestURI()) && "POST".equals(request.getMethod());
+        return "/member/logout".equals(request.getRequestURI()) && "POST".equals(request.getMethod());
     }
 
     private String extractRefreshTokenFromCookie(Cookie[] cookies) {

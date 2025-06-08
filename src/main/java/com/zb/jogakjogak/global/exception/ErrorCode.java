@@ -9,8 +9,8 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ErrorCode {
     NOT_FOUND_TOKEN(HttpStatus.NOT_FOUND, "존재하지 않는 토큰입니다."),
-    TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "만료된 토큰입니다."),
-    NOT_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "refresh 토큰이 아닙니다." )
+    TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
+    NOT_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "refresh 토큰이 아닙니다." ),
 
 
 
