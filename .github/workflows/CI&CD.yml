@@ -6,13 +6,19 @@ on:
   pull_request:
     branches: [ "main", "dev" ]
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
-        name: Set up JDK 17
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -38,28 +44,21 @@ jobs:
       - name: Test with Gradle
         run: ./gradlew test
 
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
+      - name: Generate JaCoCo Report
+        run: ./gradlew jacocoTestReport
+
+      - name: JaCoCo Report to PR
+        uses: madrapps/jacoco-report@v1.7.1
         with:
-          name: test-report
-          path: build/reports/tests/test
-# 테스트 코드 작성 후 주석 제거할 예정(JaCoCo 연결)
-#      - name: Generate JaCoCo Report
-#        run: ./gradlew jacocoTestReport
-#
-#      - name: JaCoCo Report to PR
-#        uses: madrapps/jacoco-report@v1.7.1
-#        with:
-#          paths: ${{ github.workspace }}/build/reports/jacoco/test/jacocoTestReport.xml
-#          token: ${{ secrets.GITHUB_TOKEN }}
-#          title: 'Code Coverage'
-#          update-comment: true
-#
-#      - name: Upload JaCoCo coverage report
-#        uses: codecov/codecov-action@v3
-#        if: ${{ success() }}
-#        with:
-#          files: build/reports/jacoco/test/jacocoTestReport.xml
-#          flags: unittests
-#          name: codecov-unit
+          paths: ${{ github.workspace }}/build/reports/jacoco/test/jacocoTestReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: 'Code Coverage'
+          update-comment: true
+
+      - name: Upload JaCoCo coverage report
+        uses: codecov/codecov-action@v3
+        if: ${{ success() }}
+        with:
+          files: build/reports/jacoco/test/jacocoTestReport.xml
+          flags: unittests
+          name: codecov-unit
