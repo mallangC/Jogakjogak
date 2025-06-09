@@ -22,7 +22,6 @@ class ReissueServiceTest {
     private JWTUtil jwtUtil;
     private RefreshTokenRepository refreshTokenRepository;
     private ReissueService reissueService;
-
     private final Faker faker = new Faker();
 
     @BeforeEach
@@ -33,7 +32,7 @@ class ReissueServiceTest {
     }
 
     @Test
-    @DisplayName("기존 refresh토큰이 존재할 경우 업데이트")
+    @DisplayName("기존 refresh 토큰이 존재할 경우 업데이트")
     void reissue_when_exists_refresh_token_test() {
         // given
         String refreshToken = faker.internet().uuid();
@@ -64,7 +63,7 @@ class ReissueServiceTest {
     }
 
     @Test
-    @DisplayName("기존 refresh토큰이 없을경우 생성후 DB저장")
+    @DisplayName("기존 refresh 토큰이 없을경우 생성후 DB저장")
     void reissue_when_not_exists_refresh_token_test() {
         // given
         String refreshToken = faker.internet().uuid();

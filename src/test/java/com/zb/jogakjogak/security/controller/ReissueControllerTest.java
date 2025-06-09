@@ -4,6 +4,7 @@ import com.zb.jogakjogak.security.dto.ReissueResultDto;
 import com.zb.jogakjogak.security.service.ReissueService;
 import jakarta.servlet.http.Cookie;
 import net.datafaker.Faker;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -30,6 +31,7 @@ class ReissueControllerTest {
     private final Faker faker = new Faker();
 
     @Test
+    @DisplayName("refresh, access토큰 재발급 성공")
     void refreshToken_reissue_success_test() throws Exception {
         // given
         String oldRefresh = faker.internet().uuid();

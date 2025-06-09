@@ -1,10 +1,9 @@
 package com.zb.jogakjogak.security.jwt;
 
-import com.zb.jogakjogak.global.exception.CustomException;
-import com.zb.jogakjogak.global.exception.ErrorCode;
+import com.zb.jogakjogak.global.exception.SecurityException;
+import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.security.Token;
 import com.zb.jogakjogak.security.repository.RefreshTokenRepository;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -52,15 +51,15 @@ public class JWTUtil {
 
     public void validateToken(String token, Token tokenType) {
         if (token == null) {
-            throw new CustomException(ErrorCode.NOT_FOUND_TOKEN);
+            throw new SecurityException(MemberErrorCode.NOT_FOUND_TOKEN);
         }
 
         if (isExpired(token)) {
-            throw new CustomException(ErrorCode.TOKEN_EXPIRED);
+            throw new SecurityException(MemberErrorCode.TOKEN_EXPIRED);
         }
 
         if (!getToken(token).equals(tokenType.name())) {
-            throw new CustomException(ErrorCode.TOKEN_TYPE_NOT_MATCH);
+            throw new SecurityException(MemberErrorCode.TOKEN_TYPE_NOT_MATCH);
         }
     }
 

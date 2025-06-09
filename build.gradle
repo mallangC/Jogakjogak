@@ -31,7 +31,7 @@ repositories {
 dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-//    implementation 'org.springframework.boot:spring-boot-starter-security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
@@ -42,7 +42,7 @@ dependencies {
     //test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.mockito:mockito-core'
-    testImplementation 'net.datafaker:datafaker:2.0.2' // faker
+    testImplementation 'net.datafaker:datafaker:2.0.2'
 
     //
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'

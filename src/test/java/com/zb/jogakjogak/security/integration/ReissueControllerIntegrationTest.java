@@ -55,7 +55,7 @@ public class ReissueControllerIntegrationTest {
 
     @Test
     @DisplayName("통합 테스트 - refresh 토큰이 유효하면 access + refresh 재발급 성공")
-    void reissueIntegrationSuccessTest() throws Exception {
+    void reissue_integration_success_test() throws Exception {
         // when
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/api/member/reissue")
                         .with(csrf())

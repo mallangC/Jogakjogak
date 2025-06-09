@@ -57,5 +57,6 @@ jwt:
 openai:
   api:
     key: ${OPENAI_API_KEY}
+    url: ${OPENAI_API_URL}
     model: gpt-4-turbo
     max-tokens: 1000
