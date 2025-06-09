@@ -60,7 +60,7 @@ public class JWTUtil {
         }
 
         if (!getToken(token).equals(tokenType.name())) {
-            throw new CustomException(ErrorCode.NOT_REFRESH_TOKEN);
+            throw new CustomException(ErrorCode.TOKEN_TYPE_NOT_MATCH);
         }
     }
 

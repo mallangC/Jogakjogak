@@ -22,7 +22,7 @@ public class ReissueService {
 
     public ReissueResultDto reissue(String refreshToken) {
 
-        jwtUtil.validateToken(refreshToken, Token.ACCESS_TOKEN);
+        jwtUtil.validateToken(refreshToken, Token.REFRESH_TOKEN);
 
         String userName = jwtUtil.getUserName(refreshToken);
         String role = jwtUtil.getRole(refreshToken);
