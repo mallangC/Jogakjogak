@@ -14,7 +14,7 @@ import java.io.IOException;
 public class CustomLogoutFilter extends GenericFilter {
     private final RefreshTokenRepository refreshEntityRepository;
     private final JWTUtil jwtUtil;
-    private static final String LOGOUT_URI = "/member/logout";
+    private static final String LOGOUT_URI = "/api/member/logout";
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
