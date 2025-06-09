@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ToDoItemDto {
+public class ToDoListDto {
     private String type;
+    private String title;
     private String description;
-    private String priority;
 }

@@ -7,7 +7,7 @@ import com.zb.jogakjogak.global.exception.JDErrorCode;
 import com.zb.jogakjogak.global.exception.JDException;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
-import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoItemDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -85,9 +85,9 @@ public class JDService {
                 * 우수한 커뮤니케이션 및 협업 능력
                 """;
         String analysisJsonString = openAIResponseService.sendRequest(resumeContent, jdContent, 0);
-        List<ToDoItemDto> parsedAnalysisResult;
+        List<ToDoListDto> parsedAnalysisResult;
         try {
-            CollectionType listType = objectMapper.getTypeFactory().constructCollectionType(List.class, ToDoItemDto.class);
+            CollectionType listType = objectMapper.getTypeFactory().constructCollectionType(List.class, ToDoListDto.class);
             parsedAnalysisResult = objectMapper.readValue(analysisJsonString, listType);
         } catch (JsonProcessingException e) {
             throw new JDException(JDErrorCode.FAILED_JSON_PROCESS);

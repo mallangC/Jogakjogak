@@ -9,7 +9,7 @@ import com.zb.jogakjogak.global.exception.JDErrorCode;
 import com.zb.jogakjogak.global.exception.JDException;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
-import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoItemDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,7 +40,7 @@ class JDServiceTest {
 
     private JDRequestDto jdRequestDto;
     private String mockAnalysisJsonString;
-    private List<ToDoItemDto> mockToDoList;
+    private List<ToDoListDto> mockToDoList;
     private Faker faker;
 
     @BeforeEach
@@ -56,8 +56,8 @@ class JDServiceTest {
         mockAnalysisJsonString = "[{\"item\":\"Java 학습\",\"status\":\"TODO\"},{\"item\":\"Spring Boot 프로젝트 경험 쌓기\",\"status\":\"IN_PROGRESS\"}]";
 
         mockToDoList = Arrays.asList(
-                new ToDoItemDto("1", "Java 학습", "중요"),
-                new ToDoItemDto("2", "spring boot 프로젝트 경험 쌓기", "보통")
+                new ToDoListDto("1", "Java 학습", "중요"),
+                new ToDoListDto("2", "spring boot 프로젝트 경험 쌓기", "보통")
         );
     }
 
@@ -69,7 +69,7 @@ class JDServiceTest {
                 .thenReturn(mockAnalysisJsonString);
 
         when(objectMapper.getTypeFactory()).thenReturn(mock(com.fasterxml.jackson.databind.type.TypeFactory.class));
-        when(objectMapper.getTypeFactory().constructCollectionType(eq(List.class), eq(ToDoItemDto.class)))
+        when(objectMapper.getTypeFactory().constructCollectionType(eq(List.class), eq(ToDoListDto.class)))
                 .thenReturn(mock(CollectionType.class));
         when(objectMapper.readValue(eq(mockAnalysisJsonString), any(CollectionType.class)))
                 .thenReturn(mockToDoList);
@@ -85,7 +85,7 @@ class JDServiceTest {
         assertFalse(result.getAnalysisResult().isEmpty());
         assertEquals(2, result.getAnalysisResult().size());
         assertEquals("Java 학습", result.getAnalysisResult().get(0).getDescription());
-        assertEquals("중요", result.getAnalysisResult().get(0).getPriority());
+        assertEquals("중요", result.getAnalysisResult().get(0).getDescription());
 
         // verify
         verify(openAIResponseService, times(1)).sendRequest(anyString(), anyString(), eq(0));
@@ -101,7 +101,7 @@ class JDServiceTest {
 
         // objectMapper가 JsonProcessingException을 던지도록 설정
         when(objectMapper.getTypeFactory()).thenReturn(mock(com.fasterxml.jackson.databind.type.TypeFactory.class));
-        when(objectMapper.getTypeFactory().constructCollectionType(eq(List.class), eq(ToDoItemDto.class)))
+        when(objectMapper.getTypeFactory().constructCollectionType(eq(List.class), eq(ToDoListDto.class)))
                 .thenReturn(mock(CollectionType.class));
         when(objectMapper.readValue(anyString(), any(CollectionType.class)))
                 .thenThrow(mock(JsonProcessingException.class)); // 실제 JsonProcessingException 인스턴스를 모의

@@ -15,7 +15,7 @@ import java.util.List;
 public class JDResponseDto {
     private String title;
     private String jdUrl;
-    private List<ToDoItemDto> analysisResult;
+    private List<ToDoListDto> analysisResult;
     private String memo;
     private LocalDateTime endedAt;
 }
