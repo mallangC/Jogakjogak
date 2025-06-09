@@ -62,7 +62,6 @@ public class JWTUtil {
         } catch (ExpiredJwtException e) {
             throw new CustomException(ErrorCode.TOKEN_EXPIRED);
         }
-        // 토큰이 refresh인지 확인 (발급시 페이로드에 명시)
         if (!getToken(token).equals(Token.REFRESH_TOKEN.name())) {
             throw new CustomException(ErrorCode.NOT_REFRESH_TOKEN);
         }

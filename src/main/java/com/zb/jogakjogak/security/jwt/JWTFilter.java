@@ -20,7 +20,6 @@ import java.util.Set;
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
-
     private static final Set<String> WHITELIST = Set.of(
             "/member/reissue",
             "/member/logout",
@@ -56,13 +55,10 @@ public class JWTFilter extends OncePerRequestFilter {
 
         // UserDetails에 회원 정보 객체 담기
         CustomOAuth2User customOAuth2User = new CustomOAuth2User(member);
-
         // 스프링 시큐리티 인증 토큰 생성
         Authentication authToken = new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities());
-
         // 세션에 사용자 등록 => 일시적으로 user 세션 생성
         SecurityContextHolder.getContext().setAuthentication(authToken);
-
         filterChain.doFilter(request, response);
     }
 
@@ -72,7 +68,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
     private String extractAccessToken(HttpServletRequest request){
         String authorization = request.getHeader("Authorization");
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
+        if (authorization != null && authorization.startsWith("Bearer ")) {
             return  authorization.split(" ")[1];
         }
         return null;
