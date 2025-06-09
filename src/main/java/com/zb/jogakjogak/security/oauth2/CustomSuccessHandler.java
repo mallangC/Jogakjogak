@@ -25,6 +25,7 @@ import java.util.Iterator;
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     private final JWTUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
+    private static final long REFRESH_TOKEN_MS = 604800000L;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -32,8 +33,8 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         CustomOAuth2User customOAuth2User = (CustomOAuth2User) authentication.getPrincipal();
         String username = customOAuth2User.getName();
         String role = getRole(authentication);
-        String refreshToken = jwtUtil.createJwt(username, role,  604800000L, Token.REFRESH_TOKEN);
-        addRefreshToken(username, refreshToken,  604800000L);
+        String refreshToken = jwtUtil.createJwt(username, role,  REFRESH_TOKEN_MS, Token.REFRESH_TOKEN);
+        addRefreshToken(username, refreshToken,  REFRESH_TOKEN_MS);
 
         response.addCookie(createCookie("refresh", refreshToken));
         response.sendRedirect("http://localhost:3000/");
