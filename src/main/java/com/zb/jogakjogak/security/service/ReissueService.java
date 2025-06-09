@@ -22,12 +22,11 @@ public class ReissueService {
 
     public ReissueResultDto reissue(String refreshToken) {
 
-        jwtUtil.validationToken(refreshToken);
+        jwtUtil.validateToken(refreshToken, Token.ACCESS_TOKEN);
 
         String userName = jwtUtil.getUserName(refreshToken);
         String role = jwtUtil.getRole(refreshToken);
 
-        // 새로운 jwt발급
         String newAccess = jwtUtil.createJwt(userName, role, ACCESS_TOKEN_MS, Token.ACCESS_TOKEN);
         String newRefresh = jwtUtil.createJwt(userName, role, REFRESH_TOKEN_MS, Token.REFRESH_TOKEN);
 

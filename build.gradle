@@ -39,6 +39,11 @@ dependencies {
     //oauth
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
+    //test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'net.datafaker:datafaker:2.0.2' // faker
+
     //
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 

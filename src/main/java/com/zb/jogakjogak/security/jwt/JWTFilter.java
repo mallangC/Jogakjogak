@@ -1,6 +1,7 @@
 package com.zb.jogakjogak.security.jwt;
 
 import com.zb.jogakjogak.security.Role;
+import com.zb.jogakjogak.security.Token;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.entity.Member;
 import jakarta.servlet.FilterChain;
@@ -40,7 +41,7 @@ public class JWTFilter extends OncePerRequestFilter {
         }
 
         String accessToken = extractAccessToken(request);
-        jwtUtil.validationAccessToken(accessToken);
+        jwtUtil.validateToken(accessToken, Token.ACCESS_TOKEN);
 
         String userName = jwtUtil.getUserName(accessToken);
         String role = jwtUtil.getRole(accessToken);

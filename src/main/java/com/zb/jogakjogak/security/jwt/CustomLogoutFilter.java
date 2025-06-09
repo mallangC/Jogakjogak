@@ -1,5 +1,6 @@
 package com.zb.jogakjogak.security.jwt;
 
+import com.zb.jogakjogak.security.Token;
 import com.zb.jogakjogak.security.entity.RefreshToken;
 import com.zb.jogakjogak.security.repository.RefreshTokenRepository;
 import jakarta.servlet.*;
@@ -30,7 +31,7 @@ public class CustomLogoutFilter extends GenericFilter {
         }
 
         String refreshToken = extractRefreshTokenFromCookie(request.getCookies());
-        jwtUtil.validationToken(refreshToken);
+        jwtUtil.validateToken(refreshToken, Token.REFRESH_TOKEN);
 
         RefreshToken existingToken = refreshEntityRepository.findByRefreshToken(refreshToken);
         if (existingToken == null) {
