@@ -87,7 +87,6 @@ public class JDService {
         String analysisJsonString = openAIResponseService.sendRequest(resumeContent, jdContent, 0);
         List<ToDoItemDto> parsedAnalysisResult;
         try {
-            // List<ToDoItemDto> 타입으로 파싱하기 위해 CollectionType을 사용합니다.
             CollectionType listType = objectMapper.getTypeFactory().constructCollectionType(List.class, ToDoItemDto.class);
             parsedAnalysisResult = objectMapper.readValue(analysisJsonString, listType);
         } catch (JsonProcessingException e) {
@@ -96,8 +95,8 @@ public class JDService {
 
         return JDResponseDto.builder()
                 .title(jdRequestDto.getTitle())
-                .jdUrl(null)
-                .analysisResult(parsedAnalysisResult) // 파싱된 List<ToDoItemDto> 객체 할당
+                .jdUrl(jdRequestDto.getJDUrl())
+                .analysisResult(parsedAnalysisResult)
                 .memo("")
                 .endedAt(jdRequestDto.getEndedAt())
                 .build();

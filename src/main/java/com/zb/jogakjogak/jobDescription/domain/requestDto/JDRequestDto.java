@@ -18,6 +18,7 @@ public class JDRequestDto {
     @NotBlank(message = "채용 공고 URL은 필수 입력 항목입니다.")
     @URL(message = "유효한 URL 형식이 아닙니다.")
     private String JDUrl;
+    //TODO: 이력서 사용자 입력을 받을 필드 작성
     @NotNull(message = "마감일은 필수 선택 항목입니다.")
     private LocalDateTime endedAt;
 }

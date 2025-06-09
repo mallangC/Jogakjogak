@@ -20,18 +20,18 @@ import java.util.Objects;
 public class OpenAIResponseService {
 
     private final Logger logger = LoggerFactory.getLogger(OpenAIResponseService.class);
-    private final RestClient restClient; // OpenAiService 대신 RestClient 사용
+    private final RestClient restClient;
     private final String model;
     private final int defaultMaxTokens;
-    private final ObjectMapper objectMapper; // JSON 파싱을 위한 ObjectMapper 추가
+    private final ObjectMapper objectMapper;
 
     public OpenAIResponseService(
             @Value("${openai.api.key}") String apiKey,
             @Value("${openai.api.model:gpt-4}") String model,
             @Value("${openai.api.max-tokens:1000}") int maxTokens,
-            @Value("${openai.api.url}") String openaiApiUrl, // application.properties에서 API URL 주입
-            ObjectMapper objectMapper, // ObjectMapper 자동 주입
-            RestClient.Builder restClientBuilder) { // RestClient.Builder 자동 주입
+            @Value("${openai.api.url}") String openaiApiUrl,
+            ObjectMapper objectMapper,
+            RestClient.Builder restClientBuilder) {
         this.model = model;
         this.defaultMaxTokens = maxTokens;
         this.objectMapper = objectMapper;
@@ -100,13 +100,11 @@ public class OpenAIResponseService {
         OpenAIRequestDto requestDto = new OpenAIRequestDto(
                 this.model,
                 List.of(systemMessage, resumeMessage, jdMessage),
-                0.7, // temperature
+                0.7,
                 usedMaxTokens
-                // new ResponseFormatDto("json_object") // 필요하면 OpenAIRequestDto에 추가하고 여기도 사용
         );
 
         try {
-            // RestClient를 사용하여 POST 요청 전송 및 응답 DTO로 받기
             OpenAIResponseDto openaiResponse = restClient.post()
                     .uri("/chat/completions")
                     .body(requestDto)
@@ -119,7 +117,7 @@ public class OpenAIResponseService {
                         logger.error("Server Error: {} - {}", res.getStatusCode(), res.getStatusText());
                         throw new JDException(JDErrorCode.API_SERVER_ERROR);
                     })
-                    .body(OpenAIResponseDto.class); // 응답을 정의한 DTO 클래스로 받음
+                    .body(OpenAIResponseDto.class);
 
             logger.info("OpenAI API Chat Completion Result: {}", openaiResponse);
 
