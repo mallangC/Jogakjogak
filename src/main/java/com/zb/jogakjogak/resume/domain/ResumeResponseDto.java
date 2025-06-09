@@ -1,5 +1,6 @@
 package com.zb.jogakjogak.resume.domain;
 
+
 import com.zb.jogakjogak.resume.entity.Resume;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

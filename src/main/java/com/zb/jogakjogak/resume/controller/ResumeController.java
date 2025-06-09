@@ -49,4 +49,20 @@ public class ResumeController {
                         )
                 );
     }
+    /**
+     * 사용자가 작성한 이력서를 조회하는 컨트롤러 메서드
+     * @param resume_id 찾으려는 이력서의 id
+     * @return 찾으려는 이력서의 data, 성공 여부 메세지, 상태코드
+     */
+    @GetMapping("/{resume_id}")
+    public ResponseEntity get(@PathVariable Long resume_id) {
+        return ResponseEntity.ok()
+                .body(
+                        new HttpApiResponse(
+                                resumeService.get(resume_id),
+                                "이력서 조회 성공",
+                                HttpStatus.OK
+                        )
+                );
+    }
 }
