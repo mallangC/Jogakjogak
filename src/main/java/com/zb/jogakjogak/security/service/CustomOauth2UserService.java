@@ -14,6 +14,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 @Service
@@ -42,11 +43,13 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         if (existMember == null) {
             member = Member.builder()
                     .userName(userName)
-                    .name(kakaoResponseDto.getName())
+                    .nickName(kakaoResponseDto.getNickName())
                     .email(kakaoResponseDto.getEmail())
+                    .name(kakaoResponseDto.getName())
+                    .phoneNumber(kakaoResponseDto.getPhoneNumber())
+                    .lastLoginAt(LocalDateTime.now())
                     .oauth2Info(new ArrayList<>())
                     .password(null)
-                    .provider(registrationId)
                     .role(Role.USER)
                     .build();
             OAuth2Info oAuth2Info = OAuth2Info.builder()
@@ -58,8 +61,9 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
             memberRepository.save(member);
             return new CustomOAuth2User(member);
         } else{
-            existMember.setUserName(userName);
             existMember.setEmail(kakaoResponseDto.getEmail());
+            existMember.setNickName(kakaoResponseDto.getNickName());
+            existMember.setPhoneNumber(kakaoResponseDto.getPhoneNumber());
             existMember.setName(kakaoResponseDto.getName());
             memberRepository.save(existMember);
             return new CustomOAuth2User(existMember);

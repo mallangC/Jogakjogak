@@ -2,7 +2,6 @@ package com.zb.jogakjogak.security.controller;
 
 
 import com.zb.jogakjogak.global.HttpApiResponse;
-import com.zb.jogakjogak.global.exception.CustomException;
 import com.zb.jogakjogak.security.dto.ReissueResultDto;
 import com.zb.jogakjogak.security.service.ReissueService;
 import jakarta.servlet.http.Cookie;

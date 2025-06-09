@@ -5,9 +5,9 @@ import com.zb.jogakjogak.security.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,8 +39,20 @@ public class Member {
 
     private Role role;
 
-    private String provider;
+    private LocalDateTime registeredAt;
+
+    private LocalDateTime lastLoginAt;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OAuth2Info> oauth2Info = new ArrayList<>();
+
+    @PrePersist
+    public void prePersist(){
+        this.registeredAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate(){
+        this.lastLoginAt = LocalDateTime.now();
+    }
 }
