@@ -50,17 +50,18 @@ public class JWTUtil {
                 .compact();
     }
 
-    public void validationToken(String token){
+    public void validateToken(String token, Token tokenType) {
         if (token == null) {
             throw new CustomException(ErrorCode.NOT_FOUND_TOKEN);
         }
-        try {
-            isExpired(token);
-        } catch (ExpiredJwtException e) {
+
+        if (isExpired(token)) {
             throw new CustomException(ErrorCode.TOKEN_EXPIRED);
         }
-        if (!getToken(token).equals(Token.REFRESH_TOKEN.name())) {
+
+        if (!getToken(token).equals(tokenType.name())) {
             throw new CustomException(ErrorCode.NOT_REFRESH_TOKEN);
         }
     }
+
 }
