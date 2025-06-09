@@ -53,3 +53,9 @@ spring:
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}
+
+openai:
+  api:
+    key: ${OPENAI_API_KEY}
+    model: gpt-4-turbo
+    max-tokens: 1000
