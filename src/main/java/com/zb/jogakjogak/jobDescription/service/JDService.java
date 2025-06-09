@@ -19,6 +19,7 @@ public class JDService {
 
     private final OpenAIResponseService openAIResponseService;
     private final ObjectMapper objectMapper;
+    private final ToDoListService toDoListService;
 
     /**
      * JD와 이력서를 분석하여 To Do List를 만들어주는 서비스 메서드
@@ -92,6 +93,8 @@ public class JDService {
         } catch (JsonProcessingException e) {
             throw new JDException(JDErrorCode.FAILED_JSON_PROCESS);
         }
+
+        toDoListService.saveToDoList(parsedAnalysisResult);
 
         return JDResponseDto.builder()
                 .title(jdRequestDto.getTitle())

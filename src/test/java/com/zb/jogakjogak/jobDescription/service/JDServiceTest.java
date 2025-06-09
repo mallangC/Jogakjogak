@@ -10,6 +10,7 @@ import com.zb.jogakjogak.global.exception.JDException;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListDto;
+import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,9 @@ class JDServiceTest {
     @Mock
     private ObjectMapper objectMapper;
 
+    @Mock
+    private ToDoListService toDoListService;
+
     @InjectMocks
     private JDService jdService;
 
@@ -56,8 +60,8 @@ class JDServiceTest {
         mockAnalysisJsonString = "[{\"item\":\"Java 학습\",\"status\":\"TODO\"},{\"item\":\"Spring Boot 프로젝트 경험 쌓기\",\"status\":\"IN_PROGRESS\"}]";
 
         mockToDoList = Arrays.asList(
-                new ToDoListDto("1", "Java 학습", "중요"),
-                new ToDoListDto("2", "spring boot 프로젝트 경험 쌓기", "보통")
+                new ToDoListDto(ToDoListType.CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL, faker.book().title(), "Java 학습"),
+                new ToDoListDto(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN, faker.book().title(), "spring boot 협업")
         );
     }
 
@@ -85,7 +89,7 @@ class JDServiceTest {
         assertFalse(result.getAnalysisResult().isEmpty());
         assertEquals(2, result.getAnalysisResult().size());
         assertEquals("Java 학습", result.getAnalysisResult().get(0).getDescription());
-        assertEquals("중요", result.getAnalysisResult().get(0).getDescription());
+        assertEquals("Java 학습", result.getAnalysisResult().get(0).getDescription());
 
         // verify
         verify(openAIResponseService, times(1)).sendRequest(anyString(), anyString(), eq(0));
