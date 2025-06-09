@@ -40,10 +40,7 @@ public class JWTFilter extends OncePerRequestFilter {
         }
 
         String accessToken = extractAccessToken(request);
-        if (accessToken == null || jwtUtil.isExpired(accessToken)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        jwtUtil.validationAccessToken(accessToken);
 
         String userName = jwtUtil.getUserName(accessToken);
         String role = jwtUtil.getRole(accessToken);
