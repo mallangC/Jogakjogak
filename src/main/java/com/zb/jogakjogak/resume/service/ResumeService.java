@@ -39,8 +39,7 @@ public class ResumeService {
                 .build();
     }
 
-    /**
-     * 사용자가 이력서를 수정할 떄 찾으려는 서비스 메서드
+     /** 사용자가 이력서를 수정할 떄 찾으려는 서비스 메서드
      * @param resumeId 수정하려는 이력서의 id
      * @param requestDto 수정할 이력서의 내용, 수정할 이력서의 이름
      * @return 수정된 이력서의 id, 수정된 이력서의 이름, 수정된 이력서의 내용
