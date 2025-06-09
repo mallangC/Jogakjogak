@@ -1,7 +1,7 @@
 package com.zb.jogakjogak.resume.entity;
 
 import com.zb.jogakjogak.global.BaseEntity;
-import com.zb.jogakjogak.resume.domain.ResumeRequestDto;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

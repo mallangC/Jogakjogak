@@ -1,8 +1,9 @@
 package com.zb.jogakjogak.resume.service;
 
 import com.zb.jogakjogak.global.exception.ResumeException;
-import com.zb.jogakjogak.resume.domain.ResumeRequestDto;
-import com.zb.jogakjogak.resume.domain.ResumeResponseDto;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
+import com.zb.jogakjogak.resume.domain.responseDto.ResumeDeleteResponseDto;
+import com.zb.jogakjogak.resume.domain.responseDto.ResumeResponseDto;
 import com.zb.jogakjogak.resume.entity.Resume;
 import com.zb.jogakjogak.resume.repository.ResumeRepository;
 import jakarta.validation.Valid;
@@ -78,5 +79,13 @@ public class ResumeService {
                 .orElseThrow(
                         () -> new ResumeException(NOT_FOUND_RESUME)
                 );
+    }
+
+    public ResumeDeleteResponseDto delete(Long resumeId) {
+        Resume resume = findResume(resumeId);
+        resumeRepository.delete(resume);
+        return ResumeDeleteResponseDto.builder()
+                .resumeId(resume.getId())
+                .build();
     }
 }

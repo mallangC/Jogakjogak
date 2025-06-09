@@ -4,8 +4,9 @@ package com.zb.jogakjogak.resume.service;
 import com.github.javafaker.Faker;
 import com.zb.jogakjogak.global.exception.ResumeErrorCode;
 import com.zb.jogakjogak.global.exception.ResumeException;
-import com.zb.jogakjogak.resume.domain.ResumeRequestDto;
-import com.zb.jogakjogak.resume.domain.ResumeResponseDto;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
+import com.zb.jogakjogak.resume.domain.responseDto.ResumeDeleteResponseDto;
+import com.zb.jogakjogak.resume.domain.responseDto.ResumeResponseDto;
 import com.zb.jogakjogak.resume.entity.Resume;
 import com.zb.jogakjogak.resume.repository.ResumeRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
+import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.*;
 
 
@@ -169,4 +170,42 @@ class ResumeServiceTest {
         // findById 메소드가 호출되었는지 확인
         verify(resumeRepository, times(1)).findById(nonExistentResumeId);
     }
+
+    @DisplayName("이력서 삭제 성공 테스트")
+    @Test
+    void deleteResume_success() {
+        // Given
+        Long resumeIdToDelete = 1L;
+        given(resumeRepository.findById(resumeIdToDelete)).willReturn(Optional.of(sampleResume));
+        willDoNothing().given(resumeRepository).delete(sampleResume);
+
+        // When
+        ResumeDeleteResponseDto responseDto = resumeService.delete(resumeIdToDelete);
+
+        // Then
+        assertThat(responseDto).isNotNull();
+        assertThat(responseDto.getResumeId()).isEqualTo(resumeIdToDelete);
+
+        verify(resumeRepository, times(1)).findById(resumeIdToDelete);
+        verify(resumeRepository, times(1)).delete(sampleResume);
+    }
+
+    @DisplayName("이력서 삭제 실패 테스트 - 이력서를 찾을 수 없음")
+    @Test
+    void deleteResume_fail_notFound() {
+        // Given
+        Long nonExistentResumeId = 99L;
+        given(resumeRepository.findById(nonExistentResumeId)).willReturn(Optional.empty());
+
+        // When & Then
+        ResumeException exception = assertThrows(ResumeException.class, () -> {
+            resumeService.delete(nonExistentResumeId);
+        });
+
+        assertEquals(ResumeErrorCode.NOT_FOUND_RESUME, exception.getErrorCode());
+
+        verify(resumeRepository, times(1)).findById(nonExistentResumeId);
+        verify(resumeRepository, times(0)).delete(any(Resume.class));
+    }
+
 }
