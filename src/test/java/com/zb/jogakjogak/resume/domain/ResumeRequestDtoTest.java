@@ -1,5 +1,6 @@
 package com.zb.jogakjogak.resume.domain;
 
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
