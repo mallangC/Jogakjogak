@@ -7,7 +7,9 @@ import lombok.*;
 
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class ToDoList {
 
     @Id
@@ -24,9 +26,11 @@ public class ToDoList {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
+    @Builder.Default
     @Column(columnDefinition = "VARCHAR(255) DEFAULT ''")
     private String memo = "";
 
+    @Builder.Default
     @Column(nullable = false)
     private boolean isDone = false;
 
@@ -35,15 +39,6 @@ public class ToDoList {
     @JoinColumn(name = "jd_id", nullable = false)
     private JD jd;
 
-    @Builder
-    private ToDoList(ToDoListType type, String title, String description, String memo, Boolean isDone, JD jd) {
-        this.type = type;
-        this.title = title;
-        this.description = description;
-        this.memo = (memo != null) ? memo : this.memo;
-        this.isDone = isDone != null ? isDone : false;
-        this.jd = jd;
-    }
 
     public static ToDoList fromDto(ToDoListDto dto, JD jd) {
         return ToDoList.builder()

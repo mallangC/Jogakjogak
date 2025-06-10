@@ -1,6 +1,7 @@
 package com.zb.jogakjogak.jobDescription.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +13,9 @@ import java.util.List;
 @Entity
 @Table(name = "job_descriptions")
 @Getter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class JD {
 
     @Id
@@ -31,17 +34,9 @@ public class JD {
     @Column(nullable = false)
     private LocalDateTime endedAt;
 
+    @Builder.Default
     @OneToMany(mappedBy = "jd", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ToDoList> toDoLists = new ArrayList<>();
-
-    @Builder
-    private JD(String title, String jdUrl, String memo, LocalDateTime endedAt, List<ToDoList> toDoLists) {
-        this.title = title;
-        this.jdUrl = jdUrl;
-        this.memo = memo;
-        this.endedAt = endedAt;
-        this.toDoLists = (toDoLists != null) ? toDoLists : new ArrayList<>();
-    }
 
     public void addToDoList(ToDoList toDoList) {
         if (this.toDoLists == null) {
