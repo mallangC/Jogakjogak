@@ -1,5 +1,6 @@
 package com.zb.jogakjogak.jobDescription.controller;
 
+import com.zb.jogakjogak.global.HttpApiResponse;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.service.ToDoListService;
@@ -24,12 +25,41 @@ public class ToDoListController {
      * @return 새로 생성된 ToDoList의 응답 DTO
      */
     @PostMapping
-    public ResponseEntity<ToDoListResponseDto> createToDoList(
+    public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> createToDoList(
             @PathVariable Long jdId,
             @RequestBody @Valid ToDoListDto toDoListDto) {
 
         ToDoListResponseDto response = toDoListService.createToDoList(jdId, toDoListDto);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                new HttpApiResponse<>(
+                        response,
+                        "체크리스트 추가 완료",
+                        HttpStatus.CREATED
+                )
+        );
+    }
+
+    /**
+     * 특정 JD에 속한 ToDoList를 수정하는 메서드
+     *
+     * @param jdId        ToDoList가 속한 JD의 ID
+     * @param toDoListId  수정할 ToDoList의 ID
+     * @param toDoListDto 업데이트할 ToDoList의 정보
+     * @return 수정된 ToDoList의 응답 DTO
+     */
+    @PatchMapping("/{toDoListId}")
+    public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> updateToDoList(
+            @PathVariable Long jdId,
+            @PathVariable Long toDoListId,
+            @RequestBody @Valid ToDoListDto toDoListDto) {
+        ToDoListResponseDto response = toDoListService.updateToDoList(jdId, toDoListId, toDoListDto);
+        return ResponseEntity.ok().body(
+                new HttpApiResponse<>(
+                        response,
+                        "체크리스트 수정 완료",
+                        HttpStatus.OK
+                )
+        );
     }
 }

@@ -1,5 +1,6 @@
 package com.zb.jogakjogak.jobDescription.entity;
 
+
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import jakarta.persistence.*;
@@ -26,10 +27,11 @@ public class ToDoList {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
-
+    @Builder.Default
     @Column(columnDefinition = "VARCHAR(255) DEFAULT ''")
     private String memo = "";
 
+    @Builder.Default
     @Column(nullable = false)
     private boolean isDone = false;
 
@@ -51,4 +53,11 @@ public class ToDoList {
         this.jd = jd;
     }
 
+    public void updateFromDto(ToDoListDto dto) {
+        this.type = dto.getType();
+        this.title = dto.getTitle();
+        this.description = dto.getDescription();
+        this.memo = dto.getMemo() != null ? dto.getMemo() : ""; // memo는 null 방지
+        this.isDone = dto.isDone();
+    }
 }
