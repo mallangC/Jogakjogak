@@ -11,7 +11,8 @@ public enum JDErrorCode {
     FAILED_ANALYSIS_REQUEST(HttpStatus.BAD_REQUEST,"분석에 실패했습니다." + " 확인하고 다시 시도해주세요"),
     INVALID_API_REQUEST(HttpStatus.BAD_REQUEST, "클라이언트 오류 처리" ),
     API_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류" ),
-    FAILED_JSON_PROCESS(HttpStatus.INTERNAL_SERVER_ERROR, "JSON 파싱 오류")
+    FAILED_JSON_PROCESS(HttpStatus.INTERNAL_SERVER_ERROR, "JSON 파싱 오류"),
+    JD_NOT_FOUND(HttpStatus.NOT_FOUND, "JD를 찾을 수 없습니다."),
     ;
 
     private final HttpStatus httpStatus;

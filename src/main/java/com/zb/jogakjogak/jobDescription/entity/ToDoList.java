@@ -1,12 +1,15 @@
 package com.zb.jogakjogak.jobDescription.entity;
 
-import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListDto;
+
+import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class ToDoList {
 
@@ -24,26 +27,36 @@ public class ToDoList {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
+    @Builder.Default
+    @Column(columnDefinition = "VARCHAR(255) DEFAULT ''")
+    private String memo = "";
+
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean isDone = false;
+
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "jd_id", nullable = false)
     private JD jd;
 
-    @Builder
-    private ToDoList(ToDoListType type, String title, String description, JD jd) {
-        this.type = type;
-        this.title = title;
-        this.description = description;
-        this.jd = jd;
-    }
 
     public static ToDoList fromDto(ToDoListDto dto, JD jd) {
         return ToDoList.builder()
                 .type(dto.getType())
                 .title(dto.getTitle())
                 .description(dto.getDescription())
+                .memo(dto.getMemo())
+                .isDone(dto.isDone())
                 .jd(jd)
                 .build();
     }
 
+    public void updateFromDto(ToDoListDto dto) {
+        this.type = dto.getType();
+        this.title = dto.getTitle();
+        this.description = dto.getDescription();
+        this.memo = dto.getMemo() != null ? dto.getMemo() : ""; // memo는 null 방지
+        this.isDone = dto.isDone();
+    }
 }

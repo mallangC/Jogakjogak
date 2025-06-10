@@ -1,0 +1,30 @@
+package com.zb.jogakjogak.jobDescription.domain.responseDto;
+
+import com.zb.jogakjogak.jobDescription.entity.ToDoList;
+import com.zb.jogakjogak.jobDescription.type.ToDoListType;
+import lombok.Builder;
+import lombok.Getter;
+
+@Getter
+@Builder
+public class ToDoListResponseDto {
+    private Long id;
+    private ToDoListType type;
+    private String title;
+    private String description;
+    private String memo;
+    private boolean isDone;
+    private Long jdId;
+
+    public static ToDoListResponseDto fromEntity(ToDoList toDoList) {
+        return ToDoListResponseDto.builder()
+                .id(toDoList.getId())
+                .type(toDoList.getType())
+                .title(toDoList.getTitle())
+                .description(toDoList.getDescription())
+                .memo(toDoList.getMemo())
+                .isDone(toDoList.isDone())
+                .jdId(toDoList.getJd() != null ? toDoList.getJd().getId() : null)
+                .build();
+    }
+}
