@@ -6,6 +6,7 @@ import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
+import com.zb.jogakjogak.jobDescription.repsitory.JDRepository;
 import com.zb.jogakjogak.jobDescription.repsitory.ToDoListRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ToDoListService {
 
+    private final JDRepository jdRepository;
     private final ToDoListRepository toDoListRepository;
 
     /**
@@ -27,8 +29,8 @@ public class ToDoListService {
     @Transactional // 하나의 트랜잭션으로 묶어 원자성을 보장
     public ToDoListResponseDto createToDoList(Long jdId, ToDoListDto toDoListDto) {
 
-        JD jd = toDoListRepository.findById(jdId)
-                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND)).getJd();
+        JD jd = jdRepository.findById(jdId) // <-- 수정된 부분
+                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
 
         ToDoList toDoList = ToDoList.fromDto(toDoListDto, jd);
         jd.addToDoList(toDoList);
