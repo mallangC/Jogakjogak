@@ -2,6 +2,8 @@ package com.zb.jogakjogak.jobDescription.service;
 
 import com.zb.jogakjogak.global.exception.JDErrorCode;
 import com.zb.jogakjogak.global.exception.JDException;
+import com.zb.jogakjogak.global.exception.ToDoListErrorCode;
+import com.zb.jogakjogak.global.exception.ToDoListException;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
@@ -36,5 +38,30 @@ public class ToDoListService {
         jd.addToDoList(toDoList);
         ToDoList savedToDoList = toDoListRepository.save(toDoList);
         return ToDoListResponseDto.fromEntity(savedToDoList);
+    }
+
+    /**
+     * 특정 JD에 속한 ToDoList를 수정하는 메서드
+     *
+     * @param jdId        ToDoList가 속한 JD의 ID
+     * @param toDoListId  수정할 ToDoList의 ID
+     * @param toDoListDto 업데이트할 ToDoList의 정보
+     * @return 수정된 ToDoList의 응답 DTO
+     */
+    @Transactional
+    public ToDoListResponseDto updateToDoList(Long jdId, Long toDoListId, ToDoListDto toDoListDto) {
+        jdRepository.findById(jdId)
+                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
+
+        ToDoList toDoList = toDoListRepository.findById(toDoListId)
+                .orElseThrow(() -> new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_FOUND));
+
+        if (!toDoList.getJd().getId().equals(jdId)) {
+            throw new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_BELONG_TO_JD);
+        }
+
+        toDoList.updateFromDto(toDoListDto);
+        ToDoList updatedToDoList = toDoListRepository.save(toDoList);
+        return ToDoListResponseDto.fromEntity(updatedToDoList);
     }
 }
