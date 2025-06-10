@@ -6,6 +6,7 @@ import com.zb.jogakjogak.security.entity.RefreshToken;
 import com.zb.jogakjogak.security.jwt.JWTUtil;
 import com.zb.jogakjogak.security.repository.RefreshTokenRepository;
 import jakarta.servlet.http.Cookie;
+import net.datafaker.Faker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,8 @@ public class ReissueControllerIntegrationTest {
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
 
+    private final Faker faker = new Faker();
+
     private String refreshToken;
     private String userName = "testUser";
     private String role = "USER";
@@ -42,6 +45,7 @@ public class ReissueControllerIntegrationTest {
     @BeforeEach
     void setup() {
         // 기존 refresh token 생성 및 DB 저장
+
         refreshToken = jwtUtil.createJwt(userName, role, 7 * 24 * 60 * 60 * 1000L, Token.REFRESH_TOKEN);
 
         RefreshToken entity = RefreshToken.builder()
@@ -56,11 +60,15 @@ public class ReissueControllerIntegrationTest {
     @Test
     @DisplayName("통합 테스트 - refresh 토큰이 유효하면 access + refresh 재발급 성공")
     void reissue_integration_success_test() throws Exception {
+        //given
+        String userName = "testUser2";
+        String newRefreshToken = jwtUtil.createJwt(userName, role, 7 * 24 * 60 * 60 * 1000L, Token.REFRESH_TOKEN);
+
         // when
         MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/api/member/reissue")
                         .with(csrf())
                         .with(user("testUser"))
-                        .cookie(new Cookie("refresh", refreshToken)))
+                        .cookie(new Cookie("refresh", newRefreshToken)))
                 .andReturn()
                 .getResponse();
 
