@@ -10,6 +10,8 @@ import com.zb.jogakjogak.global.exception.JDException;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListDto;
+import com.zb.jogakjogak.jobDescription.entity.JD;
+import com.zb.jogakjogak.jobDescription.repsitory.JDRepository;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,15 +38,15 @@ class JDServiceTest {
     @Mock
     private ObjectMapper objectMapper;
 
-    @Mock
-    private ToDoListService toDoListService;
-
     @InjectMocks
     private JDService jdService;
 
+    @Mock
+    private JDRepository jdRepository;
+
     private JDRequestDto jdRequestDto;
     private String mockAnalysisJsonString;
-    private List<ToDoListDto> mockToDoList;
+    private List<ToDoListDto> mockToDoListDtos;
     private Faker faker;
 
     @BeforeEach
@@ -59,14 +61,14 @@ class JDServiceTest {
 
         mockAnalysisJsonString = "[{\"item\":\"Java 학습\",\"status\":\"TODO\"},{\"item\":\"Spring Boot 프로젝트 경험 쌓기\",\"status\":\"IN_PROGRESS\"}]";
 
-        mockToDoList = Arrays.asList(
+        mockToDoListDtos  = Arrays.asList(
                 new ToDoListDto(ToDoListType.CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL, faker.book().title(), "Java 학습"),
                 new ToDoListDto(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN, faker.book().title(), "spring boot 협업")
         );
     }
 
     @Test
-    @DisplayName("JD 분석 서비스 성공 테스트")
+    @DisplayName("JD 분석 서비스 성공 테스트 - JD 및 ToDoList 저장 포함")
     void analyze_success() throws JsonProcessingException {
         // given
         when(openAIResponseService.sendRequest(anyString(), anyString(), eq(0)))
@@ -76,7 +78,16 @@ class JDServiceTest {
         when(objectMapper.getTypeFactory().constructCollectionType(eq(List.class), eq(ToDoListDto.class)))
                 .thenReturn(mock(CollectionType.class));
         when(objectMapper.readValue(eq(mockAnalysisJsonString), any(CollectionType.class)))
-                .thenReturn(mockToDoList);
+                .thenReturn(mockToDoListDtos);
+        when(jdRepository.save(any(JD.class))).thenAnswer(invocation -> {
+            JD originalJd = invocation.getArgument(0);
+            JD savedJdMock = mock(JD.class);
+            when(savedJdMock.getTitle()).thenReturn(originalJd.getTitle());
+            when(savedJdMock.getJdUrl()).thenReturn(originalJd.getJdUrl());
+            when(savedJdMock.getEndedAt()).thenReturn(originalJd.getEndedAt());
+            when(savedJdMock.getMemo()).thenReturn(originalJd.getMemo());
+            return savedJdMock;
+        });
 
         // when
         JDResponseDto result = jdService.analyze(jdRequestDto);
@@ -94,6 +105,7 @@ class JDServiceTest {
         // verify
         verify(openAIResponseService, times(1)).sendRequest(anyString(), anyString(), eq(0));
         verify(objectMapper, times(1)).readValue(eq(mockAnalysisJsonString), any(CollectionType.class));
+        verify(jdRepository, times(1)).save(any(JD.class));
     }
 
     @Test
@@ -103,12 +115,11 @@ class JDServiceTest {
         when(openAIResponseService.sendRequest(anyString(), anyString(), eq(0)))
                 .thenReturn("invalid json string");
 
-        // objectMapper가 JsonProcessingException을 던지도록 설정
         when(objectMapper.getTypeFactory()).thenReturn(mock(com.fasterxml.jackson.databind.type.TypeFactory.class));
         when(objectMapper.getTypeFactory().constructCollectionType(eq(List.class), eq(ToDoListDto.class)))
                 .thenReturn(mock(CollectionType.class));
         when(objectMapper.readValue(anyString(), any(CollectionType.class)))
-                .thenThrow(mock(JsonProcessingException.class)); // 실제 JsonProcessingException 인스턴스를 모의
+                .thenThrow(mock(JsonProcessingException.class));
 
         // when & then
         JDException thrown = assertThrows(JDException.class, () -> jdService.analyze(jdRequestDto));
@@ -117,5 +128,6 @@ class JDServiceTest {
         // verify
         verify(openAIResponseService, times(1)).sendRequest(anyString(), anyString(), eq(0));
         verify(objectMapper, times(1)).readValue(anyString(), any(CollectionType.class));
+        verify(jdRepository, never()).save(any(JD.class));
     }
 }
