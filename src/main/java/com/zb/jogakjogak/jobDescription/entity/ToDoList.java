@@ -56,4 +56,11 @@ public class ToDoList {
                 .build();
     }
 
+    public void updateFromDto(ToDoListDto dto) {
+        this.type = dto.getType();
+        this.title = dto.getTitle();
+        this.description = dto.getDescription();
+        this.memo = dto.getMemo() != null ? dto.getMemo() : ""; // memo는 null 방지
+        this.isDone = dto.isDone();
+    }
 }
