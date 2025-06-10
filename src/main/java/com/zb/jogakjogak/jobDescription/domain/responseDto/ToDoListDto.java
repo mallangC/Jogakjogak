@@ -1,5 +1,6 @@
 package com.zb.jogakjogak.jobDescription.domain.responseDto;
 
+import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,8 +8,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ToDoItemDto {
-    private String type;
+public class ToDoListDto {
+    private ToDoListType type;
+    private String title;
     private String description;
-    private String priority;
 }

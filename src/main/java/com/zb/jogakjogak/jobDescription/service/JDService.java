@@ -7,7 +7,10 @@ import com.zb.jogakjogak.global.exception.JDErrorCode;
 import com.zb.jogakjogak.global.exception.JDException;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
-import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoItemDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListDto;
+import com.zb.jogakjogak.jobDescription.entity.JD;
+import com.zb.jogakjogak.jobDescription.entity.ToDoList;
+import com.zb.jogakjogak.jobDescription.repsitory.JDRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +22,7 @@ public class JDService {
 
     private final OpenAIResponseService openAIResponseService;
     private final ObjectMapper objectMapper;
+    private final JDRepository jdRepository;
 
     /**
      * JD와 이력서를 분석하여 To Do List를 만들어주는 서비스 메서드
@@ -85,20 +89,34 @@ public class JDService {
                 * 우수한 커뮤니케이션 및 협업 능력
                 """;
         String analysisJsonString = openAIResponseService.sendRequest(resumeContent, jdContent, 0);
-        List<ToDoItemDto> parsedAnalysisResult;
+        List<ToDoListDto> parsedAnalysisResult;
         try {
-            CollectionType listType = objectMapper.getTypeFactory().constructCollectionType(List.class, ToDoItemDto.class);
+            CollectionType listType = objectMapper.getTypeFactory().constructCollectionType(List.class, ToDoListDto.class);
             parsedAnalysisResult = objectMapper.readValue(analysisJsonString, listType);
         } catch (JsonProcessingException e) {
             throw new JDException(JDErrorCode.FAILED_JSON_PROCESS);
         }
 
-        return JDResponseDto.builder()
+        JD jd = JD.builder()
                 .title(jdRequestDto.getTitle())
                 .jdUrl(jdRequestDto.getJDUrl())
-                .analysisResult(parsedAnalysisResult)
-                .memo("")
                 .endedAt(jdRequestDto.getEndedAt())
+                .memo("")
+                .build();
+
+        for (ToDoListDto dto : parsedAnalysisResult) {
+            ToDoList toDoList = ToDoList.fromDto(dto, jd);
+            jd.addToDoList(toDoList);
+        }
+
+        JD savedJd = jdRepository.save(jd);
+
+        return JDResponseDto.builder()
+                .title(savedJd.getTitle())
+                .jdUrl(savedJd.getJdUrl())
+                .analysisResult(parsedAnalysisResult)
+                .memo(savedJd.getMemo())
+                .endedAt(savedJd.getEndedAt())
                 .build();
     }
 }
