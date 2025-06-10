@@ -6,13 +6,14 @@ import jakarta.servlet.http.Cookie;
 import net.datafaker.Faker;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
+
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.when;
@@ -25,6 +26,9 @@ class ReissueControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
     @MockBean
     private ReissueService reissueService;
