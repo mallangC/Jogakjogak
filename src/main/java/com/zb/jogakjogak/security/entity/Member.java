@@ -2,6 +2,8 @@ package com.zb.jogakjogak.security.entity;
 
 
 import com.zb.jogakjogak.security.Role;
+import com.zb.jogakjogak.security.dto.KakaoResponseDto;
+import com.zb.jogakjogak.security.dto.OAuth2ResponseDto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -54,5 +56,12 @@ public class Member {
     @PreUpdate
     public void preUpdate(){
         this.lastLoginAt = LocalDateTime.now();
+    }
+
+    public void updateExistingMember(KakaoResponseDto kakaoResponseDto){
+        this.email = kakaoResponseDto.getEmail();
+        this.nickName = kakaoResponseDto.getNickName();
+        this.phoneNumber = kakaoResponseDto.getPhoneNumber();
+        this.name = kakaoResponseDto.getName();
     }
 }

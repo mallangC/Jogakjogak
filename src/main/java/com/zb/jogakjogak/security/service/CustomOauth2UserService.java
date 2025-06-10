@@ -61,10 +61,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
             memberRepository.save(member);
             return new CustomOAuth2User(member);
         } else{
-            existMember.setEmail(kakaoResponseDto.getEmail());
-            existMember.setNickName(kakaoResponseDto.getNickName());
-            existMember.setPhoneNumber(kakaoResponseDto.getPhoneNumber());
-            existMember.setName(kakaoResponseDto.getName());
+            existMember.updateExistingMember(kakaoResponseDto);
             memberRepository.save(existMember);
             return new CustomOAuth2User(existMember);
         }
