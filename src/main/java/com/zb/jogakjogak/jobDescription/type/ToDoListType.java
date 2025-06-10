@@ -1,7 +1,5 @@
 package com.zb.jogakjogak.jobDescription.type;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -15,18 +13,6 @@ public enum ToDoListType {
 
     private final String koreanDescription;
 
-    @JsonCreator
-    public static ToDoListType fromKoreanDescription(String koreanDescription) {
-        for (ToDoListType type : ToDoListType.values()) {
-            if (type.koreanDescription.equals(koreanDescription)) {
-                return type;
-            }
-        }
-        // 유효하지 않은 타입 문자열이 들어왔을 때 예외 처리
-        throw new IllegalArgumentException("Unknown ToDoListType: " + koreanDescription);
-    }
-
-    @JsonValue
     public String getKoreanDescription() {
         return koreanDescription;
     }
