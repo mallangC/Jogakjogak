@@ -5,10 +5,10 @@ import lombok.Getter;
 @Getter
 public class ToDoListException extends RuntimeException {
 
-    private final ToDoListErrorCode toDoListErrorCode;
+    private final ToDoListErrorCode errorCode;
 
     public ToDoListException(ToDoListErrorCode errorCode) {
         super(errorCode.getMessage());
-        this.toDoListErrorCode = errorCode;
+        this.errorCode = errorCode;
     }
 }

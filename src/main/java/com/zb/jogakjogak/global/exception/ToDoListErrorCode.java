@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ToDoListErrorCode {
 
-    TODO_LIST_NOT_FOUND(HttpStatus.NOT_FOUND, "todoList를 찾을 수 없습니다." ),
+    TODO_LIST_NOT_FOUND(HttpStatus.NOT_FOUND, "ToDoList를 찾을 수 없습니다." ),
     TODO_LIST_NOT_BELONG_TO_JD(HttpStatus.BAD_REQUEST, "해당 JD에 속하지 않는 ToDoList입니다." ),
     ;
 
