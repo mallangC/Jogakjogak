@@ -24,16 +24,24 @@ public class ToDoList {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
+    @Column(columnDefinition = "VARCHAR(255) DEFAULT ''")
+    private String memo = "";
+
+    @Column(nullable = false)
+    private boolean isDone = false;
+
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "jd_id", nullable = false)
     private JD jd;
 
     @Builder
-    private ToDoList(ToDoListType type, String title, String description, JD jd) {
+    private ToDoList(ToDoListType type, String title, String description, String memo, Boolean isDone, JD jd) {
         this.type = type;
         this.title = title;
         this.description = description;
+        this.memo = (memo != null) ? memo : this.memo;
+        this.isDone = isDone != null ? isDone : false;
         this.jd = jd;
     }
 
@@ -42,6 +50,8 @@ public class ToDoList {
                 .type(dto.getType())
                 .title(dto.getTitle())
                 .description(dto.getDescription())
+                .memo(dto.getMemo())
+                .isDone(dto.isDone())
                 .jd(jd)
                 .build();
     }

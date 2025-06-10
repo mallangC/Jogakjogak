@@ -101,6 +101,8 @@ class JDServiceTest {
         assertEquals(2, result.getAnalysisResult().size());
         assertEquals("Java 학습", result.getAnalysisResult().get(0).getDescription());
         assertEquals("Java 학습", result.getAnalysisResult().get(0).getDescription());
+        assertEquals("", result.getAnalysisResult().get(0).getMemo());
+        assertFalse(result.getAnalysisResult().get(0).isDone());
 
         // verify
         verify(openAIResponseService, times(1)).sendRequest(anyString(), anyString(), eq(0));
