@@ -14,7 +14,6 @@ import java.util.List;
 @Table(name = "job_descriptions")
 @Getter
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 @NoArgsConstructor
 public class JD {

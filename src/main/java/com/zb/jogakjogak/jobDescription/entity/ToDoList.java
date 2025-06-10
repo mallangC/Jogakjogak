@@ -9,7 +9,6 @@ import lombok.*;
 @Entity
 @Getter
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 @NoArgsConstructor
 public class ToDoList {
