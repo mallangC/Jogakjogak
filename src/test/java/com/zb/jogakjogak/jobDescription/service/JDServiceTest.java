@@ -104,6 +104,7 @@ class JDServiceTest {
         assertEquals("", result.getAnalysisResult().get(0).getMemo());
         assertFalse(result.getAnalysisResult().get(0).isDone());
 
+
         // verify
         verify(openAIResponseService, times(1)).sendRequest(anyString(), anyString(), eq(0));
         verify(objectMapper, times(1)).readValue(eq(mockAnalysisJsonString), any(CollectionType.class));
