@@ -9,8 +9,8 @@ import lombok.*;
 @Entity
 @Getter
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class ToDoList {
 
     @Id
@@ -35,11 +35,9 @@ public class ToDoList {
     @Column(nullable = false)
     private boolean isDone = false;
 
-    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "jd_id", nullable = false)
     private JD jd;
-
 
     public static ToDoList fromDto(ToDoListDto dto, JD jd) {
         return ToDoList.builder()
@@ -50,6 +48,9 @@ public class ToDoList {
                 .isDone(dto.isDone())
                 .jd(jd)
                 .build();
+    }
+    public void setJd(JD jd) {
+        this.jd = jd;
     }
 
     public void updateFromDto(ToDoListDto dto) {
