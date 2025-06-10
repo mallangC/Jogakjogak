@@ -24,18 +24,26 @@ public class ToDoList {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "jd_id", nullable = false)
+    private JD jd;
+
     @Builder
-    private ToDoList(ToDoListType type, String title, String description) {
+    private ToDoList(ToDoListType type, String title, String description, JD jd) {
         this.type = type;
         this.title = title;
         this.description = description;
+        this.jd = jd;
     }
 
-    public static ToDoList fromDto(ToDoListDto dto) {
+    public static ToDoList fromDto(ToDoListDto dto, JD jd) {
         return ToDoList.builder()
                 .type(dto.getType())
                 .title(dto.getTitle())
                 .description(dto.getDescription())
+                .jd(jd)
                 .build();
     }
+
 }
