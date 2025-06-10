@@ -16,6 +16,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class JD {
 
     @Id
@@ -33,10 +34,11 @@ public class JD {
 
     @Column(nullable = false)
     private LocalDateTime endedAt;
-
+    
     @Builder.Default
     @OneToMany(mappedBy = "jd", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ToDoList> toDoLists = new ArrayList<>();
+
 
     public void addToDoList(ToDoList toDoList) {
         if (this.toDoLists == null) {
