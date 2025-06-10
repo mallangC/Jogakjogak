@@ -1,6 +1,6 @@
 package com.zb.jogakjogak.jobDescription.entity;
 
-import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import jakarta.persistence.*;
 import lombok.*;

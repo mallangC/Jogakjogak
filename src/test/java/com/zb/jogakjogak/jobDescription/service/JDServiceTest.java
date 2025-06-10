@@ -9,7 +9,7 @@ import com.zb.jogakjogak.global.exception.JDErrorCode;
 import com.zb.jogakjogak.global.exception.JDException;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
-import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.repsitory.JDRepository;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;

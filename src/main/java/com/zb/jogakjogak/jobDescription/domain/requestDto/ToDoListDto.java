@@ -1,4 +1,4 @@
-package com.zb.jogakjogak.jobDescription.domain.responseDto;
+package com.zb.jogakjogak.jobDescription.domain.requestDto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
