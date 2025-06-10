@@ -24,13 +24,14 @@ public class ToDoList {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
+
     @Column(columnDefinition = "VARCHAR(255) DEFAULT ''")
     private String memo = "";
 
     @Column(nullable = false)
     private boolean isDone = false;
-
-    @Setter
+  
+ 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "jd_id", nullable = false)
     private JD jd;
@@ -52,6 +53,7 @@ public class ToDoList {
                 .description(dto.getDescription())
                 .memo(dto.getMemo())
                 .isDone(dto.isDone())
+
                 .jd(jd)
                 .build();
     }

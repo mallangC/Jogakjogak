@@ -46,6 +46,7 @@ public class OpenAIResponseService {
 
     public String sendRequest(String resume, String jobDescription, Integer maxTokens) {
         String systemContent = """
+
                 당신은 제공된 이력서와 채용 공고를 보고 To do List를 작성해 주는 AI입니다.
                 응답은 오직 JSON 배열 형식으로만 제공되어야 합니다.
                 각 배열 항목은 다음 필드를 포함하는 JSON 객체여야 합니다:
