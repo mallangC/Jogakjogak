@@ -1,6 +1,9 @@
 package com.zb.jogakjogak.security.jwt;
 
+import com.zb.jogakjogak.global.exception.SecurityException;
+import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.security.Token;
+import com.zb.jogakjogak.security.repository.RefreshTokenRepository;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -13,29 +16,25 @@ import java.util.Date;
 @Component
 public class JWTUtil {
 
-    private SecretKey secretKey;
+    private final SecretKey secretKey;
 
-    public JWTUtil(@Value("${jwt.secret-key}")String secret){
+    public JWTUtil(@Value("${jwt.secret-key}")String secret, RefreshTokenRepository refreshTokenRepository){
         this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
     }
 
     public String getUserName(String token) {
-
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("userName", String.class);
     }
 
     public String getRole(String token) {
-
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("role", String.class);
     }
 
     public String getToken(String token){
-
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("token", String.class);
     }
 
     public Boolean isExpired(String token) {
-
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
@@ -49,4 +48,19 @@ public class JWTUtil {
                 .signWith(secretKey)
                 .compact();
     }
+
+    public void validateToken(String token, Token tokenType) {
+        if (token == null) {
+            throw new SecurityException(MemberErrorCode.NOT_FOUND_TOKEN);
+        }
+
+        if (isExpired(token)) {
+            throw new SecurityException(MemberErrorCode.TOKEN_EXPIRED);
+        }
+
+        if (!getToken(token).equals(tokenType.name())) {
+            throw new SecurityException(MemberErrorCode.TOKEN_TYPE_NOT_MATCH);
+        }
+    }
+
 }
