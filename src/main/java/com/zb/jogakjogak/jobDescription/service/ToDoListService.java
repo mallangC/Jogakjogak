@@ -1,14 +1,15 @@
 package com.zb.jogakjogak.jobDescription.service;
 
-import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListDto;
+import com.zb.jogakjogak.global.exception.JDErrorCode;
+import com.zb.jogakjogak.global.exception.JDException;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repsitory.ToDoListRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -16,11 +17,22 @@ public class ToDoListService {
 
     private final ToDoListRepository toDoListRepository;
 
-    public List<ToDoList> saveToDoList(List<ToDoListDto> toDoList, JD jd) {
-        List<ToDoList> entities = toDoList.stream()
-                .map(dto -> ToDoList.fromDto(dto, jd))
-                .collect(Collectors.toList());
+    /**
+     * 특정 JD에 새로운 ToDoList를 추가하는 메서드
+     *
+     * @param jdId        ToDoList를 추가할 JD의 ID
+     * @param toDoListDto 추가할 ToDoList의 정보
+     * @return 새로 생성된 ToDoList의 응답 DTO
+     */
+    @Transactional // 하나의 트랜잭션으로 묶어 원자성을 보장
+    public ToDoListResponseDto createToDoList(Long jdId, ToDoListDto toDoListDto) {
 
-        return toDoListRepository.saveAll(entities);
+        JD jd = toDoListRepository.findById(jdId)
+                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND)).getJd();
+
+        ToDoList toDoList = ToDoList.fromDto(toDoListDto, jd);
+        jd.addToDoList(toDoList);
+        ToDoList savedToDoList = toDoListRepository.save(toDoList);
+        return ToDoListResponseDto.fromEntity(savedToDoList);
     }
 }
