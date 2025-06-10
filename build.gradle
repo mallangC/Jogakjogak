@@ -31,13 +31,18 @@ repositories {
 dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-//    implementation 'org.springframework.boot:spring-boot-starter-security
+    //implementation 'org.springframework.boot:spring-boot-starter-security
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
 
 //    //oauth
 //    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+    //test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'net.datafaker:datafaker:2.0.2'
 
     //
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'
@@ -60,6 +65,8 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'com.h2database:h2'
+
 
     // java-faker
     implementation ('com.github.javafaker:javafaker:1.0.2') { exclude module: 'snakeyaml' }
