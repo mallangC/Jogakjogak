@@ -16,6 +16,13 @@ public class ToDoListController {
 
     private final ToDoListService toDoListService;
 
+    /**
+     * 특정 JD에 새로운 ToDoList를 추가하는 메서드
+     *
+     * @param jdId ToDoList를 추가할 JD의 ID
+     * @param toDoListDto 추가할 ToDoList의 정보
+     * @return 새로 생성된 ToDoList의 응답 DTO
+     */
     @PostMapping
     public ResponseEntity<ToDoListResponseDto> createToDoList(
             @PathVariable Long jdId,
