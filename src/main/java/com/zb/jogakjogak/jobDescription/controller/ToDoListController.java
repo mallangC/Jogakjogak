@@ -40,6 +40,14 @@ public class ToDoListController {
         );
     }
 
+    /**
+     * 특정 JD에 속한 ToDoList를 수정하는 메서드
+     *
+     * @param jdId        ToDoList가 속한 JD의 ID
+     * @param toDoListId  수정할 ToDoList의 ID
+     * @param toDoListDto 업데이트할 ToDoList의 정보
+     * @return 수정된 ToDoList의 응답 DTO
+     */
     @PatchMapping("/{toDoListId}")
     public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> updateToDoList(
             @PathVariable Long jdId,
