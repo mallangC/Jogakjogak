@@ -1,7 +1,5 @@
 package com.zb.jogakjogak.security.service;
 
-import com.zb.jogakjogak.global.exception.AuthException;
-import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.security.entity.Member;
 import com.zb.jogakjogak.security.repository.MemberRepository;
 import com.zb.jogakjogak.security.repository.RefreshTokenRepository;
@@ -13,8 +11,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)

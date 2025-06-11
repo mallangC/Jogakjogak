@@ -56,7 +56,6 @@ class WithdrawalControllerTest {
                 "kakao"
         );
 
-
         // when
         MockHttpServletResponse response = mockMvc.perform(post("/api/member/withdrawal")
                         .with(csrf())
