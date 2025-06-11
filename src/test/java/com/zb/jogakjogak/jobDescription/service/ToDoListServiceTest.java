@@ -81,9 +81,9 @@ class ToDoListServiceTest {
 
         mockToDoList = ToDoList.builder()
                 .id(toDoListId)
-                .category(createToDoListDto.getType())
+                .category(createToDoListDto.getCategory())
                 .title(createToDoListDto.getTitle())
-                .content(createToDoListDto.getDescription())
+                .content(createToDoListDto.getContent())
                 .memo(createToDoListDto.getMemo())
                 .isDone(createToDoListDto.isDone())
                 .jd(mockJd)
@@ -121,9 +121,9 @@ class ToDoListServiceTest {
         verify(toDoListRepository, times(1)).save(any(ToDoList.class));
 
         assertNotNull(result);
-        assertEquals(createToDoListDto.getType(), result.getType());
+        assertEquals(createToDoListDto.getCategory(), result.getCategory());
         assertEquals(createToDoListDto.getTitle(), result.getTitle());
-        assertEquals(createToDoListDto.getDescription(), result.getDescription());
+        assertEquals(createToDoListDto.getContent(), result.getContent());
         assertEquals(createToDoListDto.getMemo(), result.getMemo());
         assertEquals(createToDoListDto.isDone(), result.isDone());
     }
@@ -164,9 +164,9 @@ class ToDoListServiceTest {
 
         assertNotNull(result);
         assertEquals(toDoListId, result.getChecklist_id());
-        assertEquals(updateToDoListDto.getType(), result.getType());
+        assertEquals(updateToDoListDto.getCategory(), result.getCategory());
         assertEquals(updateToDoListDto.getTitle(), result.getTitle());
-        assertEquals(updateToDoListDto.getDescription(), result.getDescription());
+        assertEquals(updateToDoListDto.getContent(), result.getContent());
         assertEquals(updateToDoListDto.getMemo(), result.getMemo());
         assertEquals(updateToDoListDto.isDone(), result.isDone());
         assertEquals(jdId, result.getJdId());
@@ -256,9 +256,9 @@ class ToDoListServiceTest {
 
         assertNotNull(result);
         assertEquals(toDoListId, result.getChecklist_id());
-        assertEquals(mockToDoList.getCategory(), result.getType());
+        assertEquals(mockToDoList.getCategory(), result.getCategory());
         assertEquals(mockToDoList.getTitle(), result.getTitle());
-        assertEquals(mockToDoList.getContent(), result.getDescription());
+        assertEquals(mockToDoList.getContent(), result.getContent());
         assertEquals(mockToDoList.getMemo(), result.getMemo());
         assertEquals(mockToDoList.isDone(), result.isDone());
         assertEquals(jdId, result.getJdId());
