@@ -1,6 +1,7 @@
 package com.zb.jogakjogak.jobDescription.entity;
 
 
+import com.zb.jogakjogak.global.BaseEntity;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import jakarta.persistence.*;
@@ -11,7 +12,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ToDoList {
+public class ToDoList extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,21 +20,22 @@ public class ToDoList {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ToDoListType type;
+    private ToDoListType category;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean isDone = false;
 
     @Column(nullable = false)
     private String title;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String description;
+    private String content;
 
     @Builder.Default
     @Column(columnDefinition = "VARCHAR(255) DEFAULT ''")
     private String memo = "";
 
-    @Builder.Default
-    @Column(nullable = false)
-    private boolean isDone = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "jd_id", nullable = false)
@@ -41,9 +43,9 @@ public class ToDoList {
 
     public static ToDoList fromDto(ToDoListDto dto, JD jd) {
         return ToDoList.builder()
-                .type(dto.getType())
+                .category(dto.getType())
                 .title(dto.getTitle())
-                .description(dto.getDescription())
+                .content(dto.getDescription())
                 .memo(dto.getMemo())
                 .isDone(dto.isDone())
                 .jd(jd)
@@ -54,9 +56,9 @@ public class ToDoList {
     }
 
     public void updateFromDto(ToDoListDto dto) {
-        this.type = dto.getType();
+        this.category = dto.getType();
         this.title = dto.getTitle();
-        this.description = dto.getDescription();
+        this.content = dto.getDescription();
         this.memo = dto.getMemo() != null ? dto.getMemo() : ""; // memo는 null 방지
         this.isDone = dto.isDone();
     }

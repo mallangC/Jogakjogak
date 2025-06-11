@@ -60,7 +60,7 @@ class ToDoListServiceTest {
                 .id(jdId)
                 .title(faker.job().title())
                 .jdUrl(faker.internet().url())
-                .endedAt(convertToLocalDate(faker.date().future(365, TimeUnit.DAYS)))
+                .endedAt(faker.date().future(365, TimeUnit.DAYS).toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
                 .build();
 
         createToDoListDto = new ToDoListDto(
@@ -81,9 +81,9 @@ class ToDoListServiceTest {
 
         mockToDoList = ToDoList.builder()
                 .id(toDoListId)
-                .type(createToDoListDto.getType())
+                .category(createToDoListDto.getType())
                 .title(createToDoListDto.getTitle())
-                .description(createToDoListDto.getDescription())
+                .content(createToDoListDto.getDescription())
                 .memo(createToDoListDto.getMemo())
                 .isDone(createToDoListDto.isDone())
                 .jd(mockJd)
@@ -104,9 +104,9 @@ class ToDoListServiceTest {
         when(toDoListRepository.save(any(ToDoList.class))).thenAnswer(invocation -> {
             ToDoList originalToDoList = invocation.getArgument(0);
             return ToDoList.builder()
-                    .type(originalToDoList.getType())
+                    .category(originalToDoList.getCategory())
                     .title(originalToDoList.getTitle())
-                    .description(originalToDoList.getDescription())
+                    .content(originalToDoList.getContent())
                     .memo(originalToDoList.getMemo())
                     .isDone(originalToDoList.isDone())
                     .jd(originalToDoList.getJd())
@@ -216,14 +216,14 @@ class ToDoListServiceTest {
                 .id(anotherJdId)
                 .title("다른 JD")
                 .jdUrl("https://www.test.com")
-                .endedAt(LocalDate.now().atStartOfDay())
+                .endedAt(LocalDate.now())
                 .build();
 
         when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
         ToDoList toDoListBelongingToAnotherJd = ToDoList.builder()
-                .type(ToDoListType.EMPLOYMENT_SCHEDULE_RELATED)
+                .category(ToDoListType.EMPLOYMENT_SCHEDULE_RELATED)
                 .title("다른 JD의 ToDo")
-                .description("설명")
+                .content("설명")
                 .memo("메모")
                 .isDone(false)
                 .jd(anotherMockJd)
@@ -256,9 +256,9 @@ class ToDoListServiceTest {
 
         assertNotNull(result);
         assertEquals(toDoListId, result.getChecklist_id());
-        assertEquals(mockToDoList.getType(), result.getType());
+        assertEquals(mockToDoList.getCategory(), result.getType());
         assertEquals(mockToDoList.getTitle(), result.getTitle());
-        assertEquals(mockToDoList.getDescription(), result.getDescription());
+        assertEquals(mockToDoList.getContent(), result.getDescription());
         assertEquals(mockToDoList.getMemo(), result.getMemo());
         assertEquals(mockToDoList.isDone(), result.isDone());
         assertEquals(jdId, result.getJdId());
@@ -306,14 +306,14 @@ class ToDoListServiceTest {
                 .id(anotherJdId)
                 .title("다른 JD")
                 .jdUrl("https://www.test.com")
-                .endedAt(LocalDate.now().atStartOfDay())
+                .endedAt(LocalDate.now())
                 .build();
 
         ToDoList toDoListBelongingToAnotherJd = ToDoList.builder()
                 .id(toDoListId)
-                .type(ToDoListType.EMPLOYMENT_SCHEDULE_RELATED)
+                .category(ToDoListType.EMPLOYMENT_SCHEDULE_RELATED)
                 .title("다른 JD의 ToDo")
-                .description("설명")
+                .content("설명")
                 .memo("메모")
                 .isDone(false)
                 .jd(anotherMockJd)

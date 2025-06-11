@@ -19,9 +19,9 @@ public class ToDoListResponseDto {
     public static ToDoListResponseDto fromEntity(ToDoList toDoList) {
         return ToDoListResponseDto.builder()
                 .checklist_id(toDoList.getId())
-                .type(toDoList.getType())
+                .type(toDoList.getCategory())
                 .title(toDoList.getTitle())
-                .description(toDoList.getDescription())
+                .description(toDoList.getContent())
                 .memo(toDoList.getMemo())
                 .isDone(toDoList.isDone())
                 .jdId(toDoList.getJd() != null ? toDoList.getJd().getId() : null)
