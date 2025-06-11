@@ -28,4 +28,15 @@ public class JDController {
     public ResponseEntity<HttpApiResponse<JDResponseDto>> requestSend(@RequestBody JDRequestDto jdRequestDto) {
         return ResponseEntity.ok(new HttpApiResponse<>(jdService.analyze(jdRequestDto), "JD 분석하기 완료", HttpStatus.OK));
     }
+
+    @PostMapping("/jd")
+    public ResponseEntity<HttpApiResponse<JDResponseDto>> llmAnalyze(@RequestBody JDRequestDto jdRequestDto) {
+        return ResponseEntity.ok().body(
+                new HttpApiResponse<>(
+                        jdService.llmAnalyze(jdRequestDto),
+                        "JD 분석하기 완료",
+                        HttpStatus.CREATED
+                )
+        );
+    }
 }
