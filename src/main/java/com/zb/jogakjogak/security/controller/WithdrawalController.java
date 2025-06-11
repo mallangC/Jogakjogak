@@ -21,7 +21,7 @@ public class WithdrawalController {
 
     private final WithdrawalService withdrawalService;
 
-    @PostMapping()
+    @PostMapping
     public HttpApiResponse<?> oauth2Withdrawal(HttpServletResponse response){
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
