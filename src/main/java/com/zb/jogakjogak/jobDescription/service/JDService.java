@@ -151,7 +151,7 @@ public class JDService {
         String analysisJsonString = llmService.generateTodoListJson(resumeContent, jdContent);
         List<ToDoListDto> parsedAnalysisResult;
         try {
-            parsedAnalysisResult = objectMapper.readValue(analysisJsonString, new TypeReference<List<ToDoListDto>>() {
+            parsedAnalysisResult = objectMapper.readValue(analysisJsonString, new TypeReference<>() {
             });
         } catch (JsonProcessingException e) {
             throw new JDException(JDErrorCode.FAILED_JSON_PROCESS);
@@ -207,10 +207,14 @@ public class JDService {
                 .build();
     }
 
+    /**
+     * JD 분석 내용 단건 조회하는 서비스 메서드
+     * @param jdId 조회하려는 jd의 아이디
+     * @return 조회된 jd의 응답 dto
+     */
     public JDResponseDto getJd(Long jdId) {
         JD jd = jdRepository.findByIdWithToDoLists(jdId)
                 .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
         return JDResponseDto.fromEntity(jd);
     }
-
 }

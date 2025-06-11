@@ -42,6 +42,11 @@ public class JDController {
         );
     }
 
+    /**
+     * JD 분석 내용 단건 조회하는 컨트롤러 메서드
+     * @param jdId 조회하려는 jd의 아이디
+     * @return 조회된 jd의 응답 dto
+     */
     @GetMapping("/jds/{jd_id}")
     public ResponseEntity<HttpApiResponse<JDResponseDto>> getJd(@PathVariable("jd_id") Long jdId) {
         return ResponseEntity.ok().body(
