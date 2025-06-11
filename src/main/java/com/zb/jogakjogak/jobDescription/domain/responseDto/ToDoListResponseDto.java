@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class ToDoListResponseDto {
-    private Long id;
+    private Long checklist_id;
     private ToDoListType type;
     private String title;
     private String description;
@@ -18,7 +18,7 @@ public class ToDoListResponseDto {
 
     public static ToDoListResponseDto fromEntity(ToDoList toDoList) {
         return ToDoListResponseDto.builder()
-                .id(toDoList.getId())
+                .checklist_id(toDoList.getId())
                 .type(toDoList.getType())
                 .title(toDoList.getTitle())
                 .description(toDoList.getDescription())
