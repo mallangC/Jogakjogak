@@ -5,6 +5,7 @@ import com.zb.jogakjogak.global.exception.JDException;
 import com.zb.jogakjogak.global.exception.ToDoListErrorCode;
 import com.zb.jogakjogak.global.exception.ToDoListException;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListDeleteResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
@@ -83,5 +84,23 @@ public class ToDoListService {
             throw new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_BELONG_TO_JD);
         }
         return ToDoListResponseDto.fromEntity(toDoList);
+    }
+
+    public ToDoListDeleteResponseDto deleteToDoList(Long jdId, Long toDoListId) {
+
+        jdRepository.findById(jdId)
+                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
+
+        ToDoList toDoList = toDoListRepository.findById(toDoListId)
+                .orElseThrow(() -> new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_FOUND));
+
+        if (!toDoList.getJd().getId().equals(jdId)) {
+            throw new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_BELONG_TO_JD);
+        }
+
+        toDoListRepository.delete(toDoList);
+        return ToDoListDeleteResponseDto.builder()
+                .checklist_id(toDoList.getId())
+                .build();
     }
 }
