@@ -33,7 +33,7 @@ class ReissueServiceTest {
 
     @Test
     @DisplayName("기존 refresh 토큰이 존재할 경우 업데이트")
-    void reissue_when_exists_refresh_token_test() {
+    void reissue_when_exists_refresh_token_test() throws Exception{
         // given
         String refreshToken = faker.internet().uuid();
         String userName = faker.name().username();
@@ -64,7 +64,7 @@ class ReissueServiceTest {
 
     @Test
     @DisplayName("기존 refresh 토큰이 없을경우 생성후 DB저장")
-    void reissue_when_not_exists_refresh_token_test() {
+    void reissue_when_not_exists_refresh_token_test() throws Exception{
         // given
         String refreshToken = faker.internet().uuid();
         String userName = faker.name().username();
