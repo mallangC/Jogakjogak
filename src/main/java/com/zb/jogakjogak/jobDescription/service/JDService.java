@@ -1,6 +1,7 @@
 package com.zb.jogakjogak.jobDescription.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.zb.jogakjogak.global.exception.JDErrorCode;
@@ -23,16 +24,8 @@ public class JDService {
     private final OpenAIResponseService openAIResponseService;
     private final ObjectMapper objectMapper;
     private final JDRepository jdRepository;
-
-    /**
-     * JD와 이력서를 분석하여 To Do List를 만들어주는 서비스 메서드
-     *
-     * @param jdRequestDto 제목, JD의 URL, 마감일
-     * @return 제목, JD의 URL, To Do List, 사용자 메모, 마감일
-     */
-    public JDResponseDto analyze(JDRequestDto jdRequestDto) {
-        // TODO: 이력서를 받아야 함. JD를 어떻게 전달 받을 지 고민 중....
-        String resumeContent = """
+    private final LLMService llmService;
+    private String resumeContent= """
                 ## 이력서
                 **이름:** 홍길동
                 **연락처:** 010-XXXX-XXXX
@@ -60,8 +53,7 @@ public class JDService {
                     * 사용자 인증, CRUD 기능 구현
                     * Git으로 버전 관리
                 """;
-
-        String jdContent = """
+    private String jdContent = """
                 ## 채용 공고: 시니어 백엔드 개발자
                 
                 **회사:** (주)InnovateX
@@ -88,11 +80,52 @@ public class JDService {
                 * 테스트 코드 작성 및 TDD(Test Driven Development) 경험
                 * 우수한 커뮤니케이션 및 협업 능력
                 """;
-        String analysisJsonString = openAIResponseService.sendRequest(resumeContent, jdContent, 0);
+
+    /**
+     * JD와 이력서를 분석하여 To Do List를 만들어주는 서비스 메서드
+     *
+     * @param jdRequestDto 제목, JD의 URL, 마감일
+     * @return 제목, JD의 URL, To Do List, 사용자 메모, 마감일
+     */
+    public JDResponseDto analyze(JDRequestDto jdRequestDto) {
+        // TODO: 이력서를 받아야 함. JD를 어떻게 전달 받을 지 고민 중....
+        String analysisJsonString = openAIResponseService.sendRequest(resumeContent, jdContent, 4000);
         List<ToDoListDto> parsedAnalysisResult;
         try {
             CollectionType listType = objectMapper.getTypeFactory().constructCollectionType(List.class, ToDoListDto.class);
             parsedAnalysisResult = objectMapper.readValue(analysisJsonString, listType);
+        } catch (JsonProcessingException e) {
+            throw new JDException(JDErrorCode.FAILED_JSON_PROCESS);
+        }
+
+        JD jd = JD.builder()
+                .title(jdRequestDto.getTitle())
+                .jdUrl(jdRequestDto.getJDUrl())
+                .endedAt(jdRequestDto.getEndedAt())
+                .memo("")
+                .build();
+
+        for (ToDoListDto dto : parsedAnalysisResult) {
+            ToDoList toDoList = ToDoList.fromDto(dto, jd);
+            jd.addToDoList(toDoList);
+        }
+
+        JD savedJd = jdRepository.save(jd);
+
+        return JDResponseDto.builder()
+                .title(savedJd.getTitle())
+                .jdUrl(savedJd.getJdUrl())
+                .analysisResult(parsedAnalysisResult)
+                .memo(savedJd.getMemo())
+                .endedAt(savedJd.getEndedAt())
+                .build();
+    }
+
+    public JDResponseDto llmAnalyze(JDRequestDto jdRequestDto) {
+        String analysisJsonString = llmService.generateTodoListJson(resumeContent,jdContent);
+        List<ToDoListDto> parsedAnalysisResult;
+        try {
+            parsedAnalysisResult = objectMapper.readValue(analysisJsonString, new TypeReference<List<ToDoListDto>>() {});
         } catch (JsonProcessingException e) {
             throw new JDException(JDErrorCode.FAILED_JSON_PROCESS);
         }
