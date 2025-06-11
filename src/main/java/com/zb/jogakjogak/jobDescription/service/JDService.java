@@ -206,4 +206,11 @@ public class JDService {
                 .toDoLists(responseToDoLists)
                 .build();
     }
+
+    public JDResponseDto getJd(Long jdId) {
+        JD jd = jdRepository.findByIdWithToDoLists(jdId)
+                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
+        return JDResponseDto.fromEntity(jd);
+    }
+
 }
