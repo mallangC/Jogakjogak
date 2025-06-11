@@ -23,13 +23,13 @@ public class JD extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String title;
 
-    @Column(nullable = true)
+    @Column
     private String jdUrl;
 
-    @Column(nullable = true)
+    @Column
     private String memo;
 
     @Column(nullable = false)
