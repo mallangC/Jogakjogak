@@ -1,6 +1,5 @@
 package com.zb.jogakjogak.jobDescription.service;
 
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
@@ -23,7 +22,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -55,11 +53,10 @@ class JDServiceTest {
     private String mockLLMAnalysisJsonString;
     private List<ToDoListDto> mockToDoListDtos;
     private List<ToDoListDto> mockToDoListDtosForLLM;
-    private Faker faker;
 
     @BeforeEach
     void setUp() {
-        faker = new Faker();
+        Faker faker = new Faker();
 
         jdRequestDto = JDRequestDto.builder()
                 .title("시니어 백엔드 개발자 채용")
