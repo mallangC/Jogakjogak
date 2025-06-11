@@ -82,7 +82,7 @@ public class JDService {
                 """;
 
     /**
-     * JD와 이력서를 분석하여 To Do List를 만들어주는 서비스 메서드
+     * open ai를 이용하여 JD와 이력서를 분석하여 To Do List를 만들어주는 서비스 메서드
      *
      * @param jdRequestDto 제목, JD의 URL, 마감일
      * @return 제목, JD의 URL, To Do List, 사용자 메모, 마감일
@@ -121,6 +121,12 @@ public class JDService {
                 .build();
     }
 
+    /**
+     * gemini ai를 이용하여 JD와 이력서를 분석하여 To Do List를 만들어주는 서비스 메서드
+     *
+     * @param jdRequestDto 제목, JD의 URL, 마감일
+     * @return 제목, JD의 URL, To Do List, 사용자 메모, 마감일
+     */
     public JDResponseDto llmAnalyze(JDRequestDto jdRequestDto) {
         String analysisJsonString = llmService.generateTodoListJson(resumeContent,jdContent);
         List<ToDoListDto> parsedAnalysisResult;
