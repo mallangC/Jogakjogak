@@ -1,5 +1,6 @@
 package com.zb.jogakjogak.jobDescription.domain.responseDto;
 
+import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,7 +16,7 @@ import java.util.List;
 public class JDResponseDto {
     private String title;
     private String jdUrl;
-    private List<ToDoItemDto> analysisResult;
+    private List<ToDoListDto> analysisResult;
     private String memo;
     private LocalDateTime endedAt;
 }

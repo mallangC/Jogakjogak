@@ -10,8 +10,5 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
     void deleteByRefreshToken(String refresh);
-
-    boolean existsByRefreshToken(String refresh);
-
     RefreshToken findByRefreshToken(String refreshToken);
 }

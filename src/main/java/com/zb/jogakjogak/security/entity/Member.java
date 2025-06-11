@@ -2,13 +2,16 @@ package com.zb.jogakjogak.security.entity;
 
 
 import com.zb.jogakjogak.security.Role;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.zb.jogakjogak.security.dto.KakaoResponseDto;
+import com.zb.jogakjogak.security.dto.OAuth2ResponseDto;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -22,8 +25,10 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
     private String userName;
 
+    @Email
     private String email;
 
     private String password;
@@ -36,5 +41,27 @@ public class Member {
 
     private Role role;
 
-    private String provider;
+    private LocalDateTime registeredAt;
+
+    private LocalDateTime lastLoginAt;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OAuth2Info> oauth2Info = new ArrayList<>();
+
+    @PrePersist
+    public void prePersist(){
+        this.registeredAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate(){
+        this.lastLoginAt = LocalDateTime.now();
+    }
+
+    public void updateExistingMember(KakaoResponseDto kakaoResponseDto){
+        this.email = kakaoResponseDto.getEmail();
+        this.nickName = kakaoResponseDto.getNickName();
+        this.phoneNumber = kakaoResponseDto.getPhoneNumber();
+        this.name = kakaoResponseDto.getName();
+    }
 }

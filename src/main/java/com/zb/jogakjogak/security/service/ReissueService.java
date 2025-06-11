@@ -1,14 +1,11 @@
 package com.zb.jogakjogak.security.service;
 
 
-import com.zb.jogakjogak.global.exception.CustomException;
 import com.zb.jogakjogak.security.Token;
 import com.zb.jogakjogak.security.dto.ReissueResultDto;
 import com.zb.jogakjogak.security.entity.RefreshToken;
 import com.zb.jogakjogak.security.jwt.JWTUtil;
 import com.zb.jogakjogak.security.repository.RefreshTokenRepository;
-import com.zb.jogakjogak.global.exception.ErrorCode;
-import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,43 +17,25 @@ public class ReissueService {
 
     private final JWTUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
+    private static final long ACCESS_TOKEN_MS = 3600000L;
+    private static final long REFRESH_TOKEN_MS = 604800000L;
 
     public ReissueResultDto reissue(String refreshToken) {
 
-        if (refreshToken == null) {
-            throw new CustomException(ErrorCode.NOT_FOUND_TOKEN);
-        }
-        try {
-            jwtUtil.isExpired(refreshToken);
-        } catch (ExpiredJwtException e) {
-            throw new CustomException(ErrorCode.TOKEN_EXPIRED);
-        }
-        // 토큰이 refresh인지 확인 (발급시 페이로드에 명시)
-        if (!jwtUtil.getToken(refreshToken).equals(Token.REFRESH_TOKEN.name())) {
-            throw new CustomException(ErrorCode.NOT_REFRESH_TOKEN);
-        }
-        // DB에 저장되어 있는지 확인
-        if (!refreshTokenRepository.existsByRefreshToken(refreshToken)) {
-            throw new CustomException(ErrorCode.NOT_FOUND_TOKEN);
-        }
+        jwtUtil.validateToken(refreshToken, Token.REFRESH_TOKEN);
 
         String userName = jwtUtil.getUserName(refreshToken);
         String role = jwtUtil.getRole(refreshToken);
 
-        // 새로운 jwt발급
-        String newAccess = jwtUtil.createJwt(userName, role, 3600000L, Token.ACCESS_TOKEN);
-        String newRefresh = jwtUtil.createJwt(userName, role, 604800000L, Token.REFRESH_TOKEN);
+        String newAccess = jwtUtil.createJwt(userName, role, ACCESS_TOKEN_MS, Token.ACCESS_TOKEN);
+        String newRefresh = jwtUtil.createJwt(userName, role, REFRESH_TOKEN_MS, Token.REFRESH_TOKEN);
 
-        // refresh 토큰 저장 db에 기존의 refresh토큰 삭제후 새 refresh토큰 저장
+        // refresh 토큰 저장 DB에 존재하면 업데이트, 없으면 생성
         RefreshToken existingToken = refreshTokenRepository.findByRefreshToken(refreshToken);
         if (existingToken != null) {
-            // 기존 엔티티 업데이트
-            existingToken.setRefreshToken(newRefresh);
-            existingToken.setExpiration(new Date(System.currentTimeMillis() + 604800000L).toString());
-            refreshTokenRepository.save(existingToken);
+            updateExistingRefreshTokenEntity(existingToken, newRefresh);
         } else {
-            // 새로 생성
-            saveNewRefreshTokenEntity(userName, newRefresh, 604800000L);
+            saveNewRefreshTokenEntity(userName, newRefresh);
         }
 
         return ReissueResultDto.builder()
@@ -65,8 +44,14 @@ public class ReissueService {
                 .build();
     }
 
-    private void saveNewRefreshTokenEntity(String userName, String newRefresh, Long expiredMs) {
-        Date date = new Date(System.currentTimeMillis() + expiredMs);
+    private void updateExistingRefreshTokenEntity(RefreshToken existingToken, String newRefresh) {
+        existingToken.setRefreshToken(newRefresh);
+        existingToken.setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_MS).toString());
+        refreshTokenRepository.save(existingToken);
+    }
+
+    private void saveNewRefreshTokenEntity(String userName, String newRefresh) {
+        Date date = new Date(System.currentTimeMillis() + REFRESH_TOKEN_MS);
         RefreshToken refreshToken = RefreshToken.builder()
                 .userName(userName)
                 .refreshToken(newRefresh)
