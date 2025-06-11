@@ -28,10 +28,10 @@ public class ToDoListService {
      * @param toDoListDto 추가할 ToDoList의 정보
      * @return 새로 생성된 ToDoList의 응답 DTO
      */
-    @Transactional // 하나의 트랜잭션으로 묶어 원자성을 보장
+    @Transactional
     public ToDoListResponseDto createToDoList(Long jdId, ToDoListDto toDoListDto) {
 
-        JD jd = jdRepository.findById(jdId) // <-- 수정된 부분
+        JD jd = jdRepository.findById(jdId)
                 .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
 
         ToDoList toDoList = ToDoList.fromDto(toDoListDto, jd);
@@ -63,5 +63,18 @@ public class ToDoListService {
         toDoList.updateFromDto(toDoListDto);
         ToDoList updatedToDoList = toDoListRepository.save(toDoList);
         return ToDoListResponseDto.fromEntity(updatedToDoList);
+    }
+
+    public ToDoListResponseDto getToDoList(Long jdId, Long toDoListId) {
+        jdRepository.findById(jdId)
+                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
+
+        ToDoList toDoList = toDoListRepository.findById(toDoListId)
+                .orElseThrow(() -> new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_FOUND));
+
+        if (!toDoList.getJd().getId().equals(jdId)) {
+            throw new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_BELONG_TO_JD);
+        }
+        return ToDoListResponseDto.fromEntity(toDoList);
     }
 }
