@@ -151,9 +151,7 @@ class ToDoListServiceTest {
         // Given
         when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
         when(toDoListRepository.findById(toDoListId)).thenReturn(Optional.of(mockToDoList));
-        when(toDoListRepository.save(any(ToDoList.class))).thenAnswer(invocation -> {
-            return invocation.<ToDoList>getArgument(0);
-        });
+        when(toDoListRepository.save(any(ToDoList.class))).thenAnswer(invocation -> invocation.<ToDoList>getArgument(0));
 
 
         // When

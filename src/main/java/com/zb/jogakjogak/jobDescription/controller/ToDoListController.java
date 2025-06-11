@@ -63,6 +63,13 @@ public class ToDoListController {
         );
     }
 
+    /**
+     * 특정 JD에 속한 ToDoList를 조회하는 메서드
+     *
+     * @param jdId ToDoList가 속한 JD의 ID
+     * @param toDoListId 조회할 ToDoList의 ID
+     * @return 조회된 ToDoList의 응답 DTO
+     */
     @GetMapping("/{toDoListId}")
     public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> getToDoList(
             @PathVariable Long jdId,
