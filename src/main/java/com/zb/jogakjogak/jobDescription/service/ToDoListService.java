@@ -86,6 +86,13 @@ public class ToDoListService {
         return ToDoListResponseDto.fromEntity(toDoList);
     }
 
+    /**
+     * 특정 JD에 속한 ToDoList를 삭제하는 메서드
+     *
+     * @param jdId ToDoList가 속한 JD의 ID
+     * @param toDoListId 조회할 ToDoList의 ID
+     * @return 삭제된 ToDoList의 응답 DTO
+     */
     public ToDoListDeleteResponseDto deleteToDoList(Long jdId, Long toDoListId) {
 
         jdRepository.findById(jdId)
