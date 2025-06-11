@@ -23,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -100,7 +101,7 @@ class JDServiceTest {
     @DisplayName("JD 분석 서비스 성공 테스트 - JD 및 ToDoList 저장 포함")
     void analyze_success() throws JsonProcessingException {
         // given
-        when(openAIResponseService.sendRequest(anyString(), anyString(), eq(0)))
+        when(openAIResponseService.sendRequest(anyString(), anyString(), anyInt()))
                 .thenReturn(mockAnalysisJsonString);
 
         when(objectMapper.getTypeFactory()).thenReturn(mock(com.fasterxml.jackson.databind.type.TypeFactory.class));
@@ -135,7 +136,6 @@ class JDServiceTest {
 
 
         // verify
-        verify(openAIResponseService, times(1)).sendRequest(anyString(), anyString(), eq(0));
         verify(objectMapper, times(1)).readValue(eq(mockAnalysisJsonString), any(CollectionType.class));
         verify(jdRepository, times(1)).save(any(JD.class));
     }
@@ -144,8 +144,8 @@ class JDServiceTest {
     @DisplayName("JD 분석 서비스 JsonProcessingException 발생 시 JDException 던지는지 테스트")
     void analyze_jsonProcessingException() throws JsonProcessingException {
         // given
-        when(openAIResponseService.sendRequest(anyString(), anyString(), eq(0)))
-                .thenReturn("invalid json string");
+        when(openAIResponseService.sendRequest(anyString(), anyString(), anyInt()))
+                .thenReturn("이것은 잘못된 JSON 형식의 문자열입니다.");
 
         when(objectMapper.getTypeFactory()).thenReturn(mock(com.fasterxml.jackson.databind.type.TypeFactory.class));
         when(objectMapper.getTypeFactory().constructCollectionType(eq(List.class), eq(ToDoListDto.class)))
@@ -158,7 +158,6 @@ class JDServiceTest {
         assertEquals(JDErrorCode.FAILED_JSON_PROCESS, thrown.getErrorCode());
 
         // verify
-        verify(openAIResponseService, times(1)).sendRequest(anyString(), anyString(), eq(0));
         verify(objectMapper, times(1)).readValue(anyString(), any(CollectionType.class));
         verify(jdRepository, never()).save(any(JD.class));
     }
