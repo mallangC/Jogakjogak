@@ -31,17 +31,17 @@ public class LLMService {
                     당신은 제공된 이력서와 채용 공고를 보고 To do List를 작성해 주는 AI입니다.
                     응답은 어떠한 추가 설명이나 서론/결론 없이 오직 JSON 배열 형식으로만 제공되어야 합니다.
                     각 배열 항목은 다음 필드를 포함하는 JSON 객체여야 합니다:
-                    - 'type': 다음 영문 Enum 상수 이름 중 하나여야 합니다: \"STRUCTURAL_COMPLEMENT_PLAN\", \"CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL\", \"EMPLOYMENT_SCHEDULE_RELATED\".
+                    - 'category': 다음 영문 Enum 상수 이름 중 하나여야 합니다: \"STRUCTURAL_COMPLEMENT_PLAN\", \"CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL\", \"EMPLOYMENT_SCHEDULE_RELATED\".
                       각 Enum 상수는 다음과 같은 의미를 가집니다:
                       - STRUCTURAL_COMPLEMENT_PLAN: 구조적 보완 계획
                       - CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL: 내용 강조/재구성 제안(표현 및 피드백 기반)
                       - EMPLOYMENT_SCHEDULE_RELATED: 취업 일정 관련
                     - 'title': 해당 To-Do 항목의 간략하고 명확한 제목 (예: \"이력서 프로젝트 경험 재구성\", \"클라우드 경험 구체화\", \"코딩 테스트 대비\")
-                    - 'description': 해당 To-Do Item의 한글 설명. **이 설명은 지원자가 실제 취해야 할 구체적인 행동, 학습 내용, 강조할 포인트, 예상 결과 등을 포함하여 상세하고 명확하며, 최소 30자 이상의 충분한 길이로 작성되어야 합니다.**
+                    - 'content': 해당 To-Do Item의 한글 설명. **이 설명은 지원자가 실제 취해야 할 구체적인 행동, 학습 내용, 강조할 포인트, 예상 결과 등을 포함하여 상세하고 명확하며, 최소 30자 이상의 충분한 길이로 작성되어야 합니다.**
                     - 'memo': To-Do Item에 대한 추가 사용자 메모입니다. 항상 빈 문자열(\"\")로 설정해주세요.
                     - 'isDone': To-Do Item의 완료 여부입니다. 항상 false로 설정해주세요.
 
-                    **각 'type'에 대해 최소 1개에서 최대 10개의 To-Do Item을 생성해주세요.**
+                    **각 'category'에 대해 최소 1개에서 최대 10개의 To-Do Item을 생성해주세요.**
                     만약 관련 정보가 충분하지 않으면 해당 유형의 To-Do Item은 0개 또는 1개만 포함해도 되지만, 가능한 경우 여러 개를 생성하도록 노력해야 합니다.
                     
                     예시 JSON 응답:
@@ -87,7 +87,7 @@ public class LLMService {
                     .type("object")
                     .properties(
                             ImmutableMap.of(
-                                    "type", Schema.builder().type(Type.Known.STRING).description("To-Do 항목의 Enum 타입입니다.").build(),
+                                    "category", Schema.builder().type(Type.Known.STRING).description("To-Do 항목의 Enum 타입입니다.").build(),
                                     "title", Schema.builder().type(Type.Known.STRING).description("To-Do 항목의 간결하고 명확한 제목입니다.").build(),
                                     "description", Schema.builder().type(Type.Known.STRING).description("To-Do 항목에 대한 상세한 한글 설명입니다.").build(),
                                     "memo", Schema.builder().type(Type.Known.STRING).description("추가 사용자 메모입니다. 항상 빈 문자열로 설정해주세요.").build(),

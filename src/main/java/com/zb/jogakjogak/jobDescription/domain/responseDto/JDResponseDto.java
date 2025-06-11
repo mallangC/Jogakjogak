@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -18,5 +18,5 @@ public class JDResponseDto {
     private String jdUrl;
     private List<ToDoListDto> analysisResult;
     private String memo;
-    private LocalDateTime endedAt;
+    private LocalDate endedAt;
 }

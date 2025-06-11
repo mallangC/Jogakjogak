@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import org.hibernate.validator.constraints.URL;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @Builder
@@ -21,5 +21,5 @@ public class JDRequestDto {
     //TODO: 이력서 사용자 입력을 받을 필드 작성
     private String jdContents;
     @NotNull(message = "마감일은 필수 선택 항목입니다.")
-    private LocalDateTime endedAt;
+    private LocalDate endedAt;
 }
