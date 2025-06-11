@@ -47,21 +47,21 @@ public class LLMService {
                     예시 JSON 응답:
                     [
                       {
-                        \"type\": \"STRUCTURAL_COMPLEMENT_PLAN\",
+                        \"category\": \"STRUCTURAL_COMPLEMENT_PLAN\",
                         \"title\": \"이력서 프로젝트 경험 재구성\",
                         \"description\": \"이력서에 나열된 프로젝트 경험들을 채용 공고의 요구 기술 스택과 관련된 최신 프로젝트 위주로 재구성하고, 각 프로젝트에 대한 GitHub 저장소 링크를 명확히 추가하여 실제 코드 구현 역량을 강조합니다. 특히, 프로젝트 목표, 본인의 역할, 사용 기술, 달성한 성과(수치화 가능한 경우)를 상세하게 기술하여 인사 담당자가 지원자의 기여도를 명확히 파악할 수 있도록 돕습니다. 최소 30자 이상으로 작성되어야 합니다.\",
                         \"memo\": \"\",
                         \"isDone\": false
                       },
                       {
-                        \"type\": \"CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL\",
+                        \"category\": \"CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL\",
                         \"title\": \"AWS 클라우드 경험 구체화\",
                         \"description\": \"채용 공고에서 요구하는 '클라우드 경험'에 맞춰, 과거 AWS EC2를 활용한 서비스 배포 경험을 구체적인 수치(예: '트래픽 처리량 20% 개선', '배포 시간 15% 단축')와 함께 서술하여 실제 업무 기여도를 명확히 강조합니다. AWS S3, Lambda, DynamoDB 등 다른 관련 서비스에 대한 이해도와 활용 경험이 있다면 이를 추가하여 클라우드 전반의 역량을 어필합니다. 최소 30자 이상으로 작성되어야 합니다.\",
                         \"memo\": \"\",
                         \"isDone\": false
                       },
                       {
-                        \"type\": \"EMPLOYMENT_SCHEDULE_RELATED\",
+                        \"category\": \"EMPLOYMENT_SCHEDULE_RELATED\",
                         \"title\": \"A사 서류 제출 및 면접 준비\",
                         \"description\": \"A사의 서류 마감일(2025/07/15)에 맞춰 이력서와 자기소개서의 최종 검토 및 제출을 완료하고, 예상 면접 질문 리스트를 작성하여 답변을 준비합니다. 특히, 회사의 비전, 주요 서비스, 최근 기술 동향 등을 면밀히 조사하여 면접 시 회사에 대한 깊은 이해와 관심을 보여줄 수 있도록 합니다. 모의 면접을 통해 답변의 논리성 및 전달력을 점검하는 것도 중요합니다. 최소 30자 이상으로 작성되어야 합니다.\",
                         \"memo\": \"\",
@@ -89,12 +89,12 @@ public class LLMService {
                             ImmutableMap.of(
                                     "category", Schema.builder().type(Type.Known.STRING).description("To-Do 항목의 Enum 타입입니다.").build(),
                                     "title", Schema.builder().type(Type.Known.STRING).description("To-Do 항목의 간결하고 명확한 제목입니다.").build(),
-                                    "description", Schema.builder().type(Type.Known.STRING).description("To-Do 항목에 대한 상세한 한글 설명입니다.").build(),
+                                    "content", Schema.builder().type(Type.Known.STRING).description("To-Do 항목에 대한 상세한 한글 설명입니다.").build(),
                                     "memo", Schema.builder().type(Type.Known.STRING).description("추가 사용자 메모입니다. 항상 빈 문자열로 설정해주세요.").build(),
                                     "isDone", Schema.builder().type(Type.Known.BOOLEAN).description("To-Do 항목의 완료 여부입니다. 항상 false로 설정해주세요.").build()
                             )
                     )
-                    .required(List.of("type", "title", "description", "memo", "isDone"))
+                    .required(List.of("category", "title", "content", "memo", "isDone"))
                     .build();
 
             Schema responseArraySchema = Schema.builder()
