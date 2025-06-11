@@ -7,10 +7,7 @@ import com.zb.jogakjogak.jobDescription.service.JDService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,6 +38,17 @@ public class JDController {
                         jdService.llmAnalyze(jdRequestDto),
                         "JD 분석하기 완료",
                         HttpStatus.CREATED
+                )
+        );
+    }
+
+    @GetMapping("/jds/{jd_id}")
+    public ResponseEntity<HttpApiResponse<JDResponseDto>> getJd(@PathVariable("jd_id") Long jdId) {
+        return ResponseEntity.ok().body(
+                new HttpApiResponse<>(
+                        jdService.getJd(jdId),
+                        "나의 분석 내용 단일 조회 완료",
+                        HttpStatus.OK
                 )
         );
     }
