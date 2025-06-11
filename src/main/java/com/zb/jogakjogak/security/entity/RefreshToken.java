@@ -1,6 +1,5 @@
 package com.zb.jogakjogak.security.entity;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,7 +10,6 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class RefreshToken {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

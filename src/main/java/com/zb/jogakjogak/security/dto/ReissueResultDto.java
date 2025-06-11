@@ -1,6 +1,5 @@
 package com.zb.jogakjogak.security.dto;
 
-
 import lombok.*;
 
 @Getter
