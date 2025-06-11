@@ -2,6 +2,8 @@ package com.zb.jogakjogak.resume.controller;
 
 import com.zb.jogakjogak.global.HttpApiResponse;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
+import com.zb.jogakjogak.resume.domain.responseDto.ResumeDeleteResponseDto;
+import com.zb.jogakjogak.resume.domain.responseDto.ResumeResponseDto;
 import com.zb.jogakjogak.resume.service.ResumeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,20 +20,20 @@ public class ResumeController {
 
     /**
      * 이력서 등록을 위한 컨틀로러 메소드
+     *
      * @param requestDto 이력서 이름, 이력서 내용
      * @return data(이력서 id, 이력서 이름, 이력서 내용), 성공 여부 메세지, 상태코드
      */
     @PostMapping
-    public ResponseEntity register(@Valid @RequestBody ResumeRequestDto requestDto) {
-        return ResponseEntity.ok()
-                .body(
-                        new HttpApiResponse(
-                                resumeService.register(requestDto),
-                                "이력서 등록 완료",
-                                HttpStatus.CREATED)
-                );
+    public ResponseEntity<HttpApiResponse<ResumeResponseDto>> register(@Valid @RequestBody ResumeRequestDto requestDto) {
+        return ResponseEntity.ok().body(
+                new HttpApiResponse<>(
+                        resumeService.register(requestDto),
+                        "이력서 등록 완료",
+                        HttpStatus.CREATED
+                )
+        );
     }
-
     /**
      * 이력서 수정을 위한 컨트롤러 메서드
      * @param resume_id 수정하려는 이력서의 id
@@ -39,10 +41,10 @@ public class ResumeController {
      * @return data(수정한 이력서 id, 수정된 이력서 이름, 수정된 이력서 내용), 성공 여부 메세지, 상태코드
      */
     @PatchMapping("/{resume_id}")
-    public ResponseEntity modify(@PathVariable Long resume_id, @Valid @RequestBody ResumeRequestDto requestDto) {
+    public ResponseEntity<HttpApiResponse<ResumeResponseDto>> modify(@PathVariable Long resume_id, @Valid @RequestBody ResumeRequestDto requestDto) {
         return ResponseEntity.ok()
                 .body(
-                        new HttpApiResponse(
+                        new HttpApiResponse<>(
                                 resumeService.modify(resume_id, requestDto),
                                 "이력서 수정 완료",
                                 HttpStatus.OK
@@ -55,10 +57,10 @@ public class ResumeController {
      * @return 찾으려는 이력서의 data, 성공 여부 메세지, 상태코드
      */
     @GetMapping("/{resume_id}")
-    public ResponseEntity get(@PathVariable Long resume_id) {
+    public ResponseEntity<HttpApiResponse<ResumeResponseDto>> get(@PathVariable Long resume_id) {
         return ResponseEntity.ok()
                 .body(
-                        new HttpApiResponse(
+                        new HttpApiResponse<>(
                                 resumeService.get(resume_id),
                                 "이력서 조회 성공",
                                 HttpStatus.OK
@@ -67,10 +69,10 @@ public class ResumeController {
     }
 
     @DeleteMapping("/{resume_id}")
-    public ResponseEntity delete(@PathVariable Long resume_id) {
+    public ResponseEntity<HttpApiResponse<ResumeDeleteResponseDto>> delete(@PathVariable Long resume_id) {
         return ResponseEntity.ok()
                 .body(
-                        new HttpApiResponse(
+                        new HttpApiResponse<>(
                                 resumeService.delete(resume_id),
                                 "이력서 삭제 성공",
                                 HttpStatus.OK
