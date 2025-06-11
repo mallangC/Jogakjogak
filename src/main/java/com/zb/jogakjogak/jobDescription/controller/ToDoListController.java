@@ -62,4 +62,17 @@ public class ToDoListController {
                 )
         );
     }
+
+    @GetMapping("/{toDoListId}")
+    public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> getToDoList(
+            @PathVariable Long jdId,
+            @PathVariable Long toDoListId) {
+        return ResponseEntity.ok().body(
+                new HttpApiResponse<>(
+                        toDoListService.getToDoList(jdId, toDoListId),
+                        "체크리스트 조회 성공",
+                        HttpStatus.OK
+                )
+        );
+    }
 }
