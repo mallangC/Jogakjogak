@@ -196,31 +196,4 @@ class CustomOauth2UserServiceTest {
         member = memberRepository.save(member);
         return new CustomOAuth2User(member);
     }
-
-    private Member createNewMember(OAuth2User oAuth2User, String registrationId) {
-        Map<String, Object> kakaoAccount = (Map<String, Object>) oAuth2User.getAttribute("kakao_account");
-        Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
-
-        return Member.builder()
-                .userName(registrationId + " " + oAuth2User.getAttribute("id"))
-                .nickName((String) profile.get("nickname"))
-                .email((String) kakaoAccount.get("email"))
-                .name((String) kakaoAccount.get("name"))
-                .phoneNumber((String) kakaoAccount.get("phone_number"))
-                .role(Role.USER)
-                .lastLoginAt(LocalDateTime.now())
-                .oauth2Info(new ArrayList<>())
-                .build();
-    }
-
-    private void updateExistingMember(Member member, OAuth2User oAuth2User) {
-        Map<String, Object> kakaoAccount = (Map<String, Object>) oAuth2User.getAttribute("kakao_account");
-        Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
-
-        member.setNickName((String) profile.get("nickname"));
-        member.setEmail((String) kakaoAccount.get("email"));
-        member.setName((String) kakaoAccount.get("name"));
-        member.setPhoneNumber((String) kakaoAccount.get("phone_number"));
-        member.setLastLoginAt(LocalDateTime.now());
-    }
 }
