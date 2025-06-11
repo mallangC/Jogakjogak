@@ -34,7 +34,7 @@ public class JDController {
      * @param jdRequestDto 제목, JD의 URL, 마감일
      * @return 제목, JD의 URL, To Do List, 사용자 메모, 마감일
      */
-    @PostMapping("/jd")
+    @PostMapping("/jds")
     public ResponseEntity<HttpApiResponse<JDResponseDto>> llmAnalyze(@RequestBody JDRequestDto jdRequestDto) {
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
