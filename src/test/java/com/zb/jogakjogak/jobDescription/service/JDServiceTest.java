@@ -9,7 +9,9 @@ import com.zb.jogakjogak.global.exception.JDException;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
+import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repsitory.JDRepository;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,10 +23,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -257,5 +261,91 @@ class JDServiceTest {
         verify(llmService, times(1)).generateTodoListJson(anyString(), anyString());
         verify(objectMapper, times(1)).readValue(anyString(), any(com.fasterxml.jackson.core.type.TypeReference.class));
         verify(jdRepository, never()).save(any(JD.class));
+    }
+
+    @Test
+    @DisplayName("JD 조회 서비스 성공 테스트 - JD 및 ToDoList 함께 조회")
+    void getJd_success() {
+        // Given
+        Long jdId = 1L;
+        JD mockJd = JD.builder()
+                .id(jdId)
+                .title("테스트 JD")
+                .companyName("테스트 회사")
+                .job("백엔드 개발자")
+                .content("테스트 JD 내용")
+                .jdUrl("http://test.com/jd/1")
+                .memo("테스트 메모")
+                .isAlarmOn(true)
+                .endedAt(LocalDate.now().plusDays(10))
+                .build();
+
+        ToDoList toDoList1 = ToDoList.builder()
+                .id(101L)
+                .category(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN)
+                .title("테스트 ToDo 1")
+                .content("테스트 ToDo 내용 1")
+                .memo("투두 메모 1")
+                .isDone(false)
+                .jd(mockJd)
+                .build();
+        ToDoList toDoList2 = ToDoList.builder()
+                .id(102L)
+                .category(ToDoListType.CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL)
+                .title("테스트 ToDo 2")
+                .content("테스트 ToDo 내용 2")
+                .memo("투두 메모 2")
+                .isDone(true)
+                .jd(mockJd)
+                .build();
+        mockJd.addToDoList(toDoList1);
+        mockJd.addToDoList(toDoList2);
+        when(jdRepository.findByIdWithToDoLists(jdId)).thenReturn(Optional.of(mockJd));
+
+        // When
+        JDResponseDto result = jdService.getJd(jdId);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(mockJd.getTitle(), result.getTitle());
+        assertEquals(mockJd.getCompanyName(), result.getCompanyName());
+        assertEquals(mockJd.getJdUrl(), result.getJdUrl());
+        assertEquals(mockJd.getMemo(), result.getMemo());
+        assertEquals(mockJd.isAlarmOn(), result.isAlarmOn());
+        assertEquals(mockJd.getEndedAt(), result.getEndedAt());
+        assertEquals(mockJd.getCreatedAt(), result.getCreatedAt());
+        assertEquals(mockJd.getUpdatedAt(), result.getUpdatedAt());
+
+        // ToDoList 검증
+        assertNotNull(result.getToDoLists());
+        assertFalse(result.getToDoLists().isEmpty());
+        assertEquals(2, result.getToDoLists().size());
+
+        ToDoListResponseDto firstToDo = result.getToDoLists().get(0);
+        assertEquals(toDoList1.getId(), firstToDo.getChecklist_id());
+        assertEquals(toDoList1.getCategory(), firstToDo.getCategory());
+        assertEquals(toDoList1.getTitle(), firstToDo.getTitle());
+        assertEquals(toDoList1.getContent(), firstToDo.getContent());
+        assertEquals(toDoList1.getMemo(), firstToDo.getMemo());
+        assertEquals(toDoList1.isDone(), firstToDo.isDone());
+        assertEquals(mockJd.getId(), firstToDo.getJdId());
+
+        // Verify
+        verify(jdRepository, times(1)).findByIdWithToDoLists(jdId);
+    }
+
+    @Test
+    @DisplayName("JD 조회 서비스 실패 테스트 - JD를 찾을 수 없음")
+    void getJd_notFound() {
+        // Given
+        Long nonExistentJdId = 999L;
+        when(jdRepository.findByIdWithToDoLists(nonExistentJdId)).thenReturn(Optional.empty());
+
+        // When & Then
+        JDException thrown = assertThrows(JDException.class, () -> jdService.getJd(nonExistentJdId));
+        assertEquals(JDErrorCode.JD_NOT_FOUND, thrown.getErrorCode());
+
+        // Verify
+        verify(jdRepository, times(1)).findByIdWithToDoLists(nonExistentJdId);
     }
 }
