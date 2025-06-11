@@ -10,7 +10,6 @@ import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
-import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repsitory.JDRepository;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,9 +21,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -49,9 +50,7 @@ class JDServiceTest {
     private JDRepository jdRepository;
 
     private JDRequestDto jdRequestDto;
-    private String mockAnalysisJsonString;
     private String mockLLMAnalysisJsonString;
-    private List<ToDoListDto> mockToDoListDtos;
     private List<ToDoListDto> mockToDoListDtosForLLM;
 
     @BeforeEach
@@ -60,61 +59,88 @@ class JDServiceTest {
 
         jdRequestDto = JDRequestDto.builder()
                 .title("시니어 백엔드 개발자 채용")
-                .JDUrl("http://example.com/jd/123")
-                .endedAt(LocalDateTime.of(2050, 6, 11, 12, 0))
+                .JDUrl("https://example.com/jd/123")
+                .companyName(faker.company().name())
+                .job(faker.job().title())
+                .content(faker.lorem().paragraph())
+                .endedAt(faker.date().future(365, TimeUnit.DAYS).toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
                 .build();
-
-        mockAnalysisJsonString = "[{\"item\":\"Java 학습\",\"status\":\"TODO\"},{\"item\":\"Spring Boot 프로젝트 경험 쌓기\",\"status\":\"IN_PROGRESS\"}]";
-
-        mockToDoListDtos = Arrays.asList(
-                new ToDoListDto(ToDoListType.CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL, faker.book().title(), "Java 학습"),
-                new ToDoListDto(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN, faker.book().title(), "spring boot 협업")
-        );
 
         mockLLMAnalysisJsonString = "[" +
                 "  {" +
-                "    \"type\": \"STRUCTURAL_COMPLEMENT_PLAN\"," +
+                "    \"category\": \"STRUCTURAL_COMPLEMENT_PLAN\"," +
                 "    \"title\": \"이력서 Java/Spring Boot 경험 강조\"," +
-                "    \"description\": \"이력서에 Spring Boot 프로젝트 경험을 구체적으로 서술합니다.\"," +
+                "    \"content\": \"이력서에 Spring Boot 프로젝트 경험을 구체적으로 서술합니다.\"," +
                 "    \"memo\": \"\"," +
                 "    \"isDone\": false" +
                 "  }," +
                 "  {" +
-                "    \"type\": \"CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL\"," +
+                "    \"category\": \"CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL\"," +
                 "    \"title\": \"AWS 클라우드 경험 구체화\"," +
-                "    \"description\": \"AWS EC2 배포 경험을 수치와 함께 명확히 기술합니다.\"," +
+                "    \"content\": \"AWS EC2 배포 경험을 수치와 함께 명확히 기술합니다.\"," +
                 "    \"memo\": \"\"," +
                 "    \"isDone\": false" +
                 "  }" +
                 "]";
 
-        ToDoListDto llmDto1 = new ToDoListDto(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN, "이력서 Java/Spring Boot 경험 강조", "이력서에 Spring Boot 프로젝트 경험을 구체적으로 서술합니다.", "", false);
-        ToDoListDto llmDto2 = new ToDoListDto(ToDoListType.CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL, "AWS 클라우드 경험 구체화", "AWS EC2 배포 경험을 수치와 함께 명확히 기술합니다.", "", false);
+        ToDoListDto llmDto1 = ToDoListDto.builder()
+                .category(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN)
+                .title("이력서 Java/Spring Boot 경험 강조")
+                .content("이력서에 Spring Boot 프로젝트 경험을 구체적으로 서술합니다.") // description -> content
+                .memo("")
+                .isDone(false)
+                .build();
+        ToDoListDto llmDto2 = ToDoListDto.builder()
+                .category(ToDoListType.CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL)
+                .title("AWS 클라우드 경험 구체화")
+                .content("AWS EC2 배포 경험을 수치와 함께 명확히 기술합니다.") // description -> content
+                .memo("")
+                .isDone(false)
+                .build();
         mockToDoListDtosForLLM = Arrays.asList(llmDto1, llmDto2);
-
     }
 
     @Test
     @DisplayName("JD 분석 서비스 성공 테스트 - JD 및 ToDoList 저장 포함")
     void analyze_success() throws JsonProcessingException {
-        // given
-        when(openAIResponseService.sendRequest(anyString(), anyString(), anyInt()))
-                .thenReturn(mockAnalysisJsonString);
+        // Given
+        String openAIAssumedJson = "[{\"category\":\"STRUCTURAL_COMPLEMENT_PLAN\"," +
+                "\"title\":\"OpenAI Test Title\"," +
+                "\"content\":\"OpenAI Test Content\"," +
+                "\"memo\":\"\",\"isDone\":false}]";
+        ToDoListDto openAIToDo1 = ToDoListDto.builder()
+                .category(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN)
+                .title("OpenAI Test Title")
+                .content("OpenAI Test Content")
+                .memo("")
+                .isDone(false)
+                .build();
+        List<ToDoListDto> openAIToDoListDtos = Collections.singletonList(openAIToDo1);
 
-        when(objectMapper.getTypeFactory()).thenReturn(mock(com.fasterxml.jackson.databind.type.TypeFactory.class));
-        when(objectMapper.getTypeFactory().constructCollectionType(eq(List.class), eq(ToDoListDto.class)))
-                .thenReturn(mock(CollectionType.class));
-        when(objectMapper.readValue(eq(mockAnalysisJsonString), any(CollectionType.class)))
-                .thenReturn(mockToDoListDtos);
+
+        when(openAIResponseService.sendRequest(anyString(), anyString(), anyInt()))
+                .thenReturn(openAIAssumedJson); // LLMService의 JSON과 동일하게 변경
+
+        when(objectMapper.readValue(eq(openAIAssumedJson), any(com.fasterxml.jackson.core.type.TypeReference.class)))
+                .thenReturn(openAIToDoListDtos);
         when(jdRepository.save(any(JD.class))).thenAnswer(invocation -> {
             JD originalJd = invocation.getArgument(0);
-            JD savedJdMock = mock(JD.class);
-            when(savedJdMock.getTitle()).thenReturn(originalJd.getTitle());
-            when(savedJdMock.getJdUrl()).thenReturn(originalJd.getJdUrl());
-            when(savedJdMock.getEndedAt()).thenReturn(originalJd.getEndedAt());
-            when(savedJdMock.getMemo()).thenReturn(originalJd.getMemo());
-            return savedJdMock;
+            // ID mocking
+            return JD.builder()
+                    .id(1L) // ID mocking
+                    .title(originalJd.getTitle())
+                    .companyName(originalJd.getCompanyName())
+                    .job(originalJd.getJob())
+                    .content(originalJd.getContent())
+                    .jdUrl(originalJd.getJdUrl())
+                    .endedAt(originalJd.getEndedAt())
+                    .memo(originalJd.getMemo())
+                    .isAlarmOn(originalJd.isAlarmOn())
+                    .applyAt(originalJd.getApplyAt())
+                    .toDoLists(originalJd.getToDoLists())
+                    .build();
         });
+
 
         // when
         JDResponseDto result = jdService.analyze(jdRequestDto);
@@ -124,16 +150,15 @@ class JDServiceTest {
         assertEquals(jdRequestDto.getTitle(), result.getTitle());
         assertEquals(jdRequestDto.getJDUrl(), result.getJdUrl());
         assertEquals(jdRequestDto.getEndedAt(), result.getEndedAt());
-        assertFalse(result.getAnalysisResult().isEmpty());
-        assertEquals(2, result.getAnalysisResult().size());
-        assertEquals("Java 학습", result.getAnalysisResult().get(0).getDescription());
-        assertEquals("Java 학습", result.getAnalysisResult().get(0).getDescription());
-        assertEquals("", result.getAnalysisResult().get(0).getMemo());
-        assertFalse(result.getAnalysisResult().get(0).isDone());
-
+        assertFalse(result.getToDoLists().isEmpty());
+        assertEquals(openAIToDoListDtos.size(), result.getToDoLists().size());
+        assertEquals("OpenAI Test Content", result.getToDoLists().get(0).getContent());
+        assertEquals(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN, result.getToDoLists().get(0).getCategory());
+        assertEquals("", result.getToDoLists().get(0).getMemo());
+        assertFalse(result.getToDoLists().get(0).isDone());
 
         // verify
-        verify(objectMapper, times(1)).readValue(eq(mockAnalysisJsonString), any(CollectionType.class));
+        verify(objectMapper, times(1)).readValue(eq(openAIAssumedJson), any(com.fasterxml.jackson.core.type.TypeReference.class));
         verify(jdRepository, times(1)).save(any(JD.class));
     }
 
@@ -165,17 +190,23 @@ class JDServiceTest {
         // given
         when(llmService.generateTodoListJson(anyString(), anyString()))
                 .thenReturn(mockLLMAnalysisJsonString);
-
         when(objectMapper.readValue(eq(mockLLMAnalysisJsonString), any(com.fasterxml.jackson.core.type.TypeReference.class)))
                 .thenReturn(mockToDoListDtosForLLM);
-
         when(jdRepository.save(any(JD.class))).thenAnswer(invocation -> {
             JD originalJd = invocation.getArgument(0);
-            for (ToDoListDto dto : mockToDoListDtosForLLM) {
-                ToDoList toDoList = ToDoList.fromDto(dto, originalJd);
-                originalJd.addToDoList(toDoList);
-            }
-            return originalJd;
+            return JD.builder()
+                    .id(1L)
+                    .title(originalJd.getTitle())
+                    .companyName(originalJd.getCompanyName())
+                    .job(originalJd.getJob())
+                    .content(originalJd.getContent())
+                    .jdUrl(originalJd.getJdUrl())
+                    .endedAt(originalJd.getEndedAt())
+                    .memo(originalJd.getMemo())
+                    .isAlarmOn(originalJd.isAlarmOn())
+                    .applyAt(originalJd.getApplyAt())
+                    .toDoLists(originalJd.getToDoLists())
+                    .build();
         });
 
         // when
@@ -186,24 +217,26 @@ class JDServiceTest {
         assertEquals(jdRequestDto.getTitle(), result.getTitle());
         assertEquals(jdRequestDto.getJDUrl(), result.getJdUrl());
         assertEquals(jdRequestDto.getEndedAt(), result.getEndedAt());
-        assertFalse(result.getAnalysisResult().isEmpty());
-        assertEquals(mockToDoListDtosForLLM.size(), result.getAnalysisResult().size()); // LLM용 DTO 사이즈
-
-        // LLM 응답 DTO 내용 검증
-        assertEquals(mockToDoListDtosForLLM.get(0).getTitle(), result.getAnalysisResult().get(0).getTitle());
-        assertEquals(mockToDoListDtosForLLM.get(0).getDescription(), result.getAnalysisResult().get(0).getDescription());
-        assertEquals(mockToDoListDtosForLLM.get(0).getType(), result.getAnalysisResult().get(0).getType());
-        assertEquals(mockToDoListDtosForLLM.get(0).isDone(), result.getAnalysisResult().get(0).isDone());
+        assertNotNull(result.getToDoLists());
+        assertFalse(result.getToDoLists().isEmpty());
+        assertEquals(mockToDoListDtosForLLM.size(), result.getToDoLists().size());
+        assertEquals(mockToDoListDtosForLLM.get(0).getTitle(), result.getToDoLists().get(0).getTitle());
+        assertEquals(mockToDoListDtosForLLM.get(0).getContent(), result.getToDoLists().get(0).getContent());
+        assertEquals(mockToDoListDtosForLLM.get(0).getCategory(), result.getToDoLists().get(0).getCategory());
+        assertEquals(mockToDoListDtosForLLM.get(0).getMemo(), result.getToDoLists().get(0).getMemo());
+        assertEquals(mockToDoListDtosForLLM.get(0).isDone(), result.getToDoLists().get(0).isDone());
 
         // verify
+        verify(llmService, times(1)).generateTodoListJson(anyString(), anyString());
         verify(objectMapper, times(1)).readValue(eq(mockLLMAnalysisJsonString), any(com.fasterxml.jackson.core.type.TypeReference.class));
         verify(jdRepository, times(1)).save(any(JD.class));
 
         ArgumentCaptor<JD> jdCaptor = ArgumentCaptor.forClass(JD.class);
         verify(jdRepository).save(jdCaptor.capture());
-        JD savedJd = jdCaptor.getValue();
-        assertNotNull(savedJd.getToDoLists());
-        assertEquals(mockToDoListDtosForLLM.get(0).getTitle(), savedJd.getToDoLists().get(0).getTitle());
+        JD savedJdSentToRepo = jdCaptor.getValue();
+        assertNotNull(savedJdSentToRepo.getToDoLists());
+        assertEquals(mockToDoListDtosForLLM.size(), savedJdSentToRepo.getToDoLists().size());
+        assertEquals(mockToDoListDtosForLLM.get(0).getTitle(), savedJdSentToRepo.getToDoLists().get(0).getTitle());
     }
 
     @Test
