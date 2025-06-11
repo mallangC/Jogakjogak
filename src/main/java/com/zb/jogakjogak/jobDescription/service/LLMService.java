@@ -1,7 +1,6 @@
 package com.zb.jogakjogak.jobDescription.service;
 
-import autovalue.shaded.com.google.common.collect.ImmutableMap;
-
+import com.google.common.collect.ImmutableMap;
 import com.google.genai.Client;
 import com.google.genai.types.*;
 import org.springframework.beans.factory.annotation.Value;
