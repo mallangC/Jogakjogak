@@ -46,8 +46,6 @@ class ToDoListServiceTest {
     private Long jdId;
     private JD mockJd;
     private Long toDoListId;
-    private ToDoListDto toDoListDto;
-    private Faker faker;
     private ToDoList mockToDoList;
     private ToDoListDto createToDoListDto;
     private ToDoListDto updateToDoListDto;
@@ -56,7 +54,7 @@ class ToDoListServiceTest {
     void setUp() {
         jdId = 1L;
         toDoListId = 101L;
-        faker = new Faker();
+        Faker faker = new Faker();
 
         mockJd = JD.builder()
                 .id(jdId)
@@ -154,8 +152,7 @@ class ToDoListServiceTest {
         when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
         when(toDoListRepository.findById(toDoListId)).thenReturn(Optional.of(mockToDoList));
         when(toDoListRepository.save(any(ToDoList.class))).thenAnswer(invocation -> {
-            ToDoList updatedList = invocation.getArgument(0);
-            return updatedList;
+            return invocation.<ToDoList>getArgument(0);
         });
 
 
@@ -168,7 +165,7 @@ class ToDoListServiceTest {
         verify(toDoListRepository, times(1)).save(any(ToDoList.class));
 
         assertNotNull(result);
-        assertEquals(toDoListId, result.getId()); // ID는 변경되지 않음
+        assertEquals(toDoListId, result.getChecklist_id());
         assertEquals(updateToDoListDto.getType(), result.getType());
         assertEquals(updateToDoListDto.getTitle(), result.getTitle());
         assertEquals(updateToDoListDto.getDescription(), result.getDescription());
@@ -220,7 +217,7 @@ class ToDoListServiceTest {
         JD anotherMockJd = JD.builder()
                 .id(anotherJdId)
                 .title("다른 JD")
-                .jdUrl("http://other.com")
+                .jdUrl("https://www.test.com")
                 .endedAt(LocalDate.now().atStartOfDay())
                 .build();
 
@@ -243,5 +240,96 @@ class ToDoListServiceTest {
         assertEquals(ToDoListErrorCode.TODO_LIST_NOT_BELONG_TO_JD, exception.getErrorCode());
         assertEquals("해당 JD에 속하지 않는 ToDoList입니다.", exception.getMessage());
         verify(toDoListRepository, never()).save(any(ToDoList.class));
+    }
+
+    @Test
+    @DisplayName("ToDoList 성공적으로 조회")
+    void getToDoList_success() {
+        // Given
+        when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
+        when(toDoListRepository.findById(toDoListId)).thenReturn(Optional.of(mockToDoList));
+
+        // When
+        ToDoListResponseDto result = toDoListService.getToDoList(jdId, toDoListId);
+
+        // Then
+        verify(jdRepository, times(1)).findById(jdId);
+        verify(toDoListRepository, times(1)).findById(toDoListId);
+
+        assertNotNull(result);
+        assertEquals(toDoListId, result.getChecklist_id());
+        assertEquals(mockToDoList.getType(), result.getType());
+        assertEquals(mockToDoList.getTitle(), result.getTitle());
+        assertEquals(mockToDoList.getDescription(), result.getDescription());
+        assertEquals(mockToDoList.getMemo(), result.getMemo());
+        assertEquals(mockToDoList.isDone(), result.isDone());
+        assertEquals(jdId, result.getJdId());
+    }
+
+    @Test
+    @DisplayName("ToDoList 조회 실패 - JD를 찾을 수 없음")
+    void getToDoList_failure_jdNotFound() {
+        // Given
+        when(jdRepository.findById(jdId)).thenReturn(Optional.empty());
+
+        // When & Then
+        JDException exception = assertThrows(JDException.class, () ->
+                toDoListService.getToDoList(jdId, toDoListId)
+        );
+
+        assertEquals(JDErrorCode.JD_NOT_FOUND, exception.getErrorCode());
+        assertEquals("JD를 찾을 수 없습니다.", exception.getMessage());
+
+        verify(toDoListRepository, never()).findById(anyLong());
+    }
+
+    @Test
+    @DisplayName("ToDoList 조회 실패 - ToDoList를 찾을 수 없음")
+    void getToDoList_toDoListNotFound() {
+        // Given
+        when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
+        when(toDoListRepository.findById(toDoListId)).thenReturn(Optional.empty());
+
+        // When & Then
+        ToDoListException exception = assertThrows(ToDoListException.class, () ->
+                toDoListService.getToDoList(jdId, toDoListId)
+        );
+
+        assertEquals(ToDoListErrorCode.TODO_LIST_NOT_FOUND, exception.getErrorCode());
+        assertEquals("ToDoList를 찾을 수 없습니다.", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("ToDoList 조회 실패 - 해당 JD에 속하지 않음")
+    void getToDoList_notBelongToJd() {
+        // Given
+        Long anotherJdId = 99L;
+        JD anotherMockJd = JD.builder()
+                .id(anotherJdId)
+                .title("다른 JD")
+                .jdUrl("https://www.test.com")
+                .endedAt(LocalDate.now().atStartOfDay())
+                .build();
+
+        ToDoList toDoListBelongingToAnotherJd = ToDoList.builder()
+                .id(toDoListId)
+                .type(ToDoListType.EMPLOYMENT_SCHEDULE_RELATED)
+                .title("다른 JD의 ToDo")
+                .description("설명")
+                .memo("메모")
+                .isDone(false)
+                .jd(anotherMockJd)
+                .build();
+
+        when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
+        when(toDoListRepository.findById(toDoListId)).thenReturn(Optional.of(toDoListBelongingToAnotherJd));
+
+        // When & Then
+        ToDoListException exception = assertThrows(ToDoListException.class, () ->
+                toDoListService.getToDoList(jdId, toDoListId)
+        );
+
+        assertEquals(ToDoListErrorCode.TODO_LIST_NOT_BELONG_TO_JD, exception.getErrorCode());
+        assertEquals("해당 JD에 속하지 않는 ToDoList입니다.", exception.getMessage());
     }
 }
