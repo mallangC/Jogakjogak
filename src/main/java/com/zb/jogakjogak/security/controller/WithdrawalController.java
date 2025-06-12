@@ -8,6 +8,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,17 +23,23 @@ public class WithdrawalController {
     private final WithdrawalService withdrawalService;
 
     @PostMapping
-    public HttpApiResponse<?> oauth2Withdrawal(HttpServletResponse response){
+    public ResponseEntity oauth2Withdrawal(HttpServletResponse response){
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()){
-            return  new HttpApiResponse<>(null, "회원탈퇴요청 실패", HttpStatus.UNAUTHORIZED);
+            return  ResponseEntity.ok()
+                    .body(new HttpApiResponse<>(null,
+                            "회원탈퇴요청 실패",
+                            HttpStatus.UNAUTHORIZED));
         }
 
         withdrawalService.withdrawMember(authentication.getName());
         clearRefreshTokenCookie(response);
         SecurityContextHolder.clearContext();
-        return new HttpApiResponse<>(null, "회원탈퇴 완료", HttpStatus.OK);
+        return ResponseEntity.ok()
+                .body(new HttpApiResponse<>(null,
+                        "회원탈퇴 완료",
+                        HttpStatus.OK));
     }
 
     private void clearRefreshTokenCookie(HttpServletResponse response) {
