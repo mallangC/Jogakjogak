@@ -46,6 +46,7 @@ public class Member {
     private LocalDateTime lastLoginAt;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<OAuth2Info> oauth2Info = new ArrayList<>();
 
     @PrePersist
