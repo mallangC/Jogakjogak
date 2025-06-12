@@ -25,7 +25,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
-@ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
 public class ReissueControllerIntegrationTest {
