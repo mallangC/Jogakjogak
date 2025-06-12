@@ -35,7 +35,7 @@ jobs:
           rm -rf ~/.gradle/caches/
           rm -rf build/
 
-      # 7.6.4버전으로 gradle 세팅
+      # 7.6.4버전으로 gradle 세팅 (JaCoCo와 호환성이 좋은 버전으로 세팅)
       - name: Set up Gradle
         uses: gradle/gradle-build-action@v2
         with:
