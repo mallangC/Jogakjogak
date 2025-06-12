@@ -8,12 +8,15 @@ import com.zb.jogakjogak.global.exception.JDErrorCode;
 import com.zb.jogakjogak.global.exception.JDException;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.JDDeleteResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repsitory.JDRepository;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
+import com.zb.jogakjogak.security.Role;
+import com.zb.jogakjogak.security.entity.Member;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -56,10 +59,11 @@ class JDServiceTest {
     private JDRequestDto jdRequestDto;
     private String mockLLMAnalysisJsonString;
     private List<ToDoListDto> mockToDoListDtosForLLM;
+    private Faker faker;
 
     @BeforeEach
     void setUp() {
-        Faker faker = new Faker();
+        faker = new Faker();
 
         jdRequestDto = JDRequestDto.builder()
                 .title("시니어 백엔드 개발자 채용")
@@ -285,5 +289,46 @@ class JDServiceTest {
 
         // Verify
         verify(jdRepository, times(1)).findByIdWithToDoLists(nonExistentJdId);
+    }
+    @Test
+    @DisplayName("JD 삭제 서비스 성공 테스트 - JD 및 연관된 ToDoList 함께 삭제")
+    void deleteJd_success() {
+        // Given
+        Long jdId = 1L;
+        JD mockJd = JD.builder()
+                .id(jdId)
+                .title(faker.book().title())
+                .companyName(faker.artist().name())
+                .build();
+
+        when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
+        doNothing().when(jdRepository).deleteById(jdId);
+
+        // When
+        JDDeleteResponseDto result = jdService.deleteJd(jdId);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(jdId, result.getJd_id());
+
+        // Verify
+        verify(jdRepository, times(1)).findById(jdId);
+        verify(jdRepository, times(1)).deleteById(jdId);
+    }
+
+    @Test
+    @DisplayName("JD 삭제 서비스 실패 테스트 - JD를 찾을 수 없음")
+    void deleteJd_notFound() {
+        // Given
+        Long nonExistentJdId = 999L;
+        when(jdRepository.findById(nonExistentJdId)).thenReturn(Optional.empty());
+
+        // When & Then
+        JDException thrown = assertThrows(JDException.class, () -> jdService.deleteJd(nonExistentJdId));
+        assertEquals(JDErrorCode.JD_NOT_FOUND, thrown.getErrorCode());
+
+        // Verify
+        verify(jdRepository, times(1)).findById(nonExistentJdId);
+        verify(jdRepository, never()).deleteById(anyLong());
     }
 }
