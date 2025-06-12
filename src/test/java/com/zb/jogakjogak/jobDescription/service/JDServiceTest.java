@@ -6,8 +6,10 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import com.github.javafaker.Faker;
 import com.zb.jogakjogak.global.exception.JDErrorCode;
 import com.zb.jogakjogak.global.exception.JDException;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.JDAlarmResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
@@ -26,7 +28,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -285,5 +286,56 @@ class JDServiceTest {
 
         // Verify
         verify(jdRepository, times(1)).findByIdWithToDoLists(nonExistentJdId);
+    }
+
+    @Test
+    @DisplayName("JD 알람 상태 변경 서비스 성공 테스트")
+    void alarm_success() {
+        // Given
+        Long jdId = 1L;
+        boolean initialAlarmStatus = false;
+        boolean newAlarmStatus = true;
+
+        JDAlarmRequestDto requestDto = JDAlarmRequestDto.builder()
+                .isAlarmOn(newAlarmStatus)
+                .build();
+
+        JD mockJd = JD.builder()
+                .id(jdId)
+                .title("알람 테스트 JD")
+                .isAlarmOn(initialAlarmStatus)
+                .build();
+
+        when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
+
+        // When
+        JDAlarmResponseDto result = jdService.alarm(jdId, requestDto);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(jdId, result.getJdId());
+        assertEquals(newAlarmStatus, result.isAlarmOn());
+
+
+        verify(jdRepository, times(1)).findById(jdId);
+        assertEquals(newAlarmStatus, mockJd.isAlarmOn());
+    }
+
+    @Test
+    @DisplayName("JD 알람 상태 변경 서비스 실패 테스트 - JD를 찾을 수 없음")
+    void alarm_notFound() {
+        // Given
+        Long nonExistentJdId = 999L;
+        JDAlarmRequestDto requestDto = JDAlarmRequestDto.builder()
+                .isAlarmOn(true)
+                .build();
+
+        when(jdRepository.findById(nonExistentJdId)).thenReturn(Optional.empty());
+
+        // When & Then
+        JDException thrown = assertThrows(JDException.class, () -> jdService.alarm(nonExistentJdId, requestDto));
+        assertEquals(JDErrorCode.JD_NOT_FOUND, thrown.getErrorCode());
+
+        verify(jdRepository, times(1)).findById(nonExistentJdId);
     }
 }
