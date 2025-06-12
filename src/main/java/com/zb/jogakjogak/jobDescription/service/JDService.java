@@ -219,6 +219,11 @@ public class JDService {
         return JDResponseDto.fromEntity(jd);
     }
 
+    /**
+     * 선택한 JD를 삭제하는 메서드
+     * @param jdId 삭제하려는 JD의 아이디
+     * @return 삭제된 JD의 응답 Dto
+     */
     public JDDeleteResponseDto deleteJd(Long jdId) {
         JD jd = jdRepository.findById(jdId).orElseThrow(
                 () -> new JDException(JDErrorCode.JD_NOT_FOUND)

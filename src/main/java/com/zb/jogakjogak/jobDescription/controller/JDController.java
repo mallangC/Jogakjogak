@@ -60,12 +60,17 @@ public class JDController {
         );
     }
 
+    /**
+     * 선택한 JD를 삭제하는 메서드
+     * @param jdId 삭제하려는 JD의 아이디
+     * @return 삭제된 JD의 응답 Dto
+     */
     @DeleteMapping("/jds/{jd_id}")
     public ResponseEntity<HttpApiResponse<JDDeleteResponseDto>> deleteJd(
-            @PathVariable Long jd_id ) {
+            @PathVariable Long jdId ) {
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
-                        jdService.deleteJd(jd_id),
+                        jdService.deleteJd(jdId),
                         "나의 분석 내용 삭제 성공",
                         HttpStatus.OK
                 )
