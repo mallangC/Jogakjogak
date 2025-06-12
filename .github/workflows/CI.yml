@@ -2,10 +2,11 @@ name: CI
 
 on:
   push:
-    branches: [ "main", "dev" ]
+    branches: [ "dev" ]
   pull_request:
-    branches: [ "main", "dev" ]
-
+    branches: [ "dev" ]
+# 코드를 pull하기 위한 읽기 권한 부여
+# JaCoCo로 리포트를 생성하기 위한 쓰기 권한 부여
 permissions:
   contents: read
   pull-requests: write
@@ -23,30 +24,37 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      # gradle wrapper에 대한 실행 권한 부여
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # gradle 빌드관련 캐시와 빌드 결과물을 초기화
       - name: Clean Gradle Cache and Build
         run: |
           ./gradlew --stop
           rm -rf ~/.gradle/caches/
           rm -rf build/
 
+      # 7.6.4버전으로 gradle 세팅
       - name: Set up Gradle
         uses: gradle/gradle-build-action@v2
         with:
           gradle-version: '7.6.4'
 
+      # 테스트 전 애플리케이션 빌드
       - name: Build with Gradle
         if: ${{github.event_name == 'push'}}
         run: ./gradlew build -x test
 
+      # 테스트 진행
       - name: Test with Gradle
         run: ./gradlew test
 
+      # 테스트를 기반으로 JaCoCo 리포트 작성
       - name: Generate JaCoCo Report
         run: ./gradlew jacocoTestReport
 
+      # JaCoCo리포트를 PR댓글로 남기기
       - name: JaCoCo Report to PR
         uses: madrapps/jacoco-report@v1.7.1
         with:
@@ -54,11 +62,3 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           title: 'Code Coverage'
           update-comment: true
-
-      - name: Upload JaCoCo coverage report
-        uses: codecov/codecov-action@v3
-        if: ${{ success() }}
-        with:
-          files: build/reports/jacoco/test/jacocoTestReport.xml
-          flags: unittests
-          name: codecov-unit
