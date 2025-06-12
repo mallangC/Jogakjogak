@@ -1,7 +1,9 @@
 package com.zb.jogakjogak.jobDescription.controller;
 
 import com.zb.jogakjogak.global.HttpApiResponse;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.JDAlarmResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
 import com.zb.jogakjogak.jobDescription.service.JDService;
 import lombok.RequiredArgsConstructor;
@@ -57,4 +59,18 @@ public class JDController {
                 )
         );
     }
+
+    @PatchMapping("/jds/{jd_id}/alarm")
+    public ResponseEntity<HttpApiResponse<JDAlarmResponseDto>> alarm(
+            @PathVariable Long jd_id,
+            @RequestBody JDAlarmRequestDto dto) {
+        return ResponseEntity.ok().body(
+                new HttpApiResponse<>(
+                        jdService.alarm(jd_id, dto),
+                        "알람 설정 완료",
+                        HttpStatus.OK
+                )
+        );
+    }
+
 }
