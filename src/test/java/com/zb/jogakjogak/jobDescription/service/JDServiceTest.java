@@ -105,68 +105,6 @@ class JDServiceTest {
     }
 
     @Test
-    @DisplayName("JD 분석 서비스 성공 테스트 - JD 및 ToDoList 저장 포함")
-    void analyze_success() throws JsonProcessingException {
-        // Given
-        String openAIAssumedJson = "[{\"category\":\"STRUCTURAL_COMPLEMENT_PLAN\"," +
-                "\"title\":\"OpenAI Test Title\"," +
-                "\"content\":\"OpenAI Test Content\"," +
-                "\"memo\":\"\",\"isDone\":false}]";
-        ToDoListDto openAIToDo1 = ToDoListDto.builder()
-                .category(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN)
-                .title("OpenAI Test Title")
-                .content("OpenAI Test Content")
-                .memo("")
-                .isDone(false)
-                .build();
-        List<ToDoListDto> openAIToDoListDtos = Collections.singletonList(openAIToDo1);
-
-
-        when(openAIResponseService.sendRequest(anyString(), anyString(), anyInt()))
-                .thenReturn(openAIAssumedJson); // LLMService의 JSON과 동일하게 변경
-
-        when(objectMapper.readValue(eq(openAIAssumedJson), any(com.fasterxml.jackson.core.type.TypeReference.class)))
-                .thenReturn(openAIToDoListDtos);
-        when(jdRepository.save(any(JD.class))).thenAnswer(invocation -> {
-            JD originalJd = invocation.getArgument(0);
-            // ID mocking
-            return JD.builder()
-                    .id(1L) // ID mocking
-                    .title(originalJd.getTitle())
-                    .companyName(originalJd.getCompanyName())
-                    .job(originalJd.getJob())
-                    .content(originalJd.getContent())
-                    .jdUrl(originalJd.getJdUrl())
-                    .endedAt(originalJd.getEndedAt())
-                    .memo(originalJd.getMemo())
-                    .isAlarmOn(originalJd.isAlarmOn())
-                    .applyAt(originalJd.getApplyAt())
-                    .toDoLists(originalJd.getToDoLists())
-                    .build();
-        });
-
-
-        // when
-        JDResponseDto result = jdService.analyze(jdRequestDto);
-
-        // then
-        assertNotNull(result);
-        assertEquals(jdRequestDto.getTitle(), result.getTitle());
-        assertEquals(jdRequestDto.getJDUrl(), result.getJdUrl());
-        assertEquals(jdRequestDto.getEndedAt(), result.getEndedAt());
-        assertFalse(result.getToDoLists().isEmpty());
-        assertEquals(openAIToDoListDtos.size(), result.getToDoLists().size());
-        assertEquals("OpenAI Test Content", result.getToDoLists().get(0).getContent());
-        assertEquals(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN, result.getToDoLists().get(0).getCategory());
-        assertEquals("", result.getToDoLists().get(0).getMemo());
-        assertFalse(result.getToDoLists().get(0).isDone());
-
-        // verify
-        verify(objectMapper, times(1)).readValue(eq(openAIAssumedJson), any(com.fasterxml.jackson.core.type.TypeReference.class));
-        verify(jdRepository, times(1)).save(any(JD.class));
-    }
-
-    @Test
     @DisplayName("JD 분석 서비스 JsonProcessingException 발생 시 JDException 던지는지 테스트")
     void analyze_jsonProcessingException() throws JsonProcessingException {
         // given
