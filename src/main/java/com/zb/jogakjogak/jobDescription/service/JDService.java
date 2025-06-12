@@ -222,6 +222,11 @@ public class JDService {
         return JDResponseDto.fromEntity(jd);
     }
 
+    /**
+     * JD 알림 설정을 끄고 키는 메서드
+     * @param jdId 알림 설정하려는 jd의 아이디
+     * @return 알림 설정을 변경한 JD 응답 dto
+     */
     @Transactional
     public JDAlarmResponseDto alarm(Long jdId, JDAlarmRequestDto dto) {
         JD jd = jdRepository.findById(jdId)

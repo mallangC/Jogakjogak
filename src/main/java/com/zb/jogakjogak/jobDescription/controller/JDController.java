@@ -59,14 +59,18 @@ public class JDController {
                 )
         );
     }
-
+    /**
+     * JD 알림 설정을 끄고 키는 메서드
+     * @param jdId 알림 설정하려는 jd의 아이디
+     * @return 알림 설정을 변경한 JD 응답 dto
+     */
     @PatchMapping("/jds/{jd_id}/alarm")
     public ResponseEntity<HttpApiResponse<JDAlarmResponseDto>> alarm(
-            @PathVariable Long jd_id,
+            @PathVariable Long jdId,
             @RequestBody JDAlarmRequestDto dto) {
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
-                        jdService.alarm(jd_id, dto),
+                        jdService.alarm(jdId, dto),
                         "알람 설정 완료",
                         HttpStatus.OK
                 )
