@@ -8,6 +8,7 @@ import com.zb.jogakjogak.global.exception.JDErrorCode;
 import com.zb.jogakjogak.global.exception.JDException;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.JDDeleteResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
@@ -216,5 +217,15 @@ public class JDService {
         JD jd = jdRepository.findByIdWithToDoLists(jdId)
                 .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
         return JDResponseDto.fromEntity(jd);
+    }
+
+    public JDDeleteResponseDto deleteJd(Long jdId) {
+        JD jd = jdRepository.findById(jdId).orElseThrow(
+                () -> new JDException(JDErrorCode.JD_NOT_FOUND)
+        );
+        jdRepository.deleteById(jdId);
+        return JDDeleteResponseDto.builder()
+                .jd_id(jdId)
+                .build();
     }
 }
