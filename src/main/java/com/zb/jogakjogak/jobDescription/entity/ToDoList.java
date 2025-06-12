@@ -42,10 +42,13 @@ public class ToDoList extends BaseEntity {
     private JD jd;
 
     public static ToDoList fromDto(ToDoListDto dto, JD jd) {
+
+        String escapedContent = dto.getContent().replace("'", "''");
+
         return ToDoList.builder()
                 .category(dto.getCategory())
                 .title(dto.getTitle())
-                .content(dto.getContent())
+                .content(escapedContent)
                 .memo(dto.getMemo())
                 .isDone(dto.isDone())
                 .jd(jd)

@@ -107,7 +107,7 @@ public class JDService {
 
         JD jd = JD.builder()
                 .title(jdRequestDto.getTitle())
-                .jdUrl(jdRequestDto.getJDUrl())
+                .jdUrl(jdRequestDto.getJdUrl())
                 .endedAt(jdRequestDto.getEndedAt())
                 .memo("")
                 .companyName(jdRequestDto.getCompanyName())
@@ -166,7 +166,7 @@ public class JDService {
                 .companyName(jdRequestDto.getCompanyName())
                 .job(jdRequestDto.getJob())
                 .content(jdRequestDto.getContent())
-                .jdUrl(jdRequestDto.getJDUrl())
+                .jdUrl(jdRequestDto.getJdUrl())
                 .endedAt(jdRequestDto.getEndedAt())
                 .memo("")
                 .build();

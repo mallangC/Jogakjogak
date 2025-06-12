@@ -64,7 +64,7 @@ class JDServiceTest {
 
         jdRequestDto = JDRequestDto.builder()
                 .title("시니어 백엔드 개발자 채용")
-                .JDUrl("https://example.com/jd/123")
+                .jdUrl("https://example.com/jd/123")
                 .companyName(faker.company().name())
                 .job(faker.job().title())
                 .content(faker.lorem().paragraph())
@@ -158,7 +158,7 @@ class JDServiceTest {
         // then
         assertNotNull(result);
         assertEquals(jdRequestDto.getTitle(), result.getTitle());
-        assertEquals(jdRequestDto.getJDUrl(), result.getJdUrl());
+        assertEquals(jdRequestDto.getJdUrl(), result.getJdUrl());
         assertEquals(jdRequestDto.getEndedAt(), result.getEndedAt());
         assertNotNull(result.getToDoLists());
         assertFalse(result.getToDoLists().isEmpty());
