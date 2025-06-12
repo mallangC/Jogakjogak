@@ -28,21 +28,11 @@ public class WithdrawalController {
         if (authentication == null || !authentication.isAuthenticated()){
             return  new HttpApiResponse<>(null, "회원탈퇴요청 실패", HttpStatus.UNAUTHORIZED);
         }
-        String userName = extractUsername(authentication);
-        withdrawalService.withdrawMember(userName);
+
+        withdrawalService.withdrawMember(authentication.getName());
         clearRefreshTokenCookie(response);
         SecurityContextHolder.clearContext();
         return new HttpApiResponse<>(null, "회원탈퇴 완료", HttpStatus.OK);
-    }
-
-    private String extractUsername(Authentication authentication) {
-        Object principal = authentication.getPrincipal();
-
-        if (principal instanceof CustomOAuth2User) {
-            CustomOAuth2User oAuth2User = (CustomOAuth2User) principal;
-            return oAuth2User.getName();
-        }
-        return principal.toString();
     }
 
     private void clearRefreshTokenCookie(HttpServletResponse response) {
