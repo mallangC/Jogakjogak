@@ -78,4 +78,12 @@ public class ToDoList extends BaseEntity {
         this.memo = dto.getMemo() != null ? dto.getMemo() : "";
         this.isDone = dto.isDone();
     }
+
+    public void updateFromBulkUpdateToDoLists(ToDoListUpdateRequestDto dto) {
+        this.category = dto.getCategory();
+        this.title = dto.getTitle();
+        this.content = dto.getContent();
+        this.memo = dto.getMemo() != null ? dto.getMemo() : "";
+        this.isDone = dto.isDone();
+    }
 }
