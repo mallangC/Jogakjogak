@@ -181,7 +181,7 @@ public class ToDoListService {
         return ToDoListGetByCategoryResponseDto.builder()
                 .jdId(jdId)
                 .category(request.getCategory())
-                .responseDtoList(responseDtoList)
+                .toDoLists(responseDtoList)
                 .build();
     }
 
@@ -201,7 +201,7 @@ public class ToDoListService {
         return ToDoListGetByCategoryResponseDto.builder()
                 .jdId(jdId)
                 .category(category)
-                .responseDtoList(responseDtoList)
+                .toDoLists(responseDtoList)
                 .build();
     }
 }

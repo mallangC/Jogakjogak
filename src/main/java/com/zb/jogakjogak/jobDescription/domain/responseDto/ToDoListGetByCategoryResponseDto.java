@@ -12,6 +12,6 @@ public class ToDoListGetByCategoryResponseDto {
 
     private ToDoListType category;
     private Long jdId;
-    private List<ToDoListResponseDto> responseDtoList;
+    private List<ToDoListResponseDto> toDoLists;
 
 }
