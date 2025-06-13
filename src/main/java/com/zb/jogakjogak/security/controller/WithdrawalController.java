@@ -27,7 +27,7 @@ public class WithdrawalController {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()){
-            return  ResponseEntity.ok()
+            return  ResponseEntity.badRequest()
                     .body(new HttpApiResponse<>(null,
                             "회원탈퇴요청 실패",
                             HttpStatus.UNAUTHORIZED));
