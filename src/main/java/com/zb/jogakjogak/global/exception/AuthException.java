@@ -3,10 +3,10 @@ package com.zb.jogakjogak.global.exception;
 import lombok.Getter;
 
 @Getter
-public class SecurityException extends RuntimeException{
+public class AuthException extends RuntimeException{
     private final MemberErrorCode memberErrorCode;
 
-    public SecurityException(MemberErrorCode memberErrorCode) {
+    public AuthException(MemberErrorCode memberErrorCode) {
         super(memberErrorCode.getMessage());
         this.memberErrorCode = memberErrorCode;
     }

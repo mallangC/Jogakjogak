@@ -24,6 +24,7 @@ public class JWTFilter extends OncePerRequestFilter {
     private static final Set<String> WHITELIST = Set.of(
             "/api/member/reissue",
             "/api/member/logout",
+            "/login/oauth2",
             "/v3/api-docs",
             "/swagger-ui",
             "/swagger-resources",
