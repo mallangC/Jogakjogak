@@ -126,7 +126,7 @@ public class ToDoListService {
     }
 
     @Transactional
-    public List<ToDoListResponseDto> bulkUpdateToDoLists(Long jdId, BulkToDoListUpdateRequestDto request) {
+    public ToDoListGetByCategoryResponseDto bulkUpdateToDoLists(Long jdId, BulkToDoListUpdateRequestDto request) {
 
         JD jd = jdRepository.findById(jdId)
                 .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
@@ -174,9 +174,15 @@ public class ToDoListService {
         }
 
         List<ToDoList> updatedListsInTargetCategory = toDoListRepository.findByJdAndCategory(jd, targetCategory);
-        return updatedListsInTargetCategory.stream()
+        List<ToDoListResponseDto> responseDtoList = updatedListsInTargetCategory.stream()
                 .map(ToDoListResponseDto::fromEntity)
                 .collect(Collectors.toList());
+
+        return ToDoListGetByCategoryResponseDto.builder()
+                .jdId(jdId)
+                .category(request.getCategory())
+                .responseDtoList(responseDtoList)
+                .build();
     }
 
     @Transactional(readOnly = true)

@@ -132,15 +132,14 @@ public class ToDoListController {
 
 
     @PutMapping("/bulk-update")
-    public ResponseEntity<HttpApiResponse<List<ToDoListResponseDto>>> bulkUpdateToDoLists(
+    public ResponseEntity<HttpApiResponse<ToDoListGetByCategoryResponseDto>> bulkUpdateToDoLists(
             @PathVariable Long jdId,
             @RequestBody BulkToDoListUpdateRequestDto dto) {
 
-        List<ToDoListResponseDto> response = toDoListService.bulkUpdateToDoLists(jdId, dto);
 
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
-                        response,
+                        toDoListService.bulkUpdateToDoLists(jdId, dto),
                         "다중 체크리스트 수정 성공",
                         HttpStatus.OK
                 )
