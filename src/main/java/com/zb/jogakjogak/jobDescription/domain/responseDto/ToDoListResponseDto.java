@@ -9,9 +9,9 @@ import lombok.Getter;
 @Builder
 public class ToDoListResponseDto {
     private Long checklist_id;
-    private ToDoListType type;
+    private ToDoListType category;
     private String title;
-    private String description;
+    private String content;
     private String memo;
     private boolean isDone;
     private Long jdId;
@@ -19,12 +19,12 @@ public class ToDoListResponseDto {
     public static ToDoListResponseDto fromEntity(ToDoList toDoList) {
         return ToDoListResponseDto.builder()
                 .checklist_id(toDoList.getId())
-                .type(toDoList.getType())
+                .category(toDoList.getCategory())
                 .title(toDoList.getTitle())
-                .description(toDoList.getDescription())
+                .content(toDoList.getContent())
                 .memo(toDoList.getMemo())
                 .isDone(toDoList.isDone())
-                .jdId(toDoList.getJd() != null ? toDoList.getJd().getId() : null)
+                .jdId(toDoList.getJd().getId())
                 .build();
     }
 }

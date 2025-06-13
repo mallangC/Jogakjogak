@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ToDoListDto {
-    private ToDoListType type;
+    private ToDoListType category;
     private String title;
     private String description;
 }

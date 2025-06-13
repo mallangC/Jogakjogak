@@ -7,15 +7,18 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import com.zb.jogakjogak.global.exception.JDErrorCode;
 import com.zb.jogakjogak.global.exception.JDException;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repsitory.JDRepository;
+import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -103,6 +106,10 @@ public class JDService {
                 .jdUrl(jdRequestDto.getJDUrl())
                 .endedAt(jdRequestDto.getEndedAt())
                 .memo("")
+                .companyName(jdRequestDto.getCompanyName())
+                .job(jdRequestDto.getJob())
+                .content(jdRequestDto.getContent())
+                .isAlarmOn(false)
                 .build();
 
         for (ToDoListDto dto : parsedAnalysisResult) {
@@ -112,13 +119,26 @@ public class JDService {
 
         JD savedJd = jdRepository.save(jd);
 
+        List<ToDoListResponseDto> responseToDoLists = savedJd.getToDoLists().stream()
+                .map(ToDoListResponseDto::fromEntity)
+                .collect(Collectors.toList());
+
         return JDResponseDto.builder()
+                .jd_id(savedJd.getId())
                 .title(savedJd.getTitle())
+                .companyName(savedJd.getCompanyName())
+                .job(savedJd.getJob())
+                .content(savedJd.getContent())
                 .jdUrl(savedJd.getJdUrl())
-                .analysisResult(parsedAnalysisResult)
                 .memo(savedJd.getMemo())
+                .isAlarmOn(savedJd.isAlarmOn())
+                .applyAt(savedJd.getApplyAt())
                 .endedAt(savedJd.getEndedAt())
+                .createdAt(savedJd.getCreatedAt())
+                .updatedAt(savedJd.getUpdatedAt())
+                .toDoLists(responseToDoLists)
                 .build();
+
     }
 
     /**
@@ -128,34 +148,74 @@ public class JDService {
      * @return 제목, JD의 URL, To Do List, 사용자 메모, 마감일
      */
     public JDResponseDto llmAnalyze(JDRequestDto jdRequestDto) {
-        String analysisJsonString = llmService.generateTodoListJson(resumeContent,jdContent);
+        String analysisJsonString = llmService.generateTodoListJson(resumeContent, jdContent);
         List<ToDoListDto> parsedAnalysisResult;
         try {
-            parsedAnalysisResult = objectMapper.readValue(analysisJsonString, new TypeReference<List<ToDoListDto>>() {});
+            parsedAnalysisResult = objectMapper.readValue(analysisJsonString, new TypeReference<>() {
+            });
         } catch (JsonProcessingException e) {
             throw new JDException(JDErrorCode.FAILED_JSON_PROCESS);
         }
 
         JD jd = JD.builder()
                 .title(jdRequestDto.getTitle())
+                .companyName(jdRequestDto.getCompanyName())
+                .job(jdRequestDto.getJob())
+                .content(jdRequestDto.getContent())
                 .jdUrl(jdRequestDto.getJDUrl())
                 .endedAt(jdRequestDto.getEndedAt())
                 .memo("")
                 .build();
 
         for (ToDoListDto dto : parsedAnalysisResult) {
+            if (dto.getCategory() == null) {
+                System.err.println("경고: LLM 응답에서 ToDoList category가 누락되었습니다. 기본값으로 설정합니다.");
+                dto.setCategory(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN);
+            }
+            if (dto.getTitle() == null || dto.getTitle().isEmpty()) {
+                System.err.println("경고: LLM 응답에서 ToDoList title이 누락되었습니다. 기본값으로 설정합니다.");
+                dto.setTitle("제목 없음");
+            }
+            if (dto.getContent() == null || dto.getContent().isEmpty()) {
+                System.err.println("경고: LLM 응답에서 ToDoList content가 누락되었습니다. 기본값으로 설정합니다.");
+                dto.setContent("내용 없음");
+            }
+
             ToDoList toDoList = ToDoList.fromDto(dto, jd);
             jd.addToDoList(toDoList);
         }
-
         JD savedJd = jdRepository.save(jd);
 
+        List<ToDoListResponseDto> responseToDoLists = savedJd.getToDoLists().stream()
+                .map(ToDoListResponseDto::fromEntity)
+                .collect(Collectors.toList());
+
         return JDResponseDto.builder()
+                .jd_id(savedJd.getId())
                 .title(savedJd.getTitle())
+                .companyName(savedJd.getCompanyName())
+                .job(savedJd.getJob())
+                .content(savedJd.getContent())
                 .jdUrl(savedJd.getJdUrl())
-                .analysisResult(parsedAnalysisResult)
                 .memo(savedJd.getMemo())
+                .isAlarmOn(savedJd.isAlarmOn())
+                .applyAt(savedJd.getApplyAt())
                 .endedAt(savedJd.getEndedAt())
+                .createdAt(savedJd.getCreatedAt())
+                .updatedAt(savedJd.getUpdatedAt())
+                .toDoLists(responseToDoLists)
                 .build();
+    }
+
+    /**
+     * JD 분석 내용 단건 조회하는 서비스 메서드
+     * @param jdId 조회하려는 jd의 아이디
+     * @return 조회된 jd의 응답 dto
+     */
+    public JDResponseDto getJd(Long jdId) {
+        JD jd = jdRepository.findByIdWithToDoLists(jdId)
+                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
+        return JDResponseDto.fromEntity(jd);
+
     }
 }

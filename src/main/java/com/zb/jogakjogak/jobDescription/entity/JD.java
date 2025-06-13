@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,13 +28,28 @@ public class JD extends BaseEntity {
     private String title;
 
     @Column
+    private String companyName;
+
+    @Column
+    private String job;
+
+    @Column
+    private String content;
+
+    @Column(nullable = true)
     private String jdUrl;
 
     @Column
     private String memo;
 
+    @Column
+    private boolean isAlarmOn;
+
+    @Column
+    private LocalDateTime applyAt;
+
     @Column(nullable = false)
-    private LocalDateTime endedAt;
+    private LocalDate endedAt;
     
     @Builder.Default
     @OneToMany(mappedBy = "jd", cascade = CascadeType.ALL, orphanRemoval = true)
