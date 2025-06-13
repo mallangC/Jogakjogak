@@ -124,7 +124,7 @@ public class ToDoListController {
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
                         toDoListService.getToDoListsByJdAndCategory(jdId, category),
-                        "카테고리별 체크리스트 조회 성공",
+                        "카테고리별 투두리스트 조회 성공",
                         HttpStatus.OK
                 )
         );
@@ -140,7 +140,7 @@ public class ToDoListController {
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
                         toDoListService.bulkUpdateToDoLists(jdId, dto),
-                        "다중 체크리스트 수정 성공",
+                        "다중 투두리스트 수정 성공",
                         HttpStatus.OK
                 )
         );
