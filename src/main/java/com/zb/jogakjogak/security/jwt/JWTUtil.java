@@ -1,6 +1,6 @@
 package com.zb.jogakjogak.security.jwt;
 
-import com.zb.jogakjogak.global.exception.SecurityException;
+import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.security.Token;
 import com.zb.jogakjogak.security.repository.RefreshTokenRepository;
@@ -51,15 +51,15 @@ public class JWTUtil {
 
     public void validateToken(String token, Token tokenType) {
         if (token == null) {
-            throw new SecurityException(MemberErrorCode.NOT_FOUND_TOKEN);
+            throw new AuthException(MemberErrorCode.NOT_FOUND_TOKEN);
         }
 
         if (isExpired(token)) {
-            throw new SecurityException(MemberErrorCode.TOKEN_EXPIRED);
+            throw new AuthException(MemberErrorCode.TOKEN_EXPIRED);
         }
 
         if (!getToken(token).equals(tokenType.name())) {
-            throw new SecurityException(MemberErrorCode.TOKEN_TYPE_NOT_MATCH);
+            throw new AuthException(MemberErrorCode.TOKEN_TYPE_NOT_MATCH);
         }
     }
 

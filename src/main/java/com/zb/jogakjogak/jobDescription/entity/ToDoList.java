@@ -1,6 +1,7 @@
 package com.zb.jogakjogak.jobDescription.entity;
 
 
+import com.zb.jogakjogak.global.BaseEntity;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import jakarta.persistence.*;
@@ -11,7 +12,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ToDoList {
+public class ToDoList extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

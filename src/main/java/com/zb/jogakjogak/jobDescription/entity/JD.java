@@ -1,5 +1,6 @@
 package com.zb.jogakjogak.jobDescription.entity;
 
+import com.zb.jogakjogak.global.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,19 +17,19 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class JD {
+public class JD extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String title;
 
-    @Column(nullable = true)
+    @Column
     private String jdUrl;
 
-    @Column(nullable = true)
+    @Column
     private String memo;
 
     @Column(nullable = false)
