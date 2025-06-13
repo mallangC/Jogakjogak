@@ -36,7 +36,7 @@ class ReissueControllerTest {
 
     @Test
     @DisplayName("refresh, access토큰 재발급 성공")
-    void refreshToken_reissue_success_test() throws Exception {
+    void refreshToken_reissue_test() throws Exception {
         // given
         String oldRefresh = faker.internet().uuid();
         String newAccess = faker.internet().uuid();
