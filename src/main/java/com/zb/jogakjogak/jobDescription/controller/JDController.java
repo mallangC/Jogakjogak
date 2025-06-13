@@ -20,12 +20,28 @@ public class JDController {
     private final JDService jdService;
 
     /**
-     * JD와 이력서를 분석하여 To Do List를 만들어주는 컨트롤러 메서드
+     * open ai를 이용하여 JD와 이력서를 분석하여 To Do List를 만들어주는 컨트롤러 메서드
      * @param jdRequestDto 제목, JD의 URL, 마감일
      * @return 제목, JD의 URL, To Do List, 사용자 메모, 마감일
      */
     @PostMapping("/jd")
     public ResponseEntity<HttpApiResponse<JDResponseDto>> requestSend(@RequestBody JDRequestDto jdRequestDto) {
         return ResponseEntity.ok(new HttpApiResponse<>(jdService.analyze(jdRequestDto), "JD 분석하기 완료", HttpStatus.OK));
+    }
+
+    /**
+     * gemini ai를 이용하여 JD와 이력서를 분석하여 To Do List를 만들어주는 컨트롤러 메서드
+     * @param jdRequestDto 제목, JD의 URL, 마감일
+     * @return 제목, JD의 URL, To Do List, 사용자 메모, 마감일
+     */
+    @PostMapping("/jds")
+    public ResponseEntity<HttpApiResponse<JDResponseDto>> llmAnalyze(@RequestBody JDRequestDto jdRequestDto) {
+        return ResponseEntity.ok().body(
+                new HttpApiResponse<>(
+                        jdService.llmAnalyze(jdRequestDto),
+                        "JD 분석하기 완료",
+                        HttpStatus.CREATED
+                )
+        );
     }
 }
