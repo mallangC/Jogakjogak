@@ -4,16 +4,24 @@ import com.zb.jogakjogak.global.exception.JDErrorCode;
 import com.zb.jogakjogak.global.exception.JDException;
 import com.zb.jogakjogak.global.exception.ToDoListErrorCode;
 import com.zb.jogakjogak.global.exception.ToDoListException;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.BulkToDoListUpdateRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListUpdateRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListDeleteResponseDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListGetByCategoryResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repsitory.JDRepository;
 import com.zb.jogakjogak.jobDescription.repsitory.ToDoListRepository;
+import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -57,7 +65,7 @@ public class ToDoListService {
     /**
      * 특정 JD에 속한 ToDoList를 조회하는 메서드
      *
-     * @param jdId ToDoList가 속한 JD의 ID
+     * @param jdId       ToDoList가 속한 JD의 ID
      * @param toDoListId 조회할 ToDoList의 ID
      * @return 조회된 ToDoList의 응답 DTO
      */
@@ -69,7 +77,7 @@ public class ToDoListService {
     /**
      * 특정 JD에 속한 ToDoList를 삭제하는 메서드
      *
-     * @param jdId ToDoList가 속한 JD의 ID
+     * @param jdId       ToDoList가 속한 JD의 ID
      * @param toDoListId 조회할 ToDoList의 ID
      * @return 삭제된 ToDoList의 응답 DTO
      */
@@ -86,6 +94,7 @@ public class ToDoListService {
     /**
      * ID로 JD를 찾고, 없으면 예외를 발생시킵니다.
      * Optional을 사용하여 null 체크 대신 존재 여부를 명확히 처리합니다.
+     *
      * @param jdId 찾을 JD의 ID
      * @return 찾아진 JD 엔티티
      * @throws JDException JD를 찾을 수 없을 경우
@@ -98,7 +107,8 @@ public class ToDoListService {
     /**
      * ToDoList를 ID로 찾고, 해당 JD에 속하는지 검증합니다.
      * Optional 체이닝을 활용하여 가독성을 높이고 null 체크를 줄입니다.
-     * @param jdId 검증할 JD의 ID
+     *
+     * @param jdId       검증할 JD의 ID
      * @param toDoListId 찾을 ToDoList의 ID
      * @return 찾아진 ToDoList 엔티티
      * @throws ToDoListException ToDoList를 찾을 수 없거나 해당 JD에 속하지 않을 경우
@@ -115,4 +125,77 @@ public class ToDoListService {
         return toDoList;
     }
 
+    @Transactional
+    public List<ToDoListResponseDto> bulkUpdateToDoLists(Long jdId, BulkToDoListUpdateRequestDto request) {
+
+        JD jd = jdRepository.findById(jdId)
+                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
+
+        ToDoListType targetCategory = request.getCategory();
+        if (targetCategory == null) {
+            throw new ToDoListException(ToDoListErrorCode.CATEGORY_REQUIRED);
+        }
+
+        if (request.getUpdatedOrCreateToDoLists() != null) {
+            for (ToDoListUpdateRequestDto dto : request.getUpdatedOrCreateToDoLists()) {
+                if (dto.getJdId() == null || !dto.getJdId().equals(jdId) || !dto.getCategory().equals(targetCategory)) {
+                    throw new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_BELONG_TO_JD);
+                }
+
+                if (dto.getId() != null) {
+                    ToDoList toDoList = toDoListRepository.findById(dto.getId())
+                            .orElseThrow(() -> new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_FOUND));
+                    if (!toDoList.getJd().getId().equals(jdId) || !toDoList.getCategory().equals(targetCategory)) {
+                        throw new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_BELONG_TO_JD);
+                    }
+                    toDoList.updateFromBulkUpdateToDoLists(dto);
+                } else {
+                    ToDoList newToDoList = ToDoList.fromDto(dto, jd);
+                    toDoListRepository.save(newToDoList);
+                }
+            }
+        }
+
+        if (request.getDeletedToDoListIds() != null && !request.getDeletedToDoListIds().isEmpty()) {
+            List<Long> idsToDelete = request.getDeletedToDoListIds();
+
+            // 삭제 요청된 ID들이 실제로 해당 JD와 카테고리에 속하는지 검증 (매우 중요!)
+            List<ToDoList> actualToDoListsToDelete = toDoListRepository.findAllById(idsToDelete);
+            List<Long> verifiedIdsToDelete = actualToDoListsToDelete.stream()
+                    .filter(tl -> tl.getJd().getId().equals(jdId) && tl.getCategory().equals(targetCategory))
+                    .map(ToDoList::getId)
+                    .collect(Collectors.toList());
+
+            if (verifiedIdsToDelete.size() != idsToDelete.size()) {
+                throw new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_BELONG_TO_JD);
+            }
+
+            toDoListRepository.deleteAllById(verifiedIdsToDelete);
+        }
+
+        List<ToDoList> updatedListsInTargetCategory = toDoListRepository.findByJdAndCategory(jd, targetCategory);
+        return updatedListsInTargetCategory.stream()
+                .map(ToDoListResponseDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public ToDoListGetByCategoryResponseDto getToDoListsByJdAndCategory(Long jdId, ToDoListType category) {
+
+        JD jd = jdRepository.findById(jdId)
+                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
+
+        List<ToDoList> toDoLists = toDoListRepository.findByJdAndCategory(jd, category);
+
+        List<ToDoListResponseDto> responseDtoList = toDoLists.stream()
+                .map(ToDoListResponseDto::fromEntity)
+                .collect(Collectors.toList());
+
+
+        return ToDoListGetByCategoryResponseDto.builder()
+                .jdId(jdId)
+                .category(category)
+                .responseDtoList(responseDtoList)
+                .build();
+    }
 }
