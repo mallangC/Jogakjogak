@@ -12,4 +12,6 @@ import java.util.List;
 public interface ToDoListRepository extends JpaRepository<ToDoList, Long> {
 
     List<ToDoList> findByJdAndCategory(JD jd, ToDoListType targetCategory);
+
+    Object findByIdAndJdId(Long toDoListId, Long jdId);
 }
