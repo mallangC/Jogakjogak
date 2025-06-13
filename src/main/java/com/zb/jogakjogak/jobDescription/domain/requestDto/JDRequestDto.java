@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.URL;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @NoArgsConstructor
@@ -21,9 +21,13 @@ public class JDRequestDto {
     private String title;
     @NotBlank(message = "채용 공고 URL은 필수 입력 항목입니다.")
     @URL(message = "유효한 URL 형식이 아닙니다.")
-    private String JDUrl;
-    //TODO: 이력서 사용자 입력을 받을 필드 작성
-    private String jdContents;
+    private String jdUrl;
+    @NotBlank(message = "회사 이름은 필수 항목입니다.")
+    private String companyName;
+    @NotBlank(message = "직무 이름은 필수 항목입니다.")
+    private String job;
+    @NotBlank(message = "채용 공고는 필수 항목입니다.")
+    private String content;
     @NotNull(message = "마감일은 필수 선택 항목입니다.")
-    private LocalDateTime endedAt;
+    private LocalDate endedAt;
 }

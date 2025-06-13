@@ -26,6 +26,7 @@ configurations {
 
 repositories {
     mavenCentral()
+    google()
 }
 
 dependencies {
@@ -76,6 +77,10 @@ dependencies {
     implementation 'com.theokanning.openai-gpt3-java:service:0.11.1'
     implementation 'com.theokanning.openai-gpt3-java:client:0.11.1'
     implementation 'com.google.code.gson:gson:2.8.6'
+
+    //Google AI Gemini API Client Library
+    implementation 'com.google.genai:google-genai:1.3.0'
+    implementation 'com.google.guava:guava:33.2.1-jre'
 
     implementation 'io.github.cdimascio:dotenv-java:2.3.2'
 }

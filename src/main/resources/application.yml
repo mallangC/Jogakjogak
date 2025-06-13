@@ -61,3 +61,7 @@ openai:
     url: ${OPENAI_API_URL}
     model: gpt-4-turbo
     max-tokens: 1000
+
+gemini:
+  api:
+    key: ${GEMINI_API_KEY}
