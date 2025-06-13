@@ -6,8 +6,10 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import com.github.javafaker.Faker;
 import com.zb.jogakjogak.global.exception.JDErrorCode;
 import com.zb.jogakjogak.global.exception.JDException;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.JDAlarmResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDDeleteResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
@@ -15,8 +17,6 @@ import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repsitory.JDRepository;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
-import com.zb.jogakjogak.security.Role;
-import com.zb.jogakjogak.security.entity.Member;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,6 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -68,7 +69,7 @@ class JDServiceTest {
 
         jdRequestDto = JDRequestDto.builder()
                 .title("시니어 백엔드 개발자 채용")
-                .JDUrl("https://example.com/jd/123")
+                .jdUrl("https://example.com/jd/123")
                 .companyName(faker.company().name())
                 .job(faker.job().title())
                 .content(faker.lorem().paragraph())
@@ -112,7 +113,6 @@ class JDServiceTest {
         ToDoListDto llmDto1 = new ToDoListDto(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN, "이력서 Java/Spring Boot 경험 강조", "이력서에 Spring Boot 프로젝트 경험을 구체적으로 서술합니다.", "", false);
         ToDoListDto llmDto2 = new ToDoListDto(ToDoListType.CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL, "AWS 클라우드 경험 구체화", "AWS EC2 배포 경험을 수치와 함께 명확히 기술합니다.", "", false);
         mockToDoListDtosForLLM = Arrays.asList(llmDto1, llmDto2);
-
     }
 
     @Test
@@ -167,7 +167,7 @@ class JDServiceTest {
         // then
         assertNotNull(result);
         assertEquals(jdRequestDto.getTitle(), result.getTitle());
-        assertEquals(jdRequestDto.getJDUrl(), result.getJdUrl());
+        assertEquals(jdRequestDto.getJdUrl(), result.getJdUrl());
         assertEquals(jdRequestDto.getEndedAt(), result.getEndedAt());
         assertNotNull(result.getToDoLists());
         assertFalse(result.getToDoLists().isEmpty());
@@ -336,5 +336,56 @@ class JDServiceTest {
         // Verify
         verify(jdRepository, times(1)).findById(nonExistentJdId);
         verify(jdRepository, never()).deleteById(anyLong());
+    }
+
+    @Test
+    @DisplayName("JD 알람 상태 변경 서비스 성공 테스트")
+    void alarm_success() {
+        // Given
+        Long jdId = 1L;
+        boolean initialAlarmStatus = false;
+        boolean newAlarmStatus = true;
+
+        JDAlarmRequestDto requestDto = JDAlarmRequestDto.builder()
+                .isAlarmOn(newAlarmStatus)
+                .build();
+
+        JD mockJd = JD.builder()
+                .id(jdId)
+                .title("알람 테스트 JD")
+                .isAlarmOn(initialAlarmStatus)
+                .build();
+
+        when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
+
+        // When
+        JDAlarmResponseDto result = jdService.alarm(jdId, requestDto);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(jdId, result.getJdId());
+        assertEquals(newAlarmStatus, result.isAlarmOn());
+
+
+        verify(jdRepository, times(1)).findById(jdId);
+        assertEquals(newAlarmStatus, mockJd.isAlarmOn());
+    }
+
+    @Test
+    @DisplayName("JD 알람 상태 변경 서비스 실패 테스트 - JD를 찾을 수 없음")
+    void alarm_notFound() {
+        // Given
+        Long nonExistentJdId = 999L;
+        JDAlarmRequestDto requestDto = JDAlarmRequestDto.builder()
+                .isAlarmOn(true)
+                .build();
+
+        when(jdRepository.findById(nonExistentJdId)).thenReturn(Optional.empty());
+
+        // When & Then
+        JDException thrown = assertThrows(JDException.class, () -> jdService.alarm(nonExistentJdId, requestDto));
+        assertEquals(JDErrorCode.JD_NOT_FOUND, thrown.getErrorCode());
+
+        verify(jdRepository, times(1)).findById(nonExistentJdId);
     }
 }

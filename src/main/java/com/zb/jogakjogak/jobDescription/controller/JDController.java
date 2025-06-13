@@ -1,7 +1,9 @@
 package com.zb.jogakjogak.jobDescription.controller;
 
 import com.zb.jogakjogak.global.HttpApiResponse;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.JDAlarmResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDDeleteResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
 import com.zb.jogakjogak.jobDescription.service.JDService;
@@ -55,6 +57,23 @@ public class JDController {
                 new HttpApiResponse<>(
                         jdService.getJd(jdId),
                         "나의 분석 내용 단일 조회 완료",
+                        HttpStatus.OK
+                )
+        );
+    }
+    /**
+     * JD 알림 설정을 끄고 키는 메서드
+     * @param jdId 알림 설정하려는 jd의 아이디
+     * @return 알림 설정을 변경한 JD 응답 dto
+     */
+    @PatchMapping("/jds/{jd_id}/alarm")
+    public ResponseEntity<HttpApiResponse<JDAlarmResponseDto>> alarm(
+            @PathVariable Long jdId,
+            @RequestBody JDAlarmRequestDto dto) {
+        return ResponseEntity.ok().body(
+                new HttpApiResponse<>(
+                        jdService.alarm(jdId, dto),
+                        "알람 설정 완료",
                         HttpStatus.OK
                 )
         );

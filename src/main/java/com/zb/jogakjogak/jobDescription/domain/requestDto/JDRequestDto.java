@@ -21,7 +21,7 @@ public class JDRequestDto {
     private String title;
     @NotBlank(message = "채용 공고 URL은 필수 입력 항목입니다.")
     @URL(message = "유효한 URL 형식이 아닙니다.")
-    private String JDUrl;
+    private String jdUrl;
     @NotBlank(message = "회사 이름은 필수 항목입니다.")
     private String companyName;
     @NotBlank(message = "직무 이름은 필수 항목입니다.")

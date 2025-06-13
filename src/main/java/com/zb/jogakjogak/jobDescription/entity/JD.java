@@ -64,10 +64,7 @@ public class JD extends BaseEntity {
         toDoList.setJd(this);
     }
 
-    public void removeToDoList(ToDoList toDoList) {
-        if (this.toDoLists != null) {
-            this.toDoLists.remove(toDoList);
-            toDoList.setJd(null);
-        }
+    public void isAlarmOn(boolean isAlarmOn) {
+        this.isAlarmOn = isAlarmOn;
     }
 }

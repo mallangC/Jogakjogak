@@ -6,17 +6,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.zb.jogakjogak.global.exception.JDErrorCode;
 import com.zb.jogakjogak.global.exception.JDException;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDDeleteResponseDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.JDAlarmResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repsitory.JDRepository;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
+import jakarta.persistence.Table;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -104,7 +108,7 @@ public class JDService {
 
         JD jd = JD.builder()
                 .title(jdRequestDto.getTitle())
-                .jdUrl(jdRequestDto.getJDUrl())
+                .jdUrl(jdRequestDto.getJdUrl())
                 .endedAt(jdRequestDto.getEndedAt())
                 .memo("")
                 .companyName(jdRequestDto.getCompanyName())
@@ -163,7 +167,7 @@ public class JDService {
                 .companyName(jdRequestDto.getCompanyName())
                 .job(jdRequestDto.getJob())
                 .content(jdRequestDto.getContent())
-                .jdUrl(jdRequestDto.getJDUrl())
+                .jdUrl(jdRequestDto.getJdUrl())
                 .endedAt(jdRequestDto.getEndedAt())
                 .memo("")
                 .build();
@@ -232,6 +236,23 @@ public class JDService {
         jdRepository.deleteById(jdId);
         return JDDeleteResponseDto.builder()
                 .jd_id(jdId)
+                .build();
+    }
+
+    /**
+     * JD 알림 설정을 끄고 키는 메서드
+     * @param jdId 알림 설정하려는 jd의 아이디
+     * @return 알림 설정을 변경한 JD 응답 dto
+     */
+    @Transactional
+    public JDAlarmResponseDto alarm(Long jdId, JDAlarmRequestDto dto) {
+        JD jd = jdRepository.findById(jdId)
+                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
+
+        jd.isAlarmOn(dto.isAlarmOn());
+        return JDAlarmResponseDto.builder()
+                .isAlarmOn(jd.isAlarmOn())
+                .jdId(jd.getId())
                 .build();
     }
 }
