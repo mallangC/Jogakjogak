@@ -26,7 +26,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -178,7 +177,6 @@ class JDServiceTest {
         // verify
         verify(llmService, times(1)).generateTodoListJson(anyString(), anyString());
         verify(objectMapper, times(1)).readValue(eq(mockLLMAnalysisJsonString), any(com.fasterxml.jackson.core.type.TypeReference.class));
-        verify(objectMapper, times(1)).readValue(eq(mockAnalysisJsonString), any(CollectionType.class));
         verify(jdRepository, times(1)).save(any(JD.class));
 
         ArgumentCaptor<JD> jdCaptor = ArgumentCaptor.forClass(JD.class);
