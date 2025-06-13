@@ -1,4 +1,4 @@
-package com.zb.jogakjogak.jobDescription.repsitory;
+package com.zb.jogakjogak.jobDescription.repository;
 
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import org.springframework.data.jpa.repository.JpaRepository;
