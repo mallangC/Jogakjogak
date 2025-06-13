@@ -125,6 +125,13 @@ public class ToDoListService {
         return toDoList;
     }
 
+    /**
+     *특정 JD에 속한  ToDoList들을 수정하는 메서드
+     *
+     * @param jdId ToDoList가 속한 JD의 ID
+     * @param request  ToDoList 수정 내용
+     * @return 수정된 ToDoList들의 응답 DTO 리스트
+     */
     @Transactional
     public ToDoListGetByCategoryResponseDto bulkUpdateToDoLists(Long jdId, BulkToDoListUpdateRequestDto request) {
 
@@ -185,6 +192,13 @@ public class ToDoListService {
                 .build();
     }
 
+    /**
+     * 특정 JD에 속한 특정 카테고리의 ToDoList들을 조회하는 메서드
+     *
+     * @param jdId ToDoList가 속한 JD의 ID
+     * @param category 조회할 ToDoList의 카테고리 (STRUCTURAL_COMPLEMENT_PLAN 등)
+     * @return 조회된 ToDoList들의 응답 DTO 리스트
+     */
     @Transactional(readOnly = true)
     public ToDoListGetByCategoryResponseDto getToDoListsByJdAndCategory(Long jdId, ToDoListType category) {
 

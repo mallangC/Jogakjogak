@@ -130,7 +130,13 @@ public class ToDoListController {
         );
     }
 
-
+    /**
+     * 특정 JD에 속한  ToDoList들을 수정하는 메서드
+     *
+     * @param jdId ToDoList가 속한 JD의 ID
+     * @param dto ToDoList 수정 내용
+     * @return 수정된 ToDoList들의 응답 DTO 리스트
+     */
     @PutMapping("/bulk-update")
     public ResponseEntity<HttpApiResponse<ToDoListGetByCategoryResponseDto>> bulkUpdateToDoLists(
             @PathVariable Long jdId,
