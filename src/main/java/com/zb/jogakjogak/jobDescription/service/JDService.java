@@ -216,42 +216,6 @@ public class JDService {
         JD jd = jdRepository.findByIdWithToDoLists(jdId)
                 .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
         return JDResponseDto.fromEntity(jd);
-      
-     /**
-     * gemini ai를 이용하여 JD와 이력서를 분석하여 To Do List를 만들어주는 서비스 메서드
-     *
-     * @param jdRequestDto 제목, JD의 URL, 마감일
-     * @return 제목, JD의 URL, To Do List, 사용자 메모, 마감일
-     */
-    public JDResponseDto llmAnalyze(JDRequestDto jdRequestDto) {
-        String analysisJsonString = llmService.generateTodoListJson(resumeContent,jdContent);
-        List<ToDoListDto> parsedAnalysisResult;
-        try {
-            parsedAnalysisResult = objectMapper.readValue(analysisJsonString, new TypeReference<List<ToDoListDto>>() {});
-        } catch (JsonProcessingException e) {
-            throw new JDException(JDErrorCode.FAILED_JSON_PROCESS);
-        }
 
-        JD jd = JD.builder()
-                .title(jdRequestDto.getTitle())
-                .jdUrl(jdRequestDto.getJDUrl())
-                .endedAt(jdRequestDto.getEndedAt())
-                .memo("")
-                .build();
-
-        for (ToDoListDto dto : parsedAnalysisResult) {
-            ToDoList toDoList = ToDoList.fromDto(dto, jd);
-            jd.addToDoList(toDoList);
-        }
-
-        JD savedJd = jdRepository.save(jd);
-
-        return JDResponseDto.builder()
-                .title(savedJd.getTitle())
-                .jdUrl(savedJd.getJdUrl())
-                .analysisResult(parsedAnalysisResult)
-                .memo(savedJd.getMemo())
-                .endedAt(savedJd.getEndedAt())
-                .build();
     }
 }
