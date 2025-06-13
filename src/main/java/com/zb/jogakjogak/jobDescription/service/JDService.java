@@ -15,7 +15,7 @@ import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
-import com.zb.jogakjogak.jobDescription.repsitory.JDRepository;
+import com.zb.jogakjogak.jobDescription.repository.JDRepository;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import jakarta.persistence.Table;
 import lombok.RequiredArgsConstructor;
