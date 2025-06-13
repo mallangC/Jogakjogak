@@ -31,7 +31,6 @@ public class ToDoListService {
      */
     @Transactional
     public ToDoListResponseDto createToDoList(Long jdId, ToDoListDto toDoListDto) {
-
         JD jd = findJdById(jdId);
         ToDoList toDoList = ToDoList.fromDto(toDoListDto, jd);
         jd.addToDoList(toDoList);
