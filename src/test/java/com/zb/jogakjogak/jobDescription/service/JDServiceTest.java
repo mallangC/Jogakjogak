@@ -88,7 +88,6 @@ class JDServiceTest {
                 "    \"isDone\": false" +
                 "  }" +
                 "]";
-        );
 
         mockLLMAnalysisJsonString = "[" +
                 "  {" +
@@ -294,69 +293,5 @@ class JDServiceTest {
 
         // Verify
         verify(jdRepository, times(1)).findByIdWithToDoLists(nonExistentJdId);
-    @DisplayName("LLM 분석 서비스 성공 테스트 - JD 및 ToDoList 저장 포함 (Gemini)")
-    void llmAnalyze_success() throws JsonProcessingException {
-        // given
-        when(llmService.generateTodoListJson(anyString(), anyString()))
-                .thenReturn(mockLLMAnalysisJsonString);
-
-        when(objectMapper.readValue(eq(mockLLMAnalysisJsonString), any(com.fasterxml.jackson.core.type.TypeReference.class)))
-                .thenReturn(mockToDoListDtosForLLM);
-
-        when(jdRepository.save(any(JD.class))).thenAnswer(invocation -> {
-            JD originalJd = invocation.getArgument(0);
-            for (ToDoListDto dto : mockToDoListDtosForLLM) {
-                ToDoList toDoList = ToDoList.fromDto(dto, originalJd);
-                originalJd.addToDoList(toDoList);
-            }
-            return originalJd;
-        });
-
-        // when
-        JDResponseDto result = jdService.llmAnalyze(jdRequestDto);
-
-        // then
-        assertNotNull(result);
-        assertEquals(jdRequestDto.getTitle(), result.getTitle());
-        assertEquals(jdRequestDto.getJDUrl(), result.getJdUrl());
-        assertEquals(jdRequestDto.getEndedAt(), result.getEndedAt());
-        assertFalse(result.getAnalysisResult().isEmpty());
-        assertEquals(mockToDoListDtosForLLM.size(), result.getAnalysisResult().size()); // LLM용 DTO 사이즈
-
-        // LLM 응답 DTO 내용 검증
-        assertEquals(mockToDoListDtosForLLM.get(0).getTitle(), result.getAnalysisResult().get(0).getTitle());
-        assertEquals(mockToDoListDtosForLLM.get(0).getDescription(), result.getAnalysisResult().get(0).getDescription());
-        assertEquals(mockToDoListDtosForLLM.get(0).getType(), result.getAnalysisResult().get(0).getType());
-        assertEquals(mockToDoListDtosForLLM.get(0).isDone(), result.getAnalysisResult().get(0).isDone());
-
-        // verify
-        verify(objectMapper, times(1)).readValue(eq(mockLLMAnalysisJsonString), any(com.fasterxml.jackson.core.type.TypeReference.class));
-        verify(jdRepository, times(1)).save(any(JD.class));
-
-        ArgumentCaptor<JD> jdCaptor = ArgumentCaptor.forClass(JD.class);
-        verify(jdRepository).save(jdCaptor.capture());
-        JD savedJd = jdCaptor.getValue();
-        assertNotNull(savedJd.getToDoLists());
-        assertEquals(mockToDoListDtosForLLM.get(0).getTitle(), savedJd.getToDoLists().get(0).getTitle());
-    }
-
-    @Test
-    @DisplayName("LLM 분석 서비스 JsonProcessingException 발생 시 JDException 던지는지 테스트 (Gemini)")
-    void llmAnalyze_failure_jsonProcessingException() throws JsonProcessingException {
-        // given
-        when(llmService.generateTodoListJson(anyString(), anyString()))
-                .thenReturn("invalid json string from LLM");
-
-        when(objectMapper.readValue(anyString(), any(com.fasterxml.jackson.core.type.TypeReference.class)))
-                .thenThrow(mock(JsonProcessingException.class));
-
-        // when & then
-        JDException thrown = assertThrows(JDException.class, () -> jdService.llmAnalyze(jdRequestDto));
-        assertEquals(JDErrorCode.FAILED_JSON_PROCESS, thrown.getErrorCode());
-
-        // verify
-        verify(llmService, times(1)).generateTodoListJson(anyString(), anyString());
-        verify(objectMapper, times(1)).readValue(anyString(), any(com.fasterxml.jackson.core.type.TypeReference.class));
-        verify(jdRepository, never()).save(any(JD.class));
     }
 }
