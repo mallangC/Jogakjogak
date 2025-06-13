@@ -1,6 +1,8 @@
 package com.zb.jogakjogak.security.service;
 
 
+import com.zb.jogakjogak.global.exception.AuthException;
+import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.security.Role;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.dto.KakaoResponseDto;
@@ -23,11 +25,6 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
 
     private final MemberRepository memberRepository;
 
-    /**
-     * Oauth2 리소스서버에서 받을 유저정보
-     * @param userRequest
-     * @return
-     */
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
@@ -38,6 +35,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         String userName = kakaoResponseDto.getProvider() + " " + kakaoResponseDto.getProviderId();
 
         Member existMember = memberRepository.findByUserName(userName);
+
         Member member;
 
         if (existMember == null) {
