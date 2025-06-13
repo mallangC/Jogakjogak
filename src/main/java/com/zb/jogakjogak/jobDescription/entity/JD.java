@@ -39,7 +39,7 @@ public class JD extends BaseEntity {
     @Column(nullable = true)
     private String jdUrl;
 
-    @Column(nullable = true)
+    @Column
     private String memo;
 
     @Column

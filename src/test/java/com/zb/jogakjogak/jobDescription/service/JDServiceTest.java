@@ -10,6 +10,7 @@ import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDAlarmResponseDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.JDDeleteResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
@@ -28,6 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -55,12 +57,15 @@ class JDServiceTest {
     private JDRepository jdRepository;
 
     private JDRequestDto jdRequestDto;
+    private String mockAnalysisJsonString;
     private String mockLLMAnalysisJsonString;
+    private List<ToDoListDto> mockToDoListDtos;
     private List<ToDoListDto> mockToDoListDtosForLLM;
+    private Faker faker;
 
     @BeforeEach
     void setUp() {
-        Faker faker = new Faker();
+        faker = new Faker();
 
         jdRequestDto = JDRequestDto.builder()
                 .title("시니어 백엔드 개발자 채용")
@@ -88,20 +93,25 @@ class JDServiceTest {
                 "  }" +
                 "]";
 
-        ToDoListDto llmDto1 = ToDoListDto.builder()
-                .category(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN)
-                .title("이력서 Java/Spring Boot 경험 강조")
-                .content("이력서에 Spring Boot 프로젝트 경험을 구체적으로 서술합니다.") // description -> content
-                .memo("")
-                .isDone(false)
-                .build();
-        ToDoListDto llmDto2 = ToDoListDto.builder()
-                .category(ToDoListType.CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL)
-                .title("AWS 클라우드 경험 구체화")
-                .content("AWS EC2 배포 경험을 수치와 함께 명확히 기술합니다.") // description -> content
-                .memo("")
-                .isDone(false)
-                .build();
+        mockLLMAnalysisJsonString = "[" +
+                "  {" +
+                "    \"type\": \"STRUCTURAL_COMPLEMENT_PLAN\"," +
+                "    \"title\": \"이력서 Java/Spring Boot 경험 강조\"," +
+                "    \"description\": \"이력서에 Spring Boot 프로젝트 경험을 구체적으로 서술합니다.\"," +
+                "    \"memo\": \"\"," +
+                "    \"isDone\": false" +
+                "  }," +
+                "  {" +
+                "    \"type\": \"CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL\"," +
+                "    \"title\": \"AWS 클라우드 경험 구체화\"," +
+                "    \"description\": \"AWS EC2 배포 경험을 수치와 함께 명확히 기술합니다.\"," +
+                "    \"memo\": \"\"," +
+                "    \"isDone\": false" +
+                "  }" +
+                "]";
+
+        ToDoListDto llmDto1 = new ToDoListDto(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN, "이력서 Java/Spring Boot 경험 강조", "이력서에 Spring Boot 프로젝트 경험을 구체적으로 서술합니다.", "", false);
+        ToDoListDto llmDto2 = new ToDoListDto(ToDoListType.CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL, "AWS 클라우드 경험 구체화", "AWS EC2 배포 경험을 수치와 함께 명확히 기술합니다.", "", false);
         mockToDoListDtosForLLM = Arrays.asList(llmDto1, llmDto2);
     }
 
@@ -111,7 +121,6 @@ class JDServiceTest {
         // given
         when(openAIResponseService.sendRequest(anyString(), anyString(), anyInt()))
                 .thenReturn("이것은 잘못된 JSON 형식의 문자열입니다.");
-
         when(objectMapper.getTypeFactory()).thenReturn(mock(com.fasterxml.jackson.databind.type.TypeFactory.class));
         when(objectMapper.getTypeFactory().constructCollectionType(eq(List.class), eq(ToDoListDto.class)))
                 .thenReturn(mock(CollectionType.class));
@@ -286,6 +295,47 @@ class JDServiceTest {
 
         // Verify
         verify(jdRepository, times(1)).findByIdWithToDoLists(nonExistentJdId);
+    }
+    @Test
+    @DisplayName("JD 삭제 서비스 성공 테스트 - JD 및 연관된 ToDoList 함께 삭제")
+    void deleteJd_success() {
+        // Given
+        Long jdId = 1L;
+        JD mockJd = JD.builder()
+                .id(jdId)
+                .title(faker.book().title())
+                .companyName(faker.artist().name())
+                .build();
+
+        when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
+        doNothing().when(jdRepository).deleteById(jdId);
+
+        // When
+        JDDeleteResponseDto result = jdService.deleteJd(jdId);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(jdId, result.getJd_id());
+
+        // Verify
+        verify(jdRepository, times(1)).findById(jdId);
+        verify(jdRepository, times(1)).deleteById(jdId);
+    }
+
+    @Test
+    @DisplayName("JD 삭제 서비스 실패 테스트 - JD를 찾을 수 없음")
+    void deleteJd_notFound() {
+        // Given
+        Long nonExistentJdId = 999L;
+        when(jdRepository.findById(nonExistentJdId)).thenReturn(Optional.empty());
+
+        // When & Then
+        JDException thrown = assertThrows(JDException.class, () -> jdService.deleteJd(nonExistentJdId));
+        assertEquals(JDErrorCode.JD_NOT_FOUND, thrown.getErrorCode());
+
+        // Verify
+        verify(jdRepository, times(1)).findById(nonExistentJdId);
+        verify(jdRepository, never()).deleteById(anyLong());
     }
 
     @Test

@@ -1,9 +1,7 @@
 package com.zb.jogakjogak.jobDescription.controller;
 
 import com.zb.jogakjogak.global.HttpApiResponse;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.responseDto.JDAlarmResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
 import com.zb.jogakjogak.jobDescription.service.JDService;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +48,8 @@ public class JDController {
      * @return 조회된 jd의 응답 dto
      */
     @GetMapping("/jds/{jd_id}")
-    public ResponseEntity<HttpApiResponse<JDResponseDto>> getJd(@PathVariable("jd_id") Long jdId) {
+    public ResponseEntity<HttpApiResponse<JDResponseDto>> getJd(
+            @PathVariable("jd_id") Long jdId) {
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
                         jdService.getJd(jdId),
@@ -77,4 +76,21 @@ public class JDController {
         );
     }
 
+
+    /**
+     * 선택한 JD를 삭제하는 메서드
+     * @param jdId 삭제하려는 JD의 아이디
+     * @return 삭제된 JD의 응답 Dto
+     */
+    @DeleteMapping("/jds/{jd_id}")
+    public ResponseEntity<HttpApiResponse<JDDeleteResponseDto>> deleteJd(
+            @PathVariable Long jdId ) {
+        return ResponseEntity.ok().body(
+                new HttpApiResponse<>(
+                        jdService.deleteJd(jdId),
+                        "나의 분석 내용 삭제 성공",
+                        HttpStatus.OK
+                )
+        );
+    }
 }
