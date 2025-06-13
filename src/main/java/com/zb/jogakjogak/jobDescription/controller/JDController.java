@@ -1,7 +1,10 @@
 package com.zb.jogakjogak.jobDescription.controller;
 
 import com.zb.jogakjogak.global.HttpApiResponse;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.JDAlarmResponseDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.JDDeleteResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
 import com.zb.jogakjogak.jobDescription.service.JDService;
 import lombok.RequiredArgsConstructor;
@@ -75,7 +78,6 @@ public class JDController {
                 )
         );
     }
-
 
     /**
      * 선택한 JD를 삭제하는 메서드
