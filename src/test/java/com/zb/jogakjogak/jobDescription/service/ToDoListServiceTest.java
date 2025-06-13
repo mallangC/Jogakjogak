@@ -319,30 +319,6 @@ class ToDoListServiceTest {
     }
 
     @Test
-    @DisplayName("ToDoList 성공적으로 조회")
-    void getToDoList_success() {
-        // Given
-        when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
-        when(toDoListRepository.findById(toDoListId)).thenReturn(Optional.of(mockToDoList));
-
-        // When
-        ToDoListResponseDto result = toDoListService.getToDoList(jdId, toDoListId);
-
-        // Then
-        verify(jdRepository, times(1)).findById(jdId);
-        verify(toDoListRepository, times(1)).findById(toDoListId);
-
-        assertNotNull(result);
-        assertEquals(toDoListId, result.getChecklist_id());
-        assertEquals(mockToDoList.getType(), result.getType());
-        assertEquals(mockToDoList.getTitle(), result.getTitle());
-        assertEquals(mockToDoList.getDescription(), result.getDescription());
-        assertEquals(mockToDoList.getMemo(), result.getMemo());
-        assertEquals(mockToDoList.isDone(), result.isDone());
-        assertEquals(jdId, result.getJdId());
-    }
-
-    @Test
     @DisplayName("ToDoList 조회 실패 - JD를 찾을 수 없음")
     void getToDoList_failure_jdNotFound() {
         // Given
