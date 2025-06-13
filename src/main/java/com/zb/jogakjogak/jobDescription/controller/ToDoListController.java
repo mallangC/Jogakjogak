@@ -1,15 +1,20 @@
 package com.zb.jogakjogak.jobDescription.controller;
 
 import com.zb.jogakjogak.global.HttpApiResponse;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.BulkToDoListUpdateRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListDeleteResponseDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListGetByCategoryResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.service.ToDoListService;
+import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -99,6 +104,44 @@ public class ToDoListController {
                 new HttpApiResponse<>(
                         toDoListService.deleteToDoList(jdId, toDoListId),
                         "체크리스트 삭제 성공",
+                        HttpStatus.OK
+                )
+        );
+    }
+
+    /**
+     * 특정 JD에 속한 특정 카테고리의 ToDoList들을 조회하는 메서드
+     *
+     * @param jdId ToDoList가 속한 JD의 ID
+     * @param category 조회할 ToDoList의 카테고리 (STRUCTURAL_COMPLEMENT_PLAN 등)
+     * @return 조회된 ToDoList들의 응답 DTO 리스트
+     */
+    @GetMapping
+    public ResponseEntity<HttpApiResponse<ToDoListGetByCategoryResponseDto>> getToDoListsByCategory(
+            @PathVariable Long jdId,
+            @RequestParam(name = "category") ToDoListType category) {
+
+        return ResponseEntity.ok().body(
+                new HttpApiResponse<>(
+                        toDoListService.getToDoListsByJdAndCategory(jdId, category),
+                        "카테고리별 체크리스트 조회 성공",
+                        HttpStatus.OK
+                )
+        );
+    }
+
+
+    @PutMapping("/bulk-update")
+    public ResponseEntity<HttpApiResponse<List<ToDoListResponseDto>>> bulkUpdateToDoLists(
+            @PathVariable Long jdId,
+            @RequestBody BulkToDoListUpdateRequestDto dto) {
+
+        List<ToDoListResponseDto> response = toDoListService.bulkUpdateToDoLists(jdId, dto);
+
+        return ResponseEntity.ok().body(
+                new HttpApiResponse<>(
+                        response,
+                        "다중 체크리스트 수정 성공",
                         HttpStatus.OK
                 )
         );
