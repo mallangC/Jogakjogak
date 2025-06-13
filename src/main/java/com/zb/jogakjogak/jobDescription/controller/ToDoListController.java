@@ -2,6 +2,7 @@ package com.zb.jogakjogak.jobDescription.controller;
 
 import com.zb.jogakjogak.global.HttpApiResponse;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListDeleteResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.service.ToDoListService;
 import jakarta.validation.Valid;
@@ -78,6 +79,26 @@ public class ToDoListController {
                 new HttpApiResponse<>(
                         toDoListService.getToDoList(jdId, toDoListId),
                         "체크리스트 조회 성공",
+                        HttpStatus.OK
+                )
+        );
+    }
+
+    /**
+     * 특정 JD에 속한 ToDoList를 삭제하는 메서드
+     *
+     * @param jdId ToDoList가 속한 JD의 ID
+     * @param toDoListId 조회할 ToDoList의 ID
+     * @return 삭제된 ToDoList의 응답 DTO
+     */
+    @DeleteMapping("/{toDoListId}")
+    public ResponseEntity<HttpApiResponse<ToDoListDeleteResponseDto>> deleteToDoList(
+            @PathVariable Long jdId,
+            @PathVariable Long toDoListId) {
+        return ResponseEntity.ok().body(
+                new HttpApiResponse<>(
+                        toDoListService.deleteToDoList(jdId, toDoListId),
+                        "체크리스트 삭제 성공",
                         HttpStatus.OK
                 )
         );
