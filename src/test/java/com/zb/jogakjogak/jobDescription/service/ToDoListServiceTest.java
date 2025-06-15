@@ -13,8 +13,8 @@ import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListGetByCategory
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
-import com.zb.jogakjogak.jobDescription.repsitory.JDRepository;
-import com.zb.jogakjogak.jobDescription.repsitory.ToDoListRepository;
+import com.zb.jogakjogak.jobDescription.repository.JDRepository;
+import com.zb.jogakjogak.jobDescription.repository.ToDoListRepository;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,7 +24,6 @@ import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.OngoingStubbing;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

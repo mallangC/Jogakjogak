@@ -12,15 +12,14 @@ import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListGetByCategory
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
-import com.zb.jogakjogak.jobDescription.repsitory.JDRepository;
-import com.zb.jogakjogak.jobDescription.repsitory.ToDoListRepository;
+import com.zb.jogakjogak.jobDescription.repository.JDRepository;
+import com.zb.jogakjogak.jobDescription.repository.ToDoListRepository;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
