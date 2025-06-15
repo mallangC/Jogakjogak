@@ -3,6 +3,7 @@ package com.zb.jogakjogak.jobDescription.entity;
 
 import com.zb.jogakjogak.global.BaseEntity;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListUpdateRequestDto;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -54,11 +55,31 @@ public class ToDoList extends BaseEntity {
                 .jd(jd)
                 .build();
     }
+
+    public static ToDoList fromDto(ToDoListUpdateRequestDto dto, JD jd) {
+
+        return ToDoList.builder()
+                .category(dto.getCategory())
+                .title(dto.getTitle())
+                .content(dto.getContent())
+                .memo(dto.getMemo())
+                .isDone(dto.isDone())
+                .jd(jd)
+                .build();
+    }
     public void setJd(JD jd) {
         this.jd = jd;
     }
 
     public void updateFromDto(ToDoListDto dto) {
+        this.category = dto.getCategory();
+        this.title = dto.getTitle();
+        this.content = dto.getContent();
+        this.memo = dto.getMemo() != null ? dto.getMemo() : "";
+        this.isDone = dto.isDone();
+    }
+
+    public void updateFromBulkUpdateToDoLists(ToDoListUpdateRequestDto dto) {
         this.category = dto.getCategory();
         this.title = dto.getTitle();
         this.content = dto.getContent();
