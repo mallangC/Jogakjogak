@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  jogak_backend_app:
+    image: mallangc/jogak-backend:1.0.0
+    container_name: jogak-backend
+    environment:
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      KAKAO_CLIENT_ID: ${KAKAO_CLIENT_ID}
+      KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET}
+      KAKAO_ADMIN_KEY: ${KAKAO_ADMIN_KEY}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+    ports:
+      - "443:8080"
