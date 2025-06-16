@@ -186,7 +186,14 @@ public class JDService {
                 .jdId(jd.getId())
                 .build();
     }
-
+    /**
+     * 특정 사용자의 모든 JD (Job Description) 목록을 페이징하여 조회합니다.
+     *
+     * @param memberName 조회할 사용자의 이름.
+     * @param pageable   페이징 및 정렬 정보를 담는 객체.
+     * @return           페이징처리된 목록을 포함하는 객체.
+     * @throws AuthException 회원을 찾을 수 없을 경우 발생하는 예외.
+     */
     public Page<AllGetJDResponseDto> getAllJds(String memberName, Pageable pageable) {
         Member member = memberRepository.findByUserName(memberName);
         if (member == null) {
@@ -200,7 +207,13 @@ public class JDService {
 
         return new PageImpl<>(dtos, pageable, jdEntitiesPage.getTotalElements());
     }
-
+    /**
+     * JD엔티티를 AllGetJDResponseDto로 변환합니다.
+     * 이 과정에서 JD에 연결된 ToDoList의 총 개수와 완료된 개수를 계산하여 DTO에 포함합니다.
+     *
+     * @param jd 변환할 JD 엔티티.
+     * @return   변환된 AllGetJDResponseDto 객체.
+     */
     private AllGetJDResponseDto convertToDto(JD jd) {
         long totalPieces = jd.getToDoLists().size();
         long completedPieces = jd.getToDoLists().stream()
