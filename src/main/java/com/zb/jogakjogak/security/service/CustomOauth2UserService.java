@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,11 +35,9 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         KakaoResponseDto kakaoResponseDto = new KakaoResponseDto(oAuth2User.getAttributes());
         String userName = kakaoResponseDto.getProvider() + " " + kakaoResponseDto.getProviderId();
 
-        Member existMember = memberRepository.findByUserName(userName);
-
+        Optional<Member> existMember = memberRepository.findByUserName(userName);
         Member member;
-
-        if (existMember == null) {
+        if (existMember.isEmpty()) {
             member = Member.builder()
                     .userName(userName)
                     .nickName(kakaoResponseDto.getNickName())
@@ -47,6 +46,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
                     .phoneNumber(kakaoResponseDto.getPhoneNumber())
                     .lastLoginAt(LocalDateTime.now())
                     .oauth2Info(new ArrayList<>())
+                    .jdList(new ArrayList<>())
                     .password(null)
                     .role(Role.USER)
                     .build();
@@ -59,9 +59,10 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
             memberRepository.save(member);
             return new CustomOAuth2User(member);
         } else{
-            existMember.updateExistingMember(kakaoResponseDto);
-            memberRepository.save(existMember);
-            return new CustomOAuth2User(existMember);
+            member = existMember.get();
+            member.updateExistingMember(kakaoResponseDto);
+            memberRepository.save(member);
+            return new CustomOAuth2User(member);
         }
     }
 

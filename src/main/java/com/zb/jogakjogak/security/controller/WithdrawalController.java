@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,17 +24,16 @@ public class WithdrawalController {
     private final WithdrawalService withdrawalService;
 
     @PostMapping
-    public ResponseEntity oauth2Withdrawal(HttpServletResponse response){
-
+    public ResponseEntity oauth2Withdrawal(HttpServletResponse response, @AuthenticationPrincipal CustomOAuth2User customOAuth2User){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         if (authentication == null || !authentication.isAuthenticated()){
             return  ResponseEntity.badRequest()
                     .body(new HttpApiResponse<>(null,
                             "회원탈퇴요청 실패",
                             HttpStatus.UNAUTHORIZED));
         }
-
-        withdrawalService.withdrawMember(authentication.getName());
+        withdrawalService.withdrawMember(customOAuth2User.getName());
         clearRefreshTokenCookie(response);
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok()

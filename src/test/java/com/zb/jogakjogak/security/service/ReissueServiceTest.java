@@ -11,6 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -51,7 +52,7 @@ class ReissueServiceTest {
         when(jwtUtil.getRole(refreshToken)).thenReturn(role);
         when(jwtUtil.createJwt(eq(userName), eq(role), anyLong(), eq(Token.ACCESS_TOKEN))).thenReturn(newAccess);
         when(jwtUtil.createJwt(eq(userName), eq(role), anyLong(), eq(Token.REFRESH_TOKEN))).thenReturn(newRefresh);
-        when(refreshTokenRepository.findByRefreshToken(refreshToken)).thenReturn(existingToken);
+        when(refreshTokenRepository.findByRefreshToken(refreshToken)).thenReturn(Optional.ofNullable(existingToken));
 
         // when
         ReissueResultDto result = reissueService.reissue(refreshToken);
@@ -76,7 +77,7 @@ class ReissueServiceTest {
         when(jwtUtil.getRole(refreshToken)).thenReturn(role);
         when(jwtUtil.createJwt(eq(userName), eq(role), anyLong(), eq(Token.ACCESS_TOKEN))).thenReturn(newAccess);
         when(jwtUtil.createJwt(eq(userName), eq(role), anyLong(), eq(Token.REFRESH_TOKEN))).thenReturn(newRefresh);
-        when(refreshTokenRepository.findByRefreshToken(refreshToken)).thenReturn(null);
+        when(refreshTokenRepository.findByRefreshToken(refreshToken)).thenReturn(Optional.empty());
 
         // when
         ReissueResultDto result = reissueService.reissue(refreshToken);
