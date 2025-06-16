@@ -1,6 +1,6 @@
 spring:
   application:
-  name: jogakjogak
+   name: jogakjogak
 
   datasource:
     url: ${DB_URL}
@@ -26,5 +26,48 @@ spring:
       hibernate:
         format_sql: true
 
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: ${KAKAO_CLIENT_ID}
+            client-secret: ${KAKAO_CLIENT_SECRET}
+            scope:
+              - account_email
+              - profile_nickname
+              - name
+              - phone_number
+            authorization-grant-type: authorization_code
+            redirect-uri: "http://localhost:8080/login/oauth2/code/kakao"
+            client-name: Kakao
+            client-authentication-method: client_secret_post
+
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+
+kakao:
+  admin-key: ${KAKAO_ADMIN_KEY}
+
+
 jwt:
   secret-key: ${JWT_SECRET_KEY}
+
+openai:
+  api:
+    key: ${OPENAI_API_KEY}
+    url: ${OPENAI_API_URL}
+    model: gpt-4-turbo
+    max-tokens: 1000
+
+server:
+  port: 8080
+  
+gemini:
+  api:
+    key: ${GEMINI_API_KEY}
+

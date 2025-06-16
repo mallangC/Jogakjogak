@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.0'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'jacoco'
 }
 
 group = 'com.zb'
@@ -13,6 +14,10 @@ java {
     }
 }
 
+jacoco {
+    toolVersion = '0.8.10'
+}
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
@@ -21,6 +26,7 @@ configurations {
 
 repositories {
     mavenCentral()
+    google()
 }
 
 dependencies {
@@ -29,6 +35,25 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+
+
+    //oauth
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+    //test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'net.datafaker:datafaker:2.0.2'
+
+    //
+    implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+
+
+    //jwt
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     runtimeOnly 'com.mysql:mysql-connector-j'
@@ -41,13 +66,51 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'com.h2database:h2'
+
 
     // java-faker
     implementation ('com.github.javafaker:javafaker:1.0.2') { exclude module: 'snakeyaml' }
     implementation group: 'org.yaml', name: 'snakeyaml', version: '2.2'
+
+    //OpenAI
+    implementation 'com.theokanning.openai-gpt3-java:service:0.11.1'
+    implementation 'com.theokanning.openai-gpt3-java:client:0.11.1'
+    implementation 'com.google.code.gson:gson:2.8.6'
+
+    //Google AI Gemini API Client Library
+    implementation 'com.google.genai:google-genai:1.3.0'
+    implementation 'com.google.guava:guava:33.2.1-jre'
+
+    implementation 'io.github.cdimascio:dotenv-java:2.3.2'
+}
+
+jacocoTestReport {
+    dependsOn compileJava
+    dependsOn processResources
+
+    reports {
+        html.required.set(true)
+        xml.required.set(true)
+    }
+
+    finalizedBy 'jacocoTestCoverageVerification'
+}
+
+jacocoTestReport {
+    dependsOn compileJava
+    dependsOn processResources
+
+    reports {
+        html.required.set(true)
+        xml.required.set(true)
+    }
+
+    finalizedBy 'jacocoTestCoverageVerification'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy 'jacocoTestReport'
     jvmArgs "-Xshare:off"
 }
