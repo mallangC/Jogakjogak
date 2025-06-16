@@ -16,4 +16,4 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       OPENAI_API_URL: ${OPENAI_API_URL}
     ports:
-      - "443:8080"
+      - "8080:8080"
