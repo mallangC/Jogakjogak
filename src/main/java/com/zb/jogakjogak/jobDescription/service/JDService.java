@@ -8,6 +8,7 @@ import com.zb.jogakjogak.global.exception.*;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.AllGetJDResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDAlarmResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDDeleteResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
@@ -18,10 +19,14 @@ import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import com.zb.jogakjogak.security.entity.Member;
 import com.zb.jogakjogak.security.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -179,6 +184,39 @@ public class JDService {
         return JDAlarmResponseDto.builder()
                 .isAlarmOn(jd.isAlarmOn())
                 .jdId(jd.getId())
+                .build();
+    }
+
+    public Page<AllGetJDResponseDto> getAllJds(String memberName, Pageable pageable) {
+        Member member = memberRepository.findByUserName(memberName);
+        if (member == null) {
+            throw new AuthException(MemberErrorCode.NOT_FOUND_MEMBER);
+        }
+        Page<JD> jdEntitiesPage = jdRepository.findByMemberId(member.getId(), pageable);
+
+        List<AllGetJDResponseDto> dtos = jdEntitiesPage.getContent().stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(dtos, pageable, jdEntitiesPage.getTotalElements());
+    }
+
+    private AllGetJDResponseDto convertToDto(JD jd) {
+        long totalPieces = jd.getToDoLists().size();
+        long completedPieces = jd.getToDoLists().stream()
+                .filter(ToDoList::isDone)
+                .count();
+
+        return AllGetJDResponseDto.builder()
+                .jd_id(jd.getId())
+                .title(jd.getTitle())
+                .companyName(jd.getCompanyName())
+                .completed_pieces(completedPieces)
+                .total_pieces(totalPieces)
+                .applyAt(jd.getApplyAt())
+                .createdAt(jd.getCreatedAt())
+                .updatedAt(jd.getUpdatedAt())
+                .endedAt(jd.getEndedAt())
                 .build();
     }
 }
