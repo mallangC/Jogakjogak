@@ -1,6 +1,7 @@
 package com.zb.jogakjogak.jobDescription.entity;
 
 import com.zb.jogakjogak.global.BaseEntity;
+import com.zb.jogakjogak.security.entity.Member;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -54,6 +55,10 @@ public class JD extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "jd", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ToDoList> toDoLists = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
 
     public void addToDoList(ToDoList toDoList) {

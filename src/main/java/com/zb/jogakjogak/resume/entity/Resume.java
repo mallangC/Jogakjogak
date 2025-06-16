@@ -2,6 +2,7 @@ package com.zb.jogakjogak.resume.entity;
 
 import com.zb.jogakjogak.global.BaseEntity;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
+import com.zb.jogakjogak.security.entity.Member;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +24,10 @@ public class Resume extends BaseEntity {
     @Column(nullable = false, length = 5000)
     private String content;
     private boolean isBookMark;
+
+    @OneToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     /**
      * 사용자가 이력서를 수정할 때 사용하는 메서드
