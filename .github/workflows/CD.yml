@@ -121,7 +121,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           # 보낼 파일들
-          source: ".env docker-compose.yml"
+          source: ".env,docker-compose.yml"
           # EC2 인스턴스 내의 대상 디렉토리
           target: "/home/${{ secrets.EC2_USER }}/jogakjogak"
 
