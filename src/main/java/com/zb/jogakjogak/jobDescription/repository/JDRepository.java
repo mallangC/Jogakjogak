@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Repository
@@ -33,4 +34,7 @@ public interface JDRepository extends JpaRepository<JD, Long> {
      */
     @EntityGraph(attributePaths = "toDoLists")
     Page<JD> findByMemberId(Long memberId, Pageable pageable);
+
+    @Query("SELECT jd FROM JD jd WHERE jd.updatedAt <= :oldDate")
+    Page<JD> findOutdatedJD(@Param("oldDate")LocalDateTime oldDate, Pageable pageable);
 }

@@ -1,5 +1,6 @@
 package com.zb.jogakjogak.jobDescription.repository;
 
+
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
