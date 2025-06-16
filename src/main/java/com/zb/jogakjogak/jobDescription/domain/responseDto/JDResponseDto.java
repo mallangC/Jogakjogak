@@ -24,6 +24,7 @@ public class JDResponseDto {
     private String content;
     private String jdUrl;
     private String memo;
+    private Long memberId;
     private boolean isAlarmOn;
     private LocalDateTime applyAt;
     private LocalDate endedAt;
@@ -54,6 +55,7 @@ public class JDResponseDto {
                 .createdAt(jd.getCreatedAt())
                 .updatedAt(jd.getUpdatedAt())
                 .toDoLists(mappedToDoLists)
+                .memberId(jd.getMember().getId())
                 .build();
     }
 }
