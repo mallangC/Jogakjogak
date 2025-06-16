@@ -1,15 +1,15 @@
 package com.zb.jogakjogak.jobDescription.domain.responseDto;
 
-import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
+@Builder
 @AllArgsConstructor
-public class ToDoListDto {
-    private ToDoListType category;
-    private String title;
-    private String description;
+public class JDAlarmResponseDto {
+    private Long jdId;
+    private boolean isAlarmOn;
 }

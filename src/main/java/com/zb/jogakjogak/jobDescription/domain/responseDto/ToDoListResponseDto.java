@@ -8,23 +8,23 @@ import lombok.Getter;
 @Getter
 @Builder
 public class ToDoListResponseDto {
-    private Long id;
-    private ToDoListType type;
+    private Long checklist_id;
+    private ToDoListType category;
     private String title;
-    private String description;
+    private String content;
     private String memo;
     private boolean isDone;
     private Long jdId;
 
     public static ToDoListResponseDto fromEntity(ToDoList toDoList) {
         return ToDoListResponseDto.builder()
-                .id(toDoList.getId())
-                .type(toDoList.getType())
+                .checklist_id(toDoList.getId())
+                .category(toDoList.getCategory())
                 .title(toDoList.getTitle())
-                .description(toDoList.getDescription())
+                .content(toDoList.getContent())
                 .memo(toDoList.getMemo())
                 .isDone(toDoList.isDone())
-                .jdId(toDoList.getJd() != null ? toDoList.getJd().getId() : null)
+                .jdId(toDoList.getJd().getId())
                 .build();
     }
 }

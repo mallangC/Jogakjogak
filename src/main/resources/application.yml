@@ -50,6 +50,10 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
 
+kakao:
+  admin-key: ${KAKAO_ADMIN_KEY}
+
+
 jwt:
   secret-key: ${JWT_SECRET_KEY}
 
@@ -62,3 +66,8 @@ openai:
 
 server:
   port: 8080
+  
+gemini:
+  api:
+    key: ${GEMINI_API_KEY}
+
