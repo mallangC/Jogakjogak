@@ -71,25 +71,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Check - Print Current Working Directory
-        run: |
-          echo "Current working directory:"
-          pwd
-
-      - name: Check - List Files in Root Directory
-        run: |
-          echo "Files in current directory (root):"
-          ls -alF # 파일 목록, 권한, 타입 확인
-          echo "Files in current directory (recursive):"
-          ls -R # 모든 하위 디렉토리 파일까지 확인
-
-      - name: Check - Attempt to read Dockerfile
-        run: |
-          echo "Attempting to read Dockerfile content:"
-          cat Dockerfile || echo "Dockerfile not found by 'cat' command."
-          # 이 명령이 실패하면 Dockerfile이 정말 없는 것임
-        
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
