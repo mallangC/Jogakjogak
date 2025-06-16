@@ -14,8 +14,6 @@ import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repository.JDRepository;
 import com.zb.jogakjogak.jobDescription.repository.ToDoListRepository;
-import com.zb.jogakjogak.jobDescription.repository.JDRepository;
-import com.zb.jogakjogak.jobDescription.repository.ToDoListRepository;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
