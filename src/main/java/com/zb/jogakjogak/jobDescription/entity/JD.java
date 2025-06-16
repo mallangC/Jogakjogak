@@ -37,7 +37,7 @@ public class JD extends BaseEntity {
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
-    @Column(nullable = true)
+    @Column
     private String jdUrl;
 
     @Column
