@@ -78,7 +78,7 @@ public class BizMessageBatchConfig {
 
     @Bean
     public RepositoryItemWriter<JD> JDWriter(){
-        // 알림톡서비스 로직
+        // 알림톡서비스 로직;
         return new RepositoryItemWriterBuilder<JD>()
                 .repository(jdRepository)
                 .methodName("save")
