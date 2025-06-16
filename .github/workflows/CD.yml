@@ -1,0 +1,142 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+env:
+  DB_URL: ${{ secrets.DB_URL }}
+  DB_USERNAME: ${{ secrets.DB_USERNAME }}
+  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID}}
+  KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET}}
+  KAKAO_ADMIN_KEY: ${{ secrets.KAKAO_ADMIN_KEY}}
+  JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY}}
+  GEMINI_API_KEY: ${{ secrets.OPENAI_API_KEY}}
+  DOCKERHUB_USERNAME : ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_TOKEN : ${{ secrets.DOCKERHUB_TOKEN }}
+  DOCKER_IMAGE_NAME: ${{ secrets.DOCKER_IMAGE_NAME}}
+  EC2_HOST: ${{ secrets.EC2_HOST}}
+  EC2_USER: ${{ secrets.EC2_USER}}
+  EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY}}
+
+jobs:
+  test:
+    name: Test for Gradle
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # gradle wrapper에 대한 실행 권한 부여
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # gradle 빌드관련 캐시와 빌드 결과물을 초기화
+      - name: Clean Gradle Cache and Build
+        run: |
+          ./gradlew --stop
+          rm -rf ~/.gradle/caches/
+          rm -rf build/
+
+      # gradle 세팅
+      - name: Set up Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: '8.14.2'
+
+      # 테스트 전 애플리케이션 빌드
+      - name: Build with Gradle
+        if: ${{github.event_name == 'push'}}
+        run: ./gradlew build -x test
+
+      # 테스트 진행
+      - name: Test with Gradle
+        run: ./gradlew test
+
+
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ env.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          # Dockerfile이 있는 디렉토리
+          context: .
+          # Dockerfile 경로
+          file: ./Dockerfile
+          push: true
+          tags: ${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:1.0.0
+          platforms: linux/amd64,linux/arm64
+
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      # .env 파일 생성
+      - name: Create .env file from secrets
+        run: |
+          # .env 파일 내용을 문자열로 구성
+          echo "DB_URL=${{ env.DB_URL }}" > .env
+          echo "DB_USERNAME=${{ env.DB_USERNAME }}" >> .env
+          echo "DB_PASSWORD=${{ env.DB_PASSWORD }}" >> .env
+          echo "KAKAO_CLIENT_ID=${{ env.KAKAO_CLIENT_ID}}" >> .env
+          echo "KAKAO_CLIENT_SECRET=${{ env.KAKAO_CLIENT_SECRET}}" >> .env
+          echo "KAKAO_ADMIN_KEY=${{ env.KAKAO_ADMIN_KEY}}" >> .env
+          echo "JWT_SECRET_KEY=${{ env.JWT_SECRET_KEY}}" >> .env
+          echo "GEMINI_API_KEY=${{ env.GEMINI_API_KEY}}" >> .env
+
+        shell: bash
+
+      # 파일 전송 단계 (.env 및 docker-compose.yml)
+      - name: Copy .env and docker-compose.yml to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          # 보낼 파일들 (쉼표로 구분)
+          source: ".env,docker-compose.yml"
+          # EC2 인스턴스 내의 대상 디렉토리
+          target: "/home/${{ secrets.EC2_USER }}/jogakjogak"
+
+      # EC2에서 Docker Compose 실행 단계
+      - name: SSH into EC2 and run Docker Compose
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # 대상 디렉토리로 이동
+            cd /home/${{ secrets.EC2_USER }}/jogakjogak
+            
+            # Docker 이미지 풀 및 컨테이너 재시작
+            docker compose pull
+            docker compose up -d --build --force-recreate
+            
+            # 오래된 이미지 정리
+            docker image prune -f
+            echo "Deployment to EC2 completed successfully!"
