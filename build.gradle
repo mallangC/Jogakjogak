@@ -6,7 +6,6 @@ plugins {
 }
 
 group = 'com.zb'
-version = '0.0.1-SNAPSHOT'
 
 java {
     toolchain {
@@ -70,7 +69,7 @@ dependencies {
 
 
     // java-faker
-    implementation ('com.github.javafaker:javafaker:1.0.2') { exclude module: 'snakeyaml' }
+    implementation('com.github.javafaker:javafaker:1.0.2') { exclude module: 'snakeyaml' }
     implementation group: 'org.yaml', name: 'snakeyaml', version: '2.2'
 
     //OpenAI
@@ -107,6 +106,10 @@ jacocoTestReport {
     }
 
     finalizedBy 'jacocoTestCoverageVerification'
+}
+
+jar {
+    enabled = false
 }
 
 tasks.named('test') {
