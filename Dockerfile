@@ -25,7 +25,7 @@ RUN echo "Contents of /app/build/libs/ after build:"
 RUN ls -al /app/build/libs/ || echo "/app/build/libs/ not found or empty"
 
 # 빌드된 JAR 파일을 컨테이너 내부에 복사
-COPY build/libs/*.jar app.jar
+COPY /app/build/libs/*.jar app.jar
 
 
 
