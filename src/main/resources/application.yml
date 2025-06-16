@@ -50,7 +50,6 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
 
-
 jwt:
   secret-key: ${JWT_SECRET_KEY}
 
@@ -60,3 +59,6 @@ openai:
     url: ${OPENAI_API_URL}
     model: gpt-4-turbo
     max-tokens: 1000
+
+server:
+  port: 8080
