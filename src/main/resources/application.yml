@@ -1,6 +1,6 @@
 spring:
   application:
-  name: jogakjogak
+   name: jogakjogak
 
   datasource:
     url: ${DB_URL}
