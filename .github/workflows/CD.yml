@@ -143,4 +143,5 @@ jobs:
             docker compose up -d --force-recreate
             
             docker image prune -f
+            docker logout
             echo "Deployment to EC2 completed successfully!"
