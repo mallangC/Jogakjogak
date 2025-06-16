@@ -84,8 +84,6 @@ jobs:
         with:
           # Dockerfile이 있는 디렉토리
           context: .
-          # Dockerfile 경로
-          file: ./Dockerfile
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:1.0.0
           platforms: linux/amd64,linux/arm64
