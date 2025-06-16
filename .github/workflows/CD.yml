@@ -135,7 +135,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login --username ${{ secrets.DOCKER_USER }} --password-stdin
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
             
             cd /home/${{ secrets.EC2_USER }}/jogakjogak
             
@@ -143,4 +143,5 @@ jobs:
             docker compose up -d --force-recreate
             
             docker image prune -f
+            docker logout
             echo "Deployment to EC2 completed successfully!"
