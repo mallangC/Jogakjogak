@@ -3,10 +3,7 @@ package com.zb.jogakjogak.jobDescription.entity;
 import com.zb.jogakjogak.global.BaseEntity;
 import com.zb.jogakjogak.security.entity.Member;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Setter
 @Table(name = "job_descriptions")
 @Getter
 @Builder
@@ -59,7 +57,6 @@ public class JD extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
-
 
     public void addToDoList(ToDoList toDoList) {
         if (this.toDoLists == null) {

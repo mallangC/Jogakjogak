@@ -21,7 +21,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @WebMvcTest(ReissueController.class)
-class ReissueControllerTest {
+class ReissueTestControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
