@@ -110,6 +110,8 @@ jobs:
           echo "KAKAO_ADMIN_KEY=${{ env.KAKAO_ADMIN_KEY}}" >> .env
           echo "JWT_SECRET_KEY=${{ env.JWT_SECRET_KEY}}" >> .env
           echo "GEMINI_API_KEY=${{ env.GEMINI_API_KEY}}" >> .env
+          echo "OPENAI_API_KEY=${{ env.OPENAI_API_KEY}}" >> .env
+          echo "OPENAI_API_URL=${{ env.OPENAI_API_URL}}" >> .env
 
         shell: bash
 
@@ -135,7 +137,6 @@ jobs:
           script: |
             # 대상 디렉토리로 이동
             cd /home/${{ secrets.EC2_USER }}/jogakjogak
-            pwd
             
             # Docker 이미지 풀 및 컨테이너 재시작
             docker compose pull
