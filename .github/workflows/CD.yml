@@ -135,6 +135,7 @@ jobs:
           script: |
             # 대상 디렉토리로 이동
             cd /home/${{ secrets.EC2_USER }}/jogakjogak
+            pwd
             
             # Docker 이미지 풀 및 컨테이너 재시작
             docker compose pull
