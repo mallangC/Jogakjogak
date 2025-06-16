@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 public class CustomLogoutFilter extends GenericFilter {
@@ -33,8 +34,8 @@ public class CustomLogoutFilter extends GenericFilter {
         String refreshToken = extractRefreshTokenFromCookie(request.getCookies());
         jwtUtil.validateToken(refreshToken, Token.REFRESH_TOKEN);
 
-        RefreshToken existingToken = refreshEntityRepository.findByRefreshToken(refreshToken);
-        if (existingToken == null) {
+        Optional<RefreshToken> existingToken = refreshEntityRepository.findByRefreshToken(refreshToken);
+        if (existingToken.isEmpty()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
