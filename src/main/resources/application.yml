@@ -2,8 +2,13 @@ spring:
   application:
    name: jogakjogak
 
-  datasource:
-    url: ${DB_URL}
+  datasource-main:
+    jdbc-url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  datasource-meta:
+    jdbc-url: ${DB_META_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -20,11 +25,16 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     database-platform: org.hibernate.dialect.MySQL8Dialect
     properties:
       hibernate:
         format_sql: true
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: always
 
   security:
     oauth2:
@@ -56,6 +66,15 @@ kakao:
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}
+
+aligo:
+  api-url: ${ALIGO_API_URL}
+  api-key: ${ALIGO_API_KEY}
+  user-id: ${ALIGO_USER_ID}
+  sender-key: ${ALIGO_SENDER_KEY}
+  sender-phone: ${ALIGO_SENDER_PHONE}
+  template-code: ${ALIGO_TEMPLATE_CODE}
+
 
 openai:
   api:

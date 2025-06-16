@@ -8,7 +8,9 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,27 +24,22 @@ public class WithdrawalController {
     private final WithdrawalService withdrawalService;
 
     @PostMapping
-    public HttpApiResponse<?> oauth2Withdrawal(HttpServletResponse response){
-
+    public ResponseEntity oauth2Withdrawal(HttpServletResponse response, @AuthenticationPrincipal CustomOAuth2User customOAuth2User){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         if (authentication == null || !authentication.isAuthenticated()){
-            return  new HttpApiResponse<>(null, "회원탈퇴요청 실패", HttpStatus.UNAUTHORIZED);
+            return  ResponseEntity.badRequest()
+                    .body(new HttpApiResponse<>(null,
+                            "회원탈퇴요청 실패",
+                            HttpStatus.UNAUTHORIZED));
         }
-        String userName = extractUsername(authentication);
-        withdrawalService.withdrawMember(userName);
+        withdrawalService.withdrawMember(customOAuth2User.getName());
         clearRefreshTokenCookie(response);
         SecurityContextHolder.clearContext();
-        return new HttpApiResponse<>(null, "회원탈퇴 완료", HttpStatus.OK);
-    }
-
-    private String extractUsername(Authentication authentication) {
-        Object principal = authentication.getPrincipal();
-
-        if (principal instanceof CustomOAuth2User) {
-            CustomOAuth2User oAuth2User = (CustomOAuth2User) principal;
-            return oAuth2User.getName();
-        }
-        return principal.toString();
+        return ResponseEntity.ok()
+                .body(new HttpApiResponse<>(null,
+                        "회원탈퇴 완료",
+                        HttpStatus.OK));
     }
 
     private void clearRefreshTokenCookie(HttpServletResponse response) {

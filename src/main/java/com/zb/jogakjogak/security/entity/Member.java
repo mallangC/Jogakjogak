@@ -1,5 +1,7 @@
 package com.zb.jogakjogak.security.entity;
 
+import com.zb.jogakjogak.global.BaseEntity;
+import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.security.Role;
 import com.zb.jogakjogak.security.dto.KakaoResponseDto;
 import jakarta.persistence.*;
@@ -17,7 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Member {
+public class Member extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,13 +49,13 @@ public class Member {
     @Builder.Default
     private List<OAuth2Info> oauth2Info = new ArrayList<>();
 
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<JD> jdList = new ArrayList<>();
+
     @PrePersist
     public void prePersist(){
         this.registeredAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    public void preUpdate(){
         this.lastLoginAt = LocalDateTime.now();
     }
 

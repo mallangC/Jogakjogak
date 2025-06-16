@@ -11,6 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,7 +41,7 @@ class WithdrawalServiceTest {
 
         Member mockMember = createMockMember(userName);
 
-        when(memberRepository.findByUserName(userName)).thenReturn(mockMember);
+        when(memberRepository.findByUserName(userName)).thenReturn(Optional.of(mockMember));
 
         // when
         withdrawalService.withdrawMember(userName);
@@ -60,7 +62,7 @@ class WithdrawalServiceTest {
 
         Member mockMember = createMockMember(userName);
 
-        when(memberRepository.findByUserName(userName)).thenReturn(mockMember);
+        when(memberRepository.findByUserName(userName)).thenReturn(Optional.of(mockMember));
 
         // when
         withdrawalService.withdrawMember(userName);

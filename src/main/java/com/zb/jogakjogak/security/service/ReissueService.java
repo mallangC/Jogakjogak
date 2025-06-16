@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,7 +18,7 @@ public class ReissueService {
 
     private final JWTUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
-    private static final long ACCESS_TOKEN_MS = 3600000L;
+    private static final long ACCESS_TOKEN_MS = 86400000L;
     private static final long REFRESH_TOKEN_MS = 604800000L;
 
     public ReissueResultDto reissue(String refreshToken) {
@@ -31,9 +32,9 @@ public class ReissueService {
         String newRefresh = jwtUtil.createJwt(userName, role, REFRESH_TOKEN_MS, Token.REFRESH_TOKEN);
 
         // refresh 토큰 저장 DB에 존재하면 업데이트, 없으면 생성
-        RefreshToken existingToken = refreshTokenRepository.findByRefreshToken(refreshToken);
-        if (existingToken != null) {
-            updateExistingRefreshTokenEntity(existingToken, newRefresh);
+        Optional<RefreshToken> existingToken = refreshTokenRepository.findByRefreshToken(refreshToken);
+        if (existingToken.isPresent()) {
+            updateExistingRefreshTokenEntity(existingToken.get(), newRefresh);
         } else {
             saveNewRefreshTokenEntity(userName, newRefresh);
         }

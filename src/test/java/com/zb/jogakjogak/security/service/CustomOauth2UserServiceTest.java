@@ -4,7 +4,7 @@ import com.zb.jogakjogak.security.Role;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.dto.KakaoResponseDto;
 import com.zb.jogakjogak.security.entity.Member;
-import com.zb.jogakjogak.security.entity.OAuth2Info; // 추가 import
+import com.zb.jogakjogak.security.entity.OAuth2Info;
 import com.zb.jogakjogak.security.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -100,7 +101,7 @@ class CustomOauth2UserServiceTest {
     @DisplayName("신규 회원가입 시 회원정보 저장 및 CustomOAuth2User 반환")
     void loadUser_NewMember_test() throws Exception {
         // given
-        given(memberRepository.findByUserName("kakao 123456789")).willReturn(null);
+        given(memberRepository.findByUserName("kakao 123456789")).willReturn(Optional.empty());
         given(memberRepository.save(any(Member.class))).willAnswer(invocation -> invocation.getArgument(0));
 
         OAuth2User result = invokeProcessUser(oAuth2User, "kakao");
@@ -141,7 +142,7 @@ class CustomOauth2UserServiceTest {
                 .role(Role.USER)
                 .build();
 
-        given(memberRepository.findByUserName("kakao 123456789")).willReturn(existingMember);
+        given(memberRepository.findByUserName(anyString())).willReturn(Optional.of(existingMember));
         given(memberRepository.save(any(Member.class))).willAnswer(invocation -> invocation.getArgument(0));
 
         // when
@@ -166,9 +167,10 @@ class CustomOauth2UserServiceTest {
         KakaoResponseDto kakaoResponseDto = new KakaoResponseDto(oAuth2User.getAttributes());
 
         String userName = registrationId + " " + kakaoResponseDto.getProviderId();
-        Member member = memberRepository.findByUserName(userName);
+        Optional<Member> optionalMember = memberRepository.findByUserName(userName);
 
-        if (member == null) {
+        Member member;
+        if (optionalMember.isEmpty()) {
             // 신규 회원 생성 로직
             member = Member.builder()
                     .userName(userName)
@@ -191,6 +193,7 @@ class CustomOauth2UserServiceTest {
             member.getOauth2Info().add(oauth2Info);
         } else {
             // 기존 회원 업데이트 로직
+            member = optionalMember.get();
             member.updateExistingMember(kakaoResponseDto);
         }
         member = memberRepository.save(member);

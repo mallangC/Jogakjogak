@@ -17,7 +17,8 @@ public class WithdrawalService {
     private final KakaoService kakaoService;
 
     public void withdrawMember(String userName) {
-        Member member = memberRepository.findByUserName(userName);
+        Member member = memberRepository.findByUserName(userName)
+                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
         if(member == null){
             throw new AuthException(MemberErrorCode.NOT_FOUND_MEMBER);
         }
