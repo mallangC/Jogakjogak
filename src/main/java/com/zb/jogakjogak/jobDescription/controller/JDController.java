@@ -7,9 +7,11 @@ import com.zb.jogakjogak.jobDescription.domain.responseDto.JDAlarmResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDDeleteResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
 import com.zb.jogakjogak.jobDescription.service.JDService;
+import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,8 +27,13 @@ public class JDController {
      * @return 제목, JD의 URL, To Do List, 사용자 메모, 마감일
      */
     @PostMapping("/jd")
-    public ResponseEntity<HttpApiResponse<JDResponseDto>> requestSend(@RequestBody JDRequestDto jdRequestDto) {
-        return ResponseEntity.ok(new HttpApiResponse<>(jdService.analyze(jdRequestDto), "JD 분석하기 완료", HttpStatus.OK));
+    public ResponseEntity<HttpApiResponse<JDResponseDto>> requestSend(
+            @RequestBody JDRequestDto jdRequestDto,
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        return ResponseEntity.ok(
+                new HttpApiResponse<>(jdService.analyze(jdRequestDto, customOAuth2User.getName()),
+                        "JD 분석하기 완료", HttpStatus.OK)
+        );
     }
 
     /**
@@ -35,10 +42,13 @@ public class JDController {
      * @return 제목, JD의 URL, To Do List, 사용자 메모, 마감일
      */
     @PostMapping("/jds")
-    public ResponseEntity<HttpApiResponse<JDResponseDto>> llmAnalyze(@RequestBody JDRequestDto jdRequestDto) {
+    public ResponseEntity<HttpApiResponse<JDResponseDto>> llmAnalyze(
+            @RequestBody JDRequestDto jdRequestDto,
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        String memberName = customOAuth2User.getName();
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
-                        jdService.llmAnalyze(jdRequestDto),
+                        jdService.llmAnalyze(jdRequestDto, memberName),
                         "JD 분석하기 완료",
                         HttpStatus.CREATED
                 )
