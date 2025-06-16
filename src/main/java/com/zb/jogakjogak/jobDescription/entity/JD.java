@@ -34,7 +34,7 @@ public class JD extends BaseEntity {
     @Column
     private String job;
 
-    @Column
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
     @Column(nullable = true)
