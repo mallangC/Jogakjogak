@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   jogak_backend_app:
-    image: mallangc/jogak-backend:1.0.0
+    image: mallangc/jogakjogak-backend:1.0.0
     container_name: jogak-backend
     environment:
       DB_URL: ${DB_URL}
