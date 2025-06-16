@@ -14,7 +14,7 @@ import com.zb.jogakjogak.jobDescription.domain.responseDto.JDDeleteResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
-import com.zb.jogakjogak.jobDescription.repsitory.JDRepository;
+import com.zb.jogakjogak.jobDescription.repository.JDRepository;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import com.zb.jogakjogak.security.entity.Member;
 import com.zb.jogakjogak.security.repository.MemberRepository;
