@@ -33,7 +33,6 @@ public class BizMessageBatchConfig {
     private final PlatformTransactionManager platformTransactionManager;
     private final JDRepository jdRepository;
 
-
     @Bean
     public Job secondJob(){
 

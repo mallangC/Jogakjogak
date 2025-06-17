@@ -63,7 +63,6 @@ spring:
 kakao:
   admin-key: ${KAKAO_ADMIN_KEY}
 
-
 jwt:
   secret-key: ${JWT_SECRET_KEY}
 
@@ -74,7 +73,6 @@ aligo:
   sender-key: ${ALIGO_SENDER_KEY}
   sender-phone: ${ALIGO_SENDER_PHONE}
   template-code: ${ALIGO_TEMPLATE_CODE}
-
 
 openai:
   api:
