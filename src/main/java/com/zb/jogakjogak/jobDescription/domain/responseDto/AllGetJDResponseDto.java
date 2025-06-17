@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 public class AllGetJDResponseDto {
     private Long jd_id;
     private String title;
+    private boolean isBookmark;
     private String companyName;
     private Long total_pieces;
     private Long completed_pieces;

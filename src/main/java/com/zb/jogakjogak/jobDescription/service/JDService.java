@@ -97,7 +97,7 @@ public class JDService {
             throw new ResumeException(ResumeErrorCode.NOT_FOUND_RESUME);
         }
 
-        String analysisJsonString = llmService.generateTodoListJson(member.getResume().getContent(), jdRequestDto.getContent());
+        String analysisJsonString = llmService.generateTodoListJson(member.getResume().getContent(), jdRequestDto.getContent(), jdRequestDto.getJob());
         List<ToDoListDto> parsedAnalysisResult;
         try {
             parsedAnalysisResult = objectMapper.readValue(analysisJsonString, new TypeReference<>() {
