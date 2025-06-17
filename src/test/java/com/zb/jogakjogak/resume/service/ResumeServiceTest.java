@@ -47,6 +47,7 @@ class ResumeServiceTest {
     private Resume sampleResume;
     private ResumeRequestDto sampleRequestDto;
     private Faker faker;
+    private Member mockMember;
 
 
 
@@ -54,10 +55,20 @@ class ResumeServiceTest {
     void setUp() {
         faker = new Faker();
 
+        mockMember = Member.builder()
+                .id(1L)
+                .userName("testUser")
+                .email("test@example.com")
+                .password("password123")
+                .role(Role.USER)
+                .build();
+
+
         sampleResume = Resume.builder()
                 .id(1L)
                 .title(faker.job().title())
                 .content("기존 내용")
+                .member(mockMember)
                 .build();
 
         sampleRequestDto = ResumeRequestDto.builder()
@@ -170,9 +181,10 @@ class ResumeServiceTest {
     void modify_success() {
         //Given
         when(resumeRepository.findById(1L)).thenReturn(Optional.of(sampleResume));
+        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
 
         //When
-        ResumeResponseDto result = resumeService.modify(1L, sampleRequestDto);
+        ResumeResponseDto result = resumeService.modify(1L, sampleRequestDto, mockMember.getName());
 
         //Then
         verify(resumeRepository, times(1)).findById(1L);
@@ -191,11 +203,12 @@ class ResumeServiceTest {
     void modify_fail_notFoundResume() {
         //Given
         Long nonExistentResumeId = 99L;
+        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
         when(resumeRepository.findById(nonExistentResumeId)).thenReturn(Optional.empty());
 
         // When & Then
         ResumeException exception = assertThrows(ResumeException.class, () -> {
-            resumeService.modify(nonExistentResumeId, sampleRequestDto);
+            resumeService.modify(nonExistentResumeId, sampleRequestDto, mockMember.getName());
         });
 
         // 예외 메시지 또는 에러 코드 검증
@@ -210,9 +223,10 @@ class ResumeServiceTest {
     void get_success() {
         //Given
         when(resumeRepository.findById(1L)).thenReturn(Optional.of(sampleResume));
+        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
 
         //When
-        ResumeResponseDto result = resumeService.get(1L);
+        ResumeResponseDto result = resumeService.get(1L, mockMember.getName());
 
         //Then
         verify(resumeRepository, times(1)).findById(1L);
@@ -229,10 +243,11 @@ class ResumeServiceTest {
         //Given
         Long nonExistentResumeId = 99L;
         when(resumeRepository.findById(nonExistentResumeId)).thenReturn(Optional.empty());
+        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
 
         // When & Then
         ResumeException exception = assertThrows(ResumeException.class, () -> {
-            resumeService.get(nonExistentResumeId);
+            resumeService.get(nonExistentResumeId, mockMember.getName());
         });
 
         // 예외 메시지 또는 에러 코드 검증
@@ -248,10 +263,11 @@ class ResumeServiceTest {
         // Given
         Long resumeIdToDelete = 1L;
         given(resumeRepository.findById(resumeIdToDelete)).willReturn(Optional.of(sampleResume));
+        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
         willDoNothing().given(resumeRepository).delete(sampleResume);
 
         // When
-        ResumeDeleteResponseDto responseDto = resumeService.delete(resumeIdToDelete);
+        ResumeDeleteResponseDto responseDto = resumeService.delete(resumeIdToDelete, mockMember.getName());
 
         // Then
         assertThat(responseDto).isNotNull();
@@ -266,11 +282,12 @@ class ResumeServiceTest {
     void deleteResume_fail_notFound() {
         // Given
         Long nonExistentResumeId = 99L;
+        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
         given(resumeRepository.findById(nonExistentResumeId)).willReturn(Optional.empty());
 
         // When & Then
         ResumeException exception = assertThrows(ResumeException.class, () -> {
-            resumeService.delete(nonExistentResumeId);
+            resumeService.delete(nonExistentResumeId, mockMember.getName());
         });
 
         assertEquals(ResumeErrorCode.NOT_FOUND_RESUME, exception.getErrorCode());
