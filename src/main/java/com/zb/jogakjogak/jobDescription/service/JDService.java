@@ -112,6 +112,7 @@ public class JDService {
 
         JD jd = JD.builder()
                 .title(jdRequestDto.getTitle())
+                .isBookmark(false)
                 .companyName(jdRequestDto.getCompanyName())
                 .job(jdRequestDto.getJob())
                 .content(jdRequestDto.getContent())
@@ -223,6 +224,7 @@ public class JDService {
         return AllGetJDResponseDto.builder()
                 .jd_id(jd.getId())
                 .title(jd.getTitle())
+                .isBookmark(jd.isBookmark())
                 .companyName(jd.getCompanyName())
                 .completed_pieces(completedPieces)
                 .total_pieces(totalPieces)

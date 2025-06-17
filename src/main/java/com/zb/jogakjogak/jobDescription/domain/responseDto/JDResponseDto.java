@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 public class JDResponseDto {
     private Long jd_id;
     private String title;
+    private boolean isBookmark;
     private String companyName;
     private String job;
     private String content;
@@ -44,6 +45,7 @@ public class JDResponseDto {
         return JDResponseDto.builder()
                 .jd_id(jd.getId())
                 .title(jd.getTitle())
+                .isBookmark(jd.isBookmark())
                 .companyName(jd.getCompanyName())
                 .job(jd.getJob())
                 .content(jd.getContent())
