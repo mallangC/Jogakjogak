@@ -22,7 +22,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,13 +56,12 @@ class ResumeServiceTest {
 
         sampleResume = Resume.builder()
                 .id(1L)
-                .name(faker.job().title())
+                .title(faker.job().title())
                 .content("기존 내용")
-                .isBookMark(false)
                 .build();
 
         sampleRequestDto = ResumeRequestDto.builder()
-                .name("새로운 이름")
+                .title("새로운 이름")
                 .content("새로운 내용")
                 .build();
     }
@@ -86,19 +84,18 @@ class ResumeServiceTest {
                 .build();
 
         ResumeRequestDto requestDto = ResumeRequestDto.builder()
-                .name(testName)
+                .title(testName)
                 .content(testContent)
                 .build();
 
         Resume mockResume = Resume.builder()
                 .id(1L)
-                .name(testName)
+                .title(testName)
                 .content(testContent)
                 .member(mockMember)
-                .isBookMark(false)
                 .build();
 
-        given(memberRepository.findByUserName(fixedUserName)).willReturn(mockMember);
+        given(memberRepository.findByUserName(fixedUserName)).willReturn(Optional.of(mockMember));
         given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
 
 
@@ -108,7 +105,7 @@ class ResumeServiceTest {
         // Then
         assertThat(responseDto).isNotNull();
         assertThat(responseDto.getResumeId()).isEqualTo(1L);
-        assertThat(responseDto.getName()).isEqualTo(testName);
+        assertThat(responseDto.getTitle()).isEqualTo(testName);
         assertThat(responseDto.getContent()).isEqualTo(testContent);
 
         verify(memberRepository, times(1)).findByUserName(fixedUserName);
@@ -121,7 +118,7 @@ class ResumeServiceTest {
         // Given
         String fixedUserName = "testUserWithResume";
         ResumeRequestDto requestDto = ResumeRequestDto.builder()
-                .name("새 이력서")
+                .title("새 이력서")
                 .content("새 내용")
                 .build();
 
@@ -134,7 +131,7 @@ class ResumeServiceTest {
                 .resume(Resume.builder().id(300L).build())
                 .build();
 
-        given(memberRepository.findByUserName(fixedUserName)).willReturn(memberWithResume);
+        given(memberRepository.findByUserName(fixedUserName)).willReturn(Optional.of(memberWithResume));
 
         // When & Then
         AuthException exception = assertThrows(AuthException.class, () -> {
@@ -152,11 +149,11 @@ class ResumeServiceTest {
         // Given
         String nonExistentUserName = "nonExistentUser";
         ResumeRequestDto requestDto = ResumeRequestDto.builder()
-                .name("새 이력서")
+                .title("새 이력서")
                 .content("새 내용")
                 .build();
 
-        given(memberRepository.findByUserName(nonExistentUserName)).willReturn(null);
+        given(memberRepository.findByUserName(nonExistentUserName)).willReturn(Optional.empty());
 
         // When & Then
         AuthException exception = assertThrows(AuthException.class, () -> {
@@ -180,12 +177,12 @@ class ResumeServiceTest {
         //Then
         verify(resumeRepository, times(1)).findById(1L);
 
-        assertEquals(sampleRequestDto.getName(), sampleResume.getName());
+        assertEquals(sampleRequestDto.getTitle(), sampleResume.getTitle());
         assertEquals(sampleRequestDto.getContent(), sampleResume.getContent());
 
         assertNotNull(result);
         assertEquals(sampleResume.getId(), result.getResumeId());
-        assertEquals(sampleRequestDto.getName(), result.getName());
+        assertEquals(sampleRequestDto.getTitle(), result.getTitle());
         assertEquals(sampleRequestDto.getContent(), result.getContent());
     }
 
@@ -222,7 +219,7 @@ class ResumeServiceTest {
 
         assertNotNull(result);
         assertEquals(sampleResume.getId(), result.getResumeId());
-        assertEquals(sampleResume.getName(), result.getName());
+        assertEquals(sampleResume.getTitle(), result.getTitle());
         assertEquals(sampleResume.getContent(), result.getContent());
     }
 
