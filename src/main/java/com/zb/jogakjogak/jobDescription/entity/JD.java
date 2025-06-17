@@ -77,7 +77,10 @@ public class JD extends BaseEntity {
         this.isBookmark = isBookmark;
     }
 
-    public void markJdAsApplied(LocalDateTime applyAt) {
-        this.applyAt = applyAt;
+    public void markJdAsApplied() {
+        this.applyAt = LocalDateTime.now();
+    }
+    public void unMarkJdAsApplied() {
+        this.applyAt = null;
     }
 }
