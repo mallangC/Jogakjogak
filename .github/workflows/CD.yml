@@ -12,6 +12,7 @@ env:
   DB_URL: ${{ secrets.DB_URL }}
   DB_USERNAME: ${{ secrets.DB_USERNAME }}
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  DB_META_URL: ${{ secrets.DB_META_URL }}
   KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID}}
   KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET}}
   KAKAO_ADMIN_KEY: ${{ secrets.KAKAO_ADMIN_KEY}}
@@ -111,6 +112,7 @@ jobs:
         run: |
           # .env 파일 내용을 문자열로 구성
           echo "DB_URL=${{ env.DB_URL }}" > .env
+          echo "DB_META_URL=${{ env.DB_META_URL }}" > .env
           echo "DB_USERNAME=${{ env.DB_USERNAME }}" >> .env
           echo "DB_PASSWORD=${{ env.DB_PASSWORD }}" >> .env
           echo "KAKAO_CLIENT_ID=${{ env.KAKAO_CLIENT_ID}}" >> .env
