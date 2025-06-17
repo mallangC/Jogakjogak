@@ -46,6 +46,7 @@ public class MainDBConfig {
         HashMap<String, Object> properties = new HashMap<>();
         properties.put("hibernate.hbm2ddl.auto", "create");
         properties.put("hibernate.show_sql", "true");
+        properties.put("hibernate.dialect", "org.hibernate.dialect.MySQL8Dialect");
         em.setJpaPropertyMap(properties);
 
         return em;
