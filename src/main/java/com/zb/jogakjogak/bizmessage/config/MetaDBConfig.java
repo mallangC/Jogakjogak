@@ -18,7 +18,6 @@ public class MetaDBConfig {
     @Bean
     @ConfigurationProperties(prefix = "spring.datasource-meta")
     public DataSource metaDBSource(){
-
         return DataSourceBuilder.create().build();
     }
 

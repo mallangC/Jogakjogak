@@ -18,13 +18,12 @@ import java.util.HashMap;
 @EnableJpaRepositories(
         basePackages = {"com.zb.jogakjogak.security.repository",
                         "com.zb.jogakjogak.jobDescription.repository",
-                        "com/zb/jogakjogak/resume/repository"
+                        "com.zb.jogakjogak.resume.repository"
         },
         entityManagerFactoryRef = "dataEntityManager",
         transactionManagerRef = "dataTransactionManager"
 )
 public class MainDBConfig {
-
 
     @Bean
     @ConfigurationProperties(prefix = "spring.datasource-main")
@@ -40,12 +39,12 @@ public class MainDBConfig {
         em.setDataSource(mainDBSource());
         em.setPackagesToScan(new String[]{"com.zb.jogakjogak.security.entity",
                                             "com.zb.jogakjogak.jobDescription.entity",
-                                            "com/zb/jogakjogak/resume/entity"
+                                            "com.zb.jogakjogak.resume.entity"
         });
         em. setJpaVendorAdapter(new HibernateJpaVendorAdapter());
 
         HashMap<String, Object> properties = new HashMap<>();
-        properties.put("hibernate.hbm2ddl.auto", "update");
+        properties.put("hibernate.hbm2ddl.auto", "create");
         properties.put("hibernate.show_sql", "true");
         em.setJpaPropertyMap(properties);
 
@@ -55,9 +54,7 @@ public class MainDBConfig {
     @Bean
     public PlatformTransactionManager dataTransactionManager(){
         JpaTransactionManager transactionManager = new JpaTransactionManager();
-
         transactionManager.setEntityManagerFactory(dataEntityManager().getObject());
-
         return transactionManager;
     }
 }
