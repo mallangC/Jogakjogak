@@ -111,7 +111,7 @@ jobs:
       - name: Create .env file from secrets
         run: |
           echo "DB_URL=${{ env.DB_URL }}" > .env
-          echo "DB_META_URL=${{ env.DB_META_URL }}" > .env
+          echo "DB_META_URL=${{ env.DB_META_URL }}" >> .env
           echo "DB_USERNAME=${{ env.DB_USERNAME }}" >> .env
           echo "DB_PASSWORD=${{ env.DB_PASSWORD }}" >> .env
           echo "KAKAO_CLIENT_ID=${{ env.KAKAO_CLIENT_ID}}" >> .env
