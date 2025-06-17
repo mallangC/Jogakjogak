@@ -19,10 +19,8 @@ public class BizMessageSchedule {
     private final JobLauncher jobLauncher;
     private final JobRegistry jobRegistry;
 
-
-    @Scheduled(cron = " * * 10 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = " 0 0 10 * * *", zone = "Asia/Seoul")
     public void runFirstJob() throws Exception{
-        System.out.println("배치 실행");
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String date = dateFormat.format(new Date());
 
