@@ -149,11 +149,20 @@ public class JDController {
         );
     }
 
+    /**
+     * 지정된 JD(Job Description)의 즐겨찾기 상태를 업데이트합니다.
+     * 사용자는 자신이 생성한 JD에 대해서만 즐겨찾기 상태를 변경할 수 있습니다.
+     *
+     * @param jdId             업데이트할 JD의 고유 ID (경로 변수)
+     * @param dto              즐겨찾기 상태를 포함하는 요청 본문 (true: 즐겨찾기 설정, false: 즐겨찾기 해제)
+     * @param customOAuth2User 현재 인증된 사용자의 정보를 담고 있는 객체.
+     * @return 업데이트된 즐겨찾기 상태 ResponseDto
+     */
     @PatchMapping("/jds/{jd_id}/bookmark")
     public ResponseEntity<HttpApiResponse<BookmarkResponseDto>> toggleBookmark
-            (@PathVariable("jd_id") Long jdId,
-             @RequestBody BookmarkRequestDto dto,
-             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+    (@PathVariable("jd_id") Long jdId,
+     @RequestBody BookmarkRequestDto dto,
+     @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         String memberName = customOAuth2User.getName();
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
@@ -164,6 +173,15 @@ public class JDController {
         );
     }
 
+    /**
+     * 지정된 JD(Job Description)의 지원 완료 상태를 토글합니다.
+     * JD의 현재 지원 상태(applyAt이 null이면 미완료, 값이 있으면 완료)에 따라 상태를 전환합니다.
+     * 사용자는 자신이 생성한 JD에 대해서만 지원 완료 상태를 변경할 수 있습니다.
+     *
+     * @param jdId 상태를 토글할 JD의 고유 ID (경로 변수)
+     * @param customOAuth2User 현재 인증된 사용자의 정보를 담고 있는 객체.
+     * @return 토글된 지원 완료 상태 ResponseDto
+     */
     @PatchMapping("/jds/{jd_id}/apply")
     public ResponseEntity<HttpApiResponse<ApplyStatusResponseDto>> toggleApplyStatus(
             @PathVariable("jd_id") Long jdId,
