@@ -24,6 +24,7 @@ spring:
     user: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     locations: classpath:db/migration
+    driver-class-name: com.mysql.cj.jdbc.Driver
     enabled: true
     baseline-on-migrate: true
     baseline-version: 0
