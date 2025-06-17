@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ResumeRequestDto {
     @NotBlank(message = "이력서 이름은 필수 입력 사항입니다.")
-    private String name;
+    private String title;
     @Size(max = 5000, message = "이력서는 5000자 이내여야 합니다.")
     private String content;
 }

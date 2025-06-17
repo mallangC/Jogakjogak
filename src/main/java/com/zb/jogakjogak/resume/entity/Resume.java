@@ -20,10 +20,9 @@ public class Resume extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false, length = 30)
-    private String name;
+    private String title;
     @Column(nullable = false, length = 5000)
     private String content;
-    private boolean isBookMark;
 
     @OneToOne
     @JoinColumn(name = "member_id")
@@ -34,7 +33,7 @@ public class Resume extends BaseEntity {
      * @param requestDto 수정할 이력서 이름, 수정할 이력서 내용
      */
     public void modify(ResumeRequestDto requestDto) {
-        this.name = requestDto.getName();
+        this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
     }
 }

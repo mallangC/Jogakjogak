@@ -40,17 +40,18 @@ public class ResumeService {
         }
 
         Resume saveResume = Resume.builder()
-                .name(requestDto.getName())
+                .title(requestDto.getTitle())
                 .content(requestDto.getContent())
                 .member(member)
-                .isBookMark(false)
                 .build();
 
         Resume resume = resumeRepository.save(saveResume);
         return ResumeResponseDto.builder()
                 .resumeId(resume.getId())
-                .name(resume.getName())
+                .title(resume.getTitle())
                 .content(resume.getContent())
+                .createdAt(resume.getCreatedAt())
+                .updatedAt(resume.getUpdatedAt())
                 .build();
     }
 
@@ -65,8 +66,10 @@ public class ResumeService {
         resume.modify(requestDto);
         return ResumeResponseDto.builder()
                 .resumeId(resume.getId())
-                .name(resume.getName())
+                .title(resume.getTitle())
                 .content(resume.getContent())
+                .createdAt(resume.getCreatedAt())
+                .updatedAt(resume.getUpdatedAt())
                 .build();
     }
 
@@ -79,8 +82,10 @@ public class ResumeService {
         Resume resume = findResume(resumeId);
         return ResumeResponseDto.builder()
                 .resumeId(resume.getId())
-                .name(resume.getName())
+                .title(resume.getTitle())
                 .content(resume.getContent())
+                .createdAt(resume.getCreatedAt())
+                .updatedAt(resume.getUpdatedAt())
                 .build();
     }
 
