@@ -2,21 +2,23 @@ package com.zb.jogakjogak.jobDescription.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.CollectionType;
 import com.github.javafaker.Faker;
+import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.JDErrorCode;
 import com.zb.jogakjogak.global.exception.JDException;
+import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
-import com.zb.jogakjogak.jobDescription.domain.responseDto.JDAlarmResponseDto;
-import com.zb.jogakjogak.jobDescription.domain.responseDto.JDDeleteResponseDto;
-import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
-import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.*;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repository.JDRepository;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
+import com.zb.jogakjogak.resume.entity.Resume;
+import com.zb.jogakjogak.security.Role;
+import com.zb.jogakjogak.security.entity.Member;
+import com.zb.jogakjogak.security.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,10 +27,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -39,9 +43,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class JDServiceTest {
-
-    @Mock
-    private OpenAIResponseService openAIResponseService;
 
     @Mock
     private LLMService llmService;
@@ -55,16 +56,33 @@ class JDServiceTest {
     @Mock
     private JDRepository jdRepository;
 
+    @Mock
+    private MemberRepository memberRepository;
+
     private JDRequestDto jdRequestDto;
-    private String mockAnalysisJsonString;
     private String mockLLMAnalysisJsonString;
-    private List<ToDoListDto> mockToDoListDtos;
     private List<ToDoListDto> mockToDoListDtosForLLM;
     private Faker faker;
+    private Member mockMember;
+    private Pageable pageable;
 
     @BeforeEach
     void setUp() {
         faker = new Faker();
+
+        Resume mockResume = Resume.builder()
+                .id(1L)
+                .content(faker.lorem().paragraph(5))
+                .build();
+
+        mockMember = Member.builder()
+                .id(1L)
+                .userName("testUser")
+                .email("test@example.com")
+                .password("password123")
+                .role(Role.USER)
+                .resume(mockResume)
+                .build();
 
         jdRequestDto = JDRequestDto.builder()
                 .title("시니어 백엔드 개발자 채용")
@@ -74,23 +92,6 @@ class JDServiceTest {
                 .content(faker.lorem().paragraph())
                 .endedAt(faker.date().future(365, TimeUnit.DAYS).toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
                 .build();
-
-        mockLLMAnalysisJsonString = "[" +
-                "  {" +
-                "    \"category\": \"STRUCTURAL_COMPLEMENT_PLAN\"," +
-                "    \"title\": \"이력서 Java/Spring Boot 경험 강조\"," +
-                "    \"content\": \"이력서에 Spring Boot 프로젝트 경험을 구체적으로 서술합니다.\"," +
-                "    \"memo\": \"\"," +
-                "    \"isDone\": false" +
-                "  }," +
-                "  {" +
-                "    \"category\": \"CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL\"," +
-                "    \"title\": \"AWS 클라우드 경험 구체화\"," +
-                "    \"content\": \"AWS EC2 배포 경험을 수치와 함께 명확히 기술합니다.\"," +
-                "    \"memo\": \"\"," +
-                "    \"isDone\": false" +
-                "  }" +
-                "]";
 
         mockLLMAnalysisJsonString = "[" +
                 "  {" +
@@ -112,34 +113,16 @@ class JDServiceTest {
         ToDoListDto llmDto1 = new ToDoListDto(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN, "이력서 Java/Spring Boot 경험 강조", "이력서에 Spring Boot 프로젝트 경험을 구체적으로 서술합니다.", "", false);
         ToDoListDto llmDto2 = new ToDoListDto(ToDoListType.CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL, "AWS 클라우드 경험 구체화", "AWS EC2 배포 경험을 수치와 함께 명확히 기술합니다.", "", false);
         mockToDoListDtosForLLM = Arrays.asList(llmDto1, llmDto2);
-    }
 
-    @Test
-    @DisplayName("JD 분석 서비스 JsonProcessingException 발생 시 JDException 던지는지 테스트")
-    void analyze_jsonProcessingException() throws JsonProcessingException {
-        // given
-        when(openAIResponseService.sendRequest(anyString(), anyString(), anyInt()))
-                .thenReturn("이것은 잘못된 JSON 형식의 문자열입니다.");
-        when(objectMapper.getTypeFactory()).thenReturn(mock(com.fasterxml.jackson.databind.type.TypeFactory.class));
-        when(objectMapper.getTypeFactory().constructCollectionType(eq(List.class), eq(ToDoListDto.class)))
-                .thenReturn(mock(CollectionType.class));
-        when(objectMapper.readValue(anyString(), any(CollectionType.class)))
-                .thenThrow(mock(JsonProcessingException.class));
-
-        // when & then
-        JDException thrown = assertThrows(JDException.class, () -> jdService.analyze(jdRequestDto));
-        assertEquals(JDErrorCode.FAILED_JSON_PROCESS, thrown.getErrorCode());
-
-        // verify
-        verify(objectMapper, times(1)).readValue(anyString(), any(CollectionType.class));
-        verify(jdRepository, never()).save(any(JD.class));
+        pageable = PageRequest.of(0, 11, Sort.by("createdAt").descending());
     }
 
     @Test
     @DisplayName("LLM 분석 서비스 성공 테스트 - JD 및 ToDoList 저장 포함 (Gemini)")
     void llmAnalyze_success() throws JsonProcessingException {
         // given
-        when(llmService.generateTodoListJson(anyString(), anyString()))
+        when(memberRepository.findByUserName(anyString())).thenReturn(Optional.of(mockMember));
+        when(llmService.generateTodoListJson(anyString(), anyString(), anyString()))
                 .thenReturn(mockLLMAnalysisJsonString);
         when(objectMapper.readValue(eq(mockLLMAnalysisJsonString), any(com.fasterxml.jackson.core.type.TypeReference.class)))
                 .thenReturn(mockToDoListDtosForLLM);
@@ -148,12 +131,14 @@ class JDServiceTest {
             return JD.builder()
                     .id(1L)
                     .title(originalJd.getTitle())
+                    .isBookmark(originalJd.isBookmark())
                     .companyName(originalJd.getCompanyName())
                     .job(originalJd.getJob())
                     .content(originalJd.getContent())
                     .jdUrl(originalJd.getJdUrl())
                     .endedAt(originalJd.getEndedAt())
                     .memo(originalJd.getMemo())
+                    .member(originalJd.getMember())
                     .isAlarmOn(originalJd.isAlarmOn())
                     .applyAt(originalJd.getApplyAt())
                     .toDoLists(originalJd.getToDoLists())
@@ -161,7 +146,7 @@ class JDServiceTest {
         });
 
         // when
-        JDResponseDto result = jdService.llmAnalyze(jdRequestDto);
+        JDResponseDto result = jdService.llmAnalyze(jdRequestDto, mockMember.getResume().getContent());
 
         // then
         assertNotNull(result);
@@ -178,7 +163,7 @@ class JDServiceTest {
         assertEquals(mockToDoListDtosForLLM.get(0).isDone(), result.getToDoLists().get(0).isDone());
 
         // verify
-        verify(llmService, times(1)).generateTodoListJson(anyString(), anyString());
+        verify(llmService, times(1)).generateTodoListJson(anyString(), anyString(), anyString());
         verify(objectMapper, times(1)).readValue(eq(mockLLMAnalysisJsonString), any(com.fasterxml.jackson.core.type.TypeReference.class));
         verify(jdRepository, times(1)).save(any(JD.class));
 
@@ -194,18 +179,19 @@ class JDServiceTest {
     @DisplayName("LLM 분석 서비스 JsonProcessingException 발생 시 JDException 던지는지 테스트 (Gemini)")
     void llmAnalyze_failure_jsonProcessingException() throws JsonProcessingException {
         // given
-        when(llmService.generateTodoListJson(anyString(), anyString()))
+        when(memberRepository.findByUserName(anyString())).thenReturn(Optional.of(mockMember));
+        when(llmService.generateTodoListJson(anyString(), anyString(), anyString()))
                 .thenReturn("invalid json string from LLM");
 
         when(objectMapper.readValue(anyString(), any(com.fasterxml.jackson.core.type.TypeReference.class)))
                 .thenThrow(mock(JsonProcessingException.class));
 
         // when & then
-        JDException thrown = assertThrows(JDException.class, () -> jdService.llmAnalyze(jdRequestDto));
+        JDException thrown = assertThrows(JDException.class, () -> jdService.llmAnalyze(jdRequestDto, mockMember.getResume().getContent()));
         assertEquals(JDErrorCode.FAILED_JSON_PROCESS, thrown.getErrorCode());
 
         // verify
-        verify(llmService, times(1)).generateTodoListJson(anyString(), anyString());
+        verify(llmService, times(1)).generateTodoListJson(anyString(), anyString(), anyString());
         verify(objectMapper, times(1)).readValue(anyString(), any(com.fasterxml.jackson.core.type.TypeReference.class));
         verify(jdRepository, never()).save(any(JD.class));
     }
@@ -221,8 +207,9 @@ class JDServiceTest {
                 .companyName("테스트 회사")
                 .job("백엔드 개발자")
                 .content("테스트 JD 내용")
-                .jdUrl("http://test.com/jd/1")
+                .jdUrl("https://test.com/jd/1")
                 .memo("테스트 메모")
+                .member(mockMember)
                 .isAlarmOn(true)
                 .endedAt(LocalDate.now().plusDays(10))
                 .build();
@@ -258,6 +245,7 @@ class JDServiceTest {
         assertEquals(mockJd.getCompanyName(), result.getCompanyName());
         assertEquals(mockJd.getJdUrl(), result.getJdUrl());
         assertEquals(mockJd.getMemo(), result.getMemo());
+        assertEquals(mockJd.getId(), result.getJd_id());
         assertEquals(mockJd.isAlarmOn(), result.isAlarmOn());
         assertEquals(mockJd.getEndedAt(), result.getEndedAt());
         assertEquals(mockJd.getCreatedAt(), result.getCreatedAt());
@@ -295,6 +283,7 @@ class JDServiceTest {
         // Verify
         verify(jdRepository, times(1)).findByIdWithToDoLists(nonExistentJdId);
     }
+
     @Test
     @DisplayName("JD 삭제 서비스 성공 테스트 - JD 및 연관된 ToDoList 함께 삭제")
     void deleteJd_success() {
@@ -386,5 +375,98 @@ class JDServiceTest {
         assertEquals(JDErrorCode.JD_NOT_FOUND, thrown.getErrorCode());
 
         verify(jdRepository, times(1)).findById(nonExistentJdId);
+    }
+
+    @Test
+    @DisplayName("JD 목록 성공적으로 조회 및 ToDoList 개수 계산")
+    void getAllJds_Success() {
+        // Given
+        when(memberRepository.findByUserName(mockMember.getUserName())).thenReturn(Optional.of(mockMember));
+
+        ToDoList todo1 = ToDoList.builder()
+                .id(1L).category(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN).title("투두1").content("내용1").isDone(true).build();
+        ToDoList todo2 = ToDoList.builder()
+                .id(2L).category(ToDoListType.CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL).title("투두2").content("내용2").isDone(false).build();
+        ToDoList todo3 = ToDoList.builder()
+                .id(3L).category(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN).title("투두3").content("내용3").isDone(true).build();
+
+        JD jd1 = JD.builder()
+                .id(101L).title("백엔드 개발자").companyName("SKC").endedAt(LocalDate.of(2025, 5, 24))
+                .member(mockMember)
+                .build();
+        jd1.addToDoList(todo1);
+        jd1.addToDoList(todo2);
+
+        JD jd2 = JD.builder()
+                .id(102L).title("UX 디렉터").companyName("메리츠화재").endedAt(LocalDate.of(2025, 1, 20))
+                .member(mockMember)
+                .build();
+        jd2.addToDoList(todo3);
+
+
+        List<JD> jds = Arrays.asList(jd1, jd2);
+        Page<JD> jdPage = new PageImpl<>(jds, pageable, jds.size());
+
+        when(jdRepository.findByMemberId(mockMember.getId(), pageable)).thenReturn(jdPage);
+
+        // When
+        Page<AllGetJDResponseDto> resultPage = jdService.getAllJds(mockMember.getUserName(), pageable);
+
+        // Then
+        verify(memberRepository, times(1)).findByUserName(mockMember.getUserName());
+        verify(jdRepository, times(1)).findByMemberId(mockMember.getId(), pageable);
+
+        assertNotNull(resultPage);
+        assertEquals(2, resultPage.getContent().size());
+        assertEquals(2, resultPage.getTotalElements());
+        assertEquals(1, resultPage.getTotalPages());
+
+        AllGetJDResponseDto dto1 = resultPage.getContent().get(0);
+        assertEquals(101L, dto1.getJd_id());
+        assertEquals(2L, dto1.getTotal_pieces());
+        assertEquals(1L, dto1.getCompleted_pieces());
+
+        AllGetJDResponseDto dto2 = resultPage.getContent().get(1);
+        assertEquals(102L, dto2.getJd_id());
+        assertEquals(1L, dto2.getTotal_pieces());
+        assertEquals(1L, dto2.getCompleted_pieces());
+    }
+
+    @Test
+    @DisplayName("JD 목록 조회 시 회원이 존재하지 않으면 AuthException 발생")
+    void getAllJds_MemberNotFound_ThrowsAuthException() {
+        // Given
+        when(memberRepository.findByUserName(anyString())).thenReturn(Optional.empty());
+
+        // When & Then
+        AuthException exception = assertThrows(AuthException.class, () ->
+                jdService.getAllJds("nonExistentUser", pageable)
+        );
+
+        assertEquals(MemberErrorCode.NOT_FOUND_MEMBER, exception.getMemberErrorCode());
+
+        verify(jdRepository, never()).findByMemberId(anyLong(), any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("회원은 존재하지만 해당 회원의 JD가 없을 때 빈 페이지 반환")
+    void getAllJds_NoJdsForMember_ReturnsEmptyPage() {
+        // Given
+        when(memberRepository.findByUserName(mockMember.getUserName())).thenReturn(Optional.of(mockMember));
+
+        Page<JD> emptyJdPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
+        when(jdRepository.findByMemberId(mockMember.getId(), pageable)).thenReturn(emptyJdPage);
+
+        // When
+        Page<AllGetJDResponseDto> resultPage = jdService.getAllJds(mockMember.getUserName(), pageable);
+
+        // Then
+        verify(memberRepository, times(1)).findByUserName(mockMember.getUserName());
+        verify(jdRepository, times(1)).findByMemberId(mockMember.getId(), pageable);
+
+        assertNotNull(resultPage);
+        assertTrue(resultPage.getContent().isEmpty());
+        assertEquals(0, resultPage.getTotalElements());
+        assertEquals(0, resultPage.getTotalPages());
     }
 }

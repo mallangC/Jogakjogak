@@ -2,6 +2,7 @@ package com.zb.jogakjogak.security.entity;
 
 import com.zb.jogakjogak.global.BaseEntity;
 import com.zb.jogakjogak.jobDescription.entity.JD;
+import com.zb.jogakjogak.resume.entity.Resume;
 import com.zb.jogakjogak.security.Role;
 import com.zb.jogakjogak.security.dto.KakaoResponseDto;
 import jakarta.persistence.*;
@@ -49,6 +50,9 @@ public class Member extends BaseEntity {
     @Builder.Default
     private List<OAuth2Info> oauth2Info = new ArrayList<>();
 
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL)
+    private Resume resume;
+
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<JD> jdList = new ArrayList<>();
@@ -56,6 +60,10 @@ public class Member extends BaseEntity {
     @PrePersist
     public void prePersist(){
         this.registeredAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate(){
         this.lastLoginAt = LocalDateTime.now();
     }
 

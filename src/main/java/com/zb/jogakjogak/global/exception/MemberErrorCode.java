@@ -15,7 +15,9 @@ public enum MemberErrorCode {
 
     NOT_FOUND_MEMBER(HttpStatus.NOT_FOUND, "존재하지않는 회원입니다."),
 
-    MEMBER_WITHDRAWAL_FAIL(HttpStatus.EXPECTATION_FAILED, "회원탈퇴를 실패했습니다." );
+    MEMBER_WITHDRAWAL_FAIL(HttpStatus.EXPECTATION_FAILED, "회원탈퇴를 실패했습니다." ),
+    ALREADY_HAVE_RESUME(HttpStatus.CONFLICT, "이미 이력서를 가지고 있습니다." )
+    ;
     private final HttpStatus httpStatus;
     private final String message;
 }
