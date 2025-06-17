@@ -1,5 +1,6 @@
 package com.zb.jogakjogak.security.jwt;
 
+import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.security.Role;
 import com.zb.jogakjogak.security.Token;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
@@ -22,6 +23,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
     private static final Set<String> WHITELIST = Set.of(
+            "/",
             "/api/member/reissue",
             "/api/member/logout",
             "/login/oauth2",
@@ -42,7 +44,17 @@ public class JWTFilter extends OncePerRequestFilter {
         }
 
         String accessToken = extractAccessToken(request);
-        jwtUtil.validateToken(accessToken, Token.ACCESS_TOKEN);
+        if (accessToken == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        try {
+            jwtUtil.validateToken(accessToken, Token.ACCESS_TOKEN);
+        }catch (AuthException e){
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
+            return;
+        }
 
         String userName = jwtUtil.getUserName(accessToken);
         String role = jwtUtil.getRole(accessToken);
