@@ -165,15 +165,18 @@ public class JDController {
     }
 
     @PatchMapping("/jds/{jd_id}/apply")
-    public ResponseEntity<HttpApiResponse<ApplyStatusResponseDto>> markAsApplied(
+    public ResponseEntity<HttpApiResponse<ApplyStatusResponseDto>> toggleApplyStatus(
             @PathVariable("jd_id") Long jdId,
-            @RequestBody ApplyStatusRequestDto dto,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         String memberName = customOAuth2User.getName();
+        ApplyStatusResponseDto response = jdService.toggleApplyStatus(jdId, memberName);
+
+        String message = (response.getApplyAt() != null) ? "지원 완료 성공" : "지원 완료 취소 성공";
+
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
-                        jdService.markJdAsApplied(jdId, dto, memberName),
-                        "지원 완료 성공",
+                        response,
+                        message,
                         HttpStatus.OK
                 )
         );
