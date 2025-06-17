@@ -80,7 +80,7 @@ class ResumeRequestDtoTest {
         // Then
         assertThat(violations).hasSize(1);
         ConstraintViolation<ResumeRequestDto> violation = violations.iterator().next();
-        assertThat(violation.getPropertyPath().toString()).isEqualTo("name");
+        assertThat(violation.getPropertyPath().toString()).isEqualTo("title");
         assertThat(violation.getMessage()).isEqualTo("이력서 이름은 필수 입력 사항입니다.");
     }
 
@@ -89,7 +89,7 @@ class ResumeRequestDtoTest {
     void testNameIsNull() {
         // Given
         ResumeRequestDto requestDto = ResumeRequestDto.builder()
-                .title(null) // null 값
+                .title(null)
                 .content("유효한 내용입니다.")
                 .build();
 
@@ -99,7 +99,7 @@ class ResumeRequestDtoTest {
         // Then
         assertThat(violations).hasSize(1);
         ConstraintViolation<ResumeRequestDto> violation = violations.iterator().next();
-        assertThat(violation.getPropertyPath().toString()).isEqualTo("name");
+        assertThat(violation.getPropertyPath().toString()).isEqualTo("title");
         assertThat(violation.getMessage()).isEqualTo("이력서 이름은 필수 입력 사항입니다.");
     }
 
