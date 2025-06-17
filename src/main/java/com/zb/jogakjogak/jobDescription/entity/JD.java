@@ -23,8 +23,11 @@ public class JD extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     private String title;
+
+    @Column
+    private boolean isBookmark;
 
     @Column
     private String companyName;
@@ -35,7 +38,7 @@ public class JD extends BaseEntity {
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
-    @Column(nullable = true)
+    @Column(nullable = false)
     private String jdUrl;
 
     @Column
@@ -54,6 +57,9 @@ public class JD extends BaseEntity {
     @OneToMany(mappedBy = "jd", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ToDoList> toDoLists = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     public void addToDoList(ToDoList toDoList) {
         if (this.toDoLists == null) {
