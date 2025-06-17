@@ -3,12 +3,12 @@ spring:
    name: jogakjogak
 
   datasource-main:
-    jdbc-url: ${DB_URL}
+    url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   datasource-meta:
-    jdbc-url: ${DB_META_URL}
+    url: ${DB_META_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
