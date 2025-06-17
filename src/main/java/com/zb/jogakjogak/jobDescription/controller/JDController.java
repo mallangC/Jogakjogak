@@ -1,6 +1,8 @@
 package com.zb.jogakjogak.jobDescription.controller;
 
 import com.zb.jogakjogak.global.HttpApiResponse;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.ApplyStatusRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.BookmarkRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.*;
@@ -15,6 +17,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -120,11 +125,11 @@ public class JDController {
      * 클라이언트가 'page', 'size', 'sort' 파라미터를 통해 페이징 및 정렬 조건을 직접 지정할 수도 있습니다.
      *
      * @param pageable         페이징 및 정렬 정보를 담는 객체.
-     * - size: 한 페이지당 항목 수 (기본값 11)
-     * - sort: 정렬 기준 필드 (기본값 "createdAt")
-     * - direction: 정렬 방향 (기본값 DESC, 즉 최신순)
+     *                         - size: 한 페이지당 항목 수 (기본값 11)
+     *                         - sort: 정렬 기준 필드 (기본값 "createdAt")
+     *                         - direction: 정렬 방향 (기본값 DESC, 즉 최신순)
      * @param customOAuth2User 현재 인증된 사용자의 OAuth2 정보를 포함하는 Principal 객체.
-     * @return                 페이징된 JD 목록과 API 응답 상태를 포함하는 ResponseDto
+     * @return 페이징된 JD 목록과 API 응답 상태를 포함하는 ResponseDto
      */
     @GetMapping("/jds")
     public ResponseEntity<HttpApiResponse<PagedJdResponseDto>> getPaginatedJds(
@@ -143,4 +148,35 @@ public class JDController {
                 )
         );
     }
+
+    @PatchMapping("/jds/{jd_id}/bookmark")
+    public ResponseEntity<HttpApiResponse<BookmarkResponseDto>> toggleBookmark
+            (@PathVariable("jd_id") Long jdId,
+             @RequestBody BookmarkRequestDto dto,
+             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        String memberName = customOAuth2User.getName();
+        return ResponseEntity.ok().body(
+                new HttpApiResponse<>(
+                        jdService.updateBookmarkStatus(jdId, dto, memberName),
+                        "즐겨찾기 설정 완료",
+                        HttpStatus.OK
+                )
+        );
+    }
+
+    @PatchMapping("/jds/{jd_id}/apply")
+    public ResponseEntity<HttpApiResponse<ApplyStatusResponseDto>> markAsApplied(
+            @PathVariable("jd_id") Long jdId,
+            @RequestBody ApplyStatusRequestDto dto,
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        String memberName = customOAuth2User.getName();
+        return ResponseEntity.ok().body(
+                new HttpApiResponse<>(
+                        jdService.markJdAsApplied(jdId, dto, memberName),
+                        "지원 완료 성공",
+                        HttpStatus.OK
+                )
+        );
+    }
+
 }

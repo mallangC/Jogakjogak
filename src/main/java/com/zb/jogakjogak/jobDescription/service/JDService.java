@@ -5,13 +5,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.zb.jogakjogak.global.exception.*;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
-import com.zb.jogakjogak.jobDescription.domain.responseDto.AllGetJDResponseDto;
-import com.zb.jogakjogak.jobDescription.domain.responseDto.JDAlarmResponseDto;
-import com.zb.jogakjogak.jobDescription.domain.responseDto.JDDeleteResponseDto;
-import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.*;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.*;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repository.JDRepository;
@@ -25,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -226,6 +222,39 @@ public class JDService {
                 .createdAt(jd.getCreatedAt())
                 .updatedAt(jd.getUpdatedAt())
                 .endedAt(jd.getEndedAt())
+                .build();
+    }
+    @Transactional
+    public BookmarkResponseDto updateBookmarkStatus(Long jdId, BookmarkRequestDto dto, String memberName) {
+        Member member = memberRepository.findByUserName(memberName.trim())
+                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
+        JD updateJd = jdRepository.findById(jdId)
+                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
+
+        if (!updateJd.getMember().getId().equals(member.getId())) {
+            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
+        }
+        updateJd.updateBookmarkStatus(dto.isBookmark());
+        return BookmarkResponseDto.builder()
+                .jd_id(jdId)
+                .isBookmark(updateJd.isBookmark())
+                .build();
+    }
+
+    @Transactional
+    public ApplyStatusResponseDto markJdAsApplied(Long jdId, ApplyStatusRequestDto dto, String memberName) {
+        Member member = memberRepository.findByUserName(memberName)
+                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
+        JD updateJd = jdRepository.findById(jdId)
+                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
+
+        if (!updateJd.getMember().getId().equals(member.getId())) {
+            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
+        }
+        updateJd.markJdAsApplied(LocalDateTime.now());
+        return ApplyStatusResponseDto.builder()
+                .jd_id(jdId)
+                .applyAt(updateJd.getApplyAt())
                 .build();
     }
 }
