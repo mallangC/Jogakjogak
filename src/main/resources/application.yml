@@ -2,6 +2,12 @@ spring:
   application:
    name: jogakjogak
 
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
   datasource-main:
     jdbc-url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -17,7 +23,6 @@ spring:
     url: ${DB_URL}
     user: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
     locations: classpath:db/migration
     enabled: true
     baseline-on-migrate: true
