@@ -110,7 +110,6 @@ jobs:
       # .env 파일 생성
       - name: Create .env file from secrets
         run: |
-          # .env 파일 내용을 문자열로 구성
           echo "DB_URL=${{ env.DB_URL }}" > .env
           echo "DB_META_URL=${{ env.DB_META_URL }}" > .env
           echo "DB_USERNAME=${{ env.DB_USERNAME }}" >> .env
