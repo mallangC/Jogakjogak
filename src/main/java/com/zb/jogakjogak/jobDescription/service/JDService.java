@@ -13,7 +13,6 @@ import com.zb.jogakjogak.jobDescription.domain.responseDto.*;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repository.JDRepository;
-import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import com.zb.jogakjogak.security.entity.Member;
 import com.zb.jogakjogak.security.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -135,17 +134,10 @@ public class JDService {
      * @param memberName 로그인한 유저
      * @return 조회된 jd의 응답 dto
      */
+    @Transactional(readOnly = true)
     public JDResponseDto getJd(Long jdId, String memberName) {
 
-        Member member = memberRepository.findByUserName(memberName)
-                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
-
-        JD jd = jdRepository.findByIdWithToDoLists(jdId)
-                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
-
-        if (!Objects.equals(member.getId(), jd.getMember().getId())) {
-            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
-        }
+        JD jd = getAuthorizedJd(jdId, memberName);
         return JDResponseDto.fromEntity(jd);
     }
 
@@ -158,16 +150,7 @@ public class JDService {
      */
     public void deleteJd(Long jdId, String memberName) {
 
-        Member member = memberRepository.findByUserName(memberName)
-                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
-
-        JD jd = jdRepository.findById(jdId).orElseThrow(
-                () -> new JDException(JDErrorCode.JD_NOT_FOUND)
-        );
-
-        if (!Objects.equals(member.getId(), jd.getMember().getId())) {
-            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
-        }
+        JD jd = getAuthorizedJd(jdId, memberName);
         jdRepository.deleteById(jd.getId());
     }
 
@@ -181,15 +164,7 @@ public class JDService {
      */
     @Transactional
     public JDAlarmResponseDto alarm(Long jdId, JDAlarmRequestDto dto, String memberName) {
-        Member member = memberRepository.findByUserName(memberName)
-                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
-
-        JD jd = jdRepository.findById(jdId)
-                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
-
-        if (!Objects.equals(member.getId(), jd.getMember().getId())) {
-            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
-        }
+        JD jd = getAuthorizedJd(jdId, memberName);
 
         jd.isAlarmOn(dto.isAlarmOn());
         return JDAlarmResponseDto.builder()
@@ -206,6 +181,7 @@ public class JDService {
      * @return 페이징처리된 목록을 포함하는 객체.
      * @throws AuthException 회원을 찾을 수 없을 경우 발생하는 예외.
      */
+    @Transactional(readOnly = true)
     public Page<AllGetJDResponseDto> getAllJds(String memberName, Pageable pageable) {
         Member member = memberRepository.findByUserName(memberName)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
@@ -255,14 +231,7 @@ public class JDService {
      */
     @Transactional
     public BookmarkResponseDto updateBookmarkStatus(Long jdId, BookmarkRequestDto dto, String memberName) {
-        Member member = memberRepository.findByUserName(memberName)
-                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
-        JD jd = jdRepository.findById(jdId)
-                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
-
-        if (!jd.getMember().getId().equals(member.getId())) {
-            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
-        }
+        JD jd = getAuthorizedJd(jdId, memberName);
         jd.updateBookmarkStatus(dto.isBookmark());
         JD saveJd = jdRepository.save(jd);
         return BookmarkResponseDto.builder()
@@ -280,15 +249,7 @@ public class JDService {
      */
     @Transactional
     public ApplyStatusResponseDto toggleApplyStatus(Long jdId, String memberName) {
-        Member member = memberRepository.findByUserName(memberName)
-                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
-        JD updateJd = jdRepository.findById(jdId)
-                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
-
-        if (!updateJd.getMember().getId().equals(member.getId())) {
-            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
-        }
-
+        JD updateJd = getAuthorizedJd(jdId, memberName);
         if (updateJd.getApplyAt() == null) {
             updateJd.markJdAsApplied();
         } else {
@@ -299,5 +260,28 @@ public class JDService {
                 .jd_id(jdId)
                 .applyAt(updateJd.getApplyAt())
                 .build();
+    }
+
+    /**
+     * Helper method to retrieve a JD and ensure the member has access.
+     * JD를 검색하고 회원이 접근 권한이 있는지 확인하는 헬퍼 메서드.
+     *
+     * @param jdId       The ID of the JD to retrieve. (조회하려는 JD의 ID)
+     * @param memberName The username of the member. (로그인한 사용자 이름)
+     * @return The authorized JD object. (권한이 확인된 JD 객체)
+     * @throws AuthException If the member is not found. (회원을 찾을 수 없을 때 발생하는 예외)
+     * @throws JDException   If the JD is not found or the member is unauthorized. (JD를 찾을 수 없거나 사용자가 권한이 없을 때 발생하는 예외)
+     */
+    private JD getAuthorizedJd(Long jdId, String memberName) {
+        Member member = memberRepository.findByUserName(memberName)
+                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
+
+        JD jd = jdRepository.findById(jdId)
+                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
+
+        if (!Objects.equals(member.getId(), jd.getMember().getId())) {
+            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
+        }
+        return jd; 
     }
 }
