@@ -40,15 +40,7 @@ public class ToDoListService {
     @Transactional
     public ToDoListResponseDto createToDoList(Long jdId, ToDoListDto toDoListDto, String memberName) {
 
-        Member member = memberRepository.findByUserName(memberName)
-                .orElseThrow(()-> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
-
-        JD jd = findJdById(jdId);
-
-        if(!Objects.equals(jd.getMember().getId(), member.getId())){
-            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
-        }
-
+        JD jd = getAuthorizedJd(jdId, memberName);
         ToDoList toDoList = ToDoList.fromDto(toDoListDto, jd);
         jd.addToDoList(toDoList);
         ToDoList savedToDoList = toDoListRepository.save(toDoList);
@@ -66,13 +58,8 @@ public class ToDoListService {
     @Transactional
     public ToDoListResponseDto updateToDoList(Long jdId, Long toDoListId, ToDoListDto toDoListDto, String memberName) {
 
-        Member member = memberRepository.findByUserName(memberName)
-                .orElseThrow(()-> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
-        JD jd = findJdById(jdId);
-        if(!Objects.equals(jd.getMember().getId(),member.getId())){
-            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
-        }
-        ToDoList toDoList = findToDoListAndValidateOwnership(jdId, toDoListId);
+        JD jd = getAuthorizedJd(jdId, memberName);
+        ToDoList toDoList = findToDoListAndValidateOwnership(jd, toDoListId);
         toDoList.updateFromDto(toDoListDto);
         ToDoList updatedToDoList = toDoListRepository.save(toDoList);
         return ToDoListResponseDto.fromEntity(updatedToDoList);
@@ -85,15 +72,10 @@ public class ToDoListService {
      * @param toDoListId 조회할 ToDoList의 ID
      * @return 조회된 ToDoList의 응답 DTO
      */
+    @Transactional(readOnly = true)
     public ToDoListResponseDto getToDoList(Long jdId, Long toDoListId, String memberName) {
-        Member member = memberRepository.findByUserName(memberName)
-                .orElseThrow(()-> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
-        JD jd = findJdById(jdId);
-        if(!Objects.equals(jd.getMember().getId(),member.getId())){
-            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
-        }
-
-        ToDoList toDoList = findToDoListAndValidateOwnership(jdId, toDoListId);
+        JD jd = getAuthorizedJd(jdId, memberName);
+        ToDoList toDoList = findToDoListAndValidateOwnership(jd, toDoListId);
         return ToDoListResponseDto.fromEntity(toDoList);
     }
 
@@ -105,49 +87,33 @@ public class ToDoListService {
      */
     public void deleteToDoList(Long jdId, Long toDoListId, String memberName) {
 
-        Member member = memberRepository.findByUserName(memberName)
-                .orElseThrow(()-> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
-        JD jd = findJdById(jdId);
-        if(!Objects.equals(jd.getMember().getId(),member.getId())){
-            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
-        }
-        ToDoList toDoList = findToDoListAndValidateOwnership(jdId, toDoListId);
+        JD jd = getAuthorizedJd(jdId, memberName);
+        ToDoList toDoList = findToDoListAndValidateOwnership(jd, toDoListId);
 
         toDoListRepository.delete(toDoList);
     }
 
-    /**
-     * ID로 JD를 찾고, 없으면 예외를 발생시킵니다.
-     * Optional을 사용하여 null 체크 대신 존재 여부를 명확히 처리합니다.
-     *
-     * @param jdId 찾을 JD의 ID
-     * @return 찾아진 JD 엔티티
-     * @throws JDException JD를 찾을 수 없을 경우
-     */
-    private JD findJdById(Long jdId) {
-        return jdRepository.findById(jdId)
-                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
-    }
-
-    /**
-     * ToDoList를 ID로 찾고, 해당 JD에 속하는지 검증합니다.
-     * Optional 체이닝을 활용하여 가독성을 높이고 null 체크를 줄입니다.
-     *
-     * @param jdId       검증할 JD의 ID
-     * @param toDoListId 찾을 ToDoList의 ID
-     * @return 찾아진 ToDoList 엔티티
-     * @throws ToDoListException ToDoList를 찾을 수 없거나 해당 JD에 속하지 않을 경우
-     */
-    private ToDoList findToDoListAndValidateOwnership(Long jdId, Long toDoListId) {
-        findJdById(jdId);
-
+    private ToDoList findToDoListAndValidateOwnership(JD jd, Long toDoListId) {
         ToDoList toDoList = toDoListRepository.findById(toDoListId)
                 .orElseThrow(() -> new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_FOUND));
 
-        if (!toDoList.getJd().getId().equals(jdId)) {
+        if (!toDoList.getJd().getId().equals(jd.getId())) {
             throw new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_BELONG_TO_JD);
         }
         return toDoList;
+    }
+
+    private JD getAuthorizedJd(Long jdId, String memberName) {
+        Member member = memberRepository.findByUserName(memberName)
+                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
+
+        JD jd = jdRepository.findById(jdId)
+                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
+
+        if (!Objects.equals(member.getId(), jd.getMember().getId())) {
+            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
+        }
+        return jd;
     }
 
     /**
@@ -159,15 +125,7 @@ public class ToDoListService {
      */
     @Transactional
     public ToDoListGetByCategoryResponseDto bulkUpdateToDoLists(Long jdId, BulkToDoListUpdateRequestDto request, String memberName) {
-
-        Member member = memberRepository.findByUserName(memberName)
-                .orElseThrow(()-> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
-
-        JD jd = jdRepository.findById(jdId)
-                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
-        if(!Objects.equals(jd.getMember().getId(),member.getId())){
-            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
-        }
+        JD jd = getAuthorizedJd(jdId, memberName);
 
         ToDoListType targetCategory = request.getCategory();
         if (targetCategory == null) {
@@ -175,40 +133,11 @@ public class ToDoListService {
         }
 
         if (request.getUpdatedOrCreateToDoLists() != null) {
-            for (ToDoListUpdateRequestDto dto : request.getUpdatedOrCreateToDoLists()) {
-                if (dto.getJdId() == null || !dto.getJdId().equals(jdId) || !dto.getCategory().equals(targetCategory)) {
-                    throw new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_BELONG_TO_JD);
-                }
-
-                if (dto.getId() != null) {
-                    ToDoList toDoList = toDoListRepository.findById(dto.getId())
-                            .orElseThrow(() -> new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_FOUND));
-                    if (!toDoList.getJd().getId().equals(jdId) || !toDoList.getCategory().equals(targetCategory)) {
-                        throw new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_BELONG_TO_JD);
-                    }
-                    toDoList.updateFromBulkUpdateToDoLists(dto);
-                } else {
-                    ToDoList newToDoList = ToDoList.fromDto(dto, jd);
-                    toDoListRepository.save(newToDoList);
-                }
-            }
+            processUpdatedOrCreateToDoLists(jd, targetCategory, request.getUpdatedOrCreateToDoLists());
         }
 
         if (request.getDeletedToDoListIds() != null && !request.getDeletedToDoListIds().isEmpty()) {
-            List<Long> idsToDelete = request.getDeletedToDoListIds();
-
-            // 삭제 요청된 ID들이 실제로 해당 JD와 카테고리에 속하는지 검증 (매우 중요!)
-            List<ToDoList> actualToDoListsToDelete = toDoListRepository.findAllById(idsToDelete);
-            List<Long> verifiedIdsToDelete = actualToDoListsToDelete.stream()
-                    .filter(tl -> tl.getJd().getId().equals(jdId) && tl.getCategory().equals(targetCategory))
-                    .map(ToDoList::getId)
-                    .collect(Collectors.toList());
-
-            if (verifiedIdsToDelete.size() != idsToDelete.size()) {
-                throw new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_BELONG_TO_JD);
-            }
-
-            toDoListRepository.deleteAllById(verifiedIdsToDelete);
+            processDeletedToDoLists(jd, targetCategory, request.getDeletedToDoListIds());
         }
 
         List<ToDoList> updatedListsInTargetCategory = toDoListRepository.findByJdAndCategory(jd, targetCategory);
@@ -233,14 +162,7 @@ public class ToDoListService {
     @Transactional(readOnly = true)
     public ToDoListGetByCategoryResponseDto getToDoListsByJdAndCategory(Long jdId, ToDoListType category, String memberName) {
 
-        Member member = memberRepository.findByUserName(memberName)
-                .orElseThrow(()-> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
-
-        JD jd = findJdById(jdId);
-
-        if(!Objects.equals(jd.getMember().getId(),member.getId())){
-            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
-        }
+        JD jd = getAuthorizedJd(jdId, memberName);
 
         List<ToDoList> toDoLists = toDoListRepository.findByJdAndCategory(jd, category);
 
@@ -248,11 +170,52 @@ public class ToDoListService {
                 .map(ToDoListResponseDto::fromEntity)
                 .collect(Collectors.toList());
 
-
         return ToDoListGetByCategoryResponseDto.builder()
                 .jdId(jdId)
                 .category(category)
                 .toDoLists(responseDtoList)
                 .build();
+    }
+
+    private void processUpdatedOrCreateToDoLists(JD jd, ToDoListType targetCategory, List<ToDoListUpdateRequestDto> dtoList) {
+        for (ToDoListUpdateRequestDto dto : dtoList) {
+            validateToDoListUpdateRequestDto(jd, targetCategory, dto);
+
+            if (dto.getId() != null) {
+                ToDoList toDoList = toDoListRepository.findById(dto.getId())
+                        .orElseThrow(() -> new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_FOUND));
+
+                if (!toDoList.getJd().getId().equals(jd.getId()) || !toDoList.getCategory().equals(targetCategory)) {
+                    throw new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_BELONG_TO_JD);
+                }
+                toDoList.updateFromBulkUpdateToDoLists(dto);
+            } else {
+                ToDoList newToDoList = ToDoList.fromDto(dto, jd);
+                toDoListRepository.save(newToDoList);
+            }
+        }
+    }
+
+    private void validateToDoListUpdateRequestDto(JD jd, ToDoListType targetCategory, ToDoListUpdateRequestDto dto) {
+        if (dto.getJdId() == null || !dto.getJdId().equals(jd.getId())) {
+            throw new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_BELONG_TO_JD);
+        }
+        if (dto.getCategory() == null || !dto.getCategory().equals(targetCategory)) {
+            throw new ToDoListException(ToDoListErrorCode.TODO_LIST_CATEGORY_MISMATCH);
+        }
+    }
+
+    private void processDeletedToDoLists(JD jd, ToDoListType targetCategory, List<Long> idsToDelete) {
+        List<ToDoList> actualToDoListsToDelete = toDoListRepository.findAllById(idsToDelete);
+
+        List<Long> verifiedIdsToDelete = actualToDoListsToDelete.stream()
+                .filter(tl -> tl.getJd().getId().equals(jd.getId()) && tl.getCategory().equals(targetCategory))
+                .map(ToDoList::getId)
+                .collect(Collectors.toList());
+
+        if (verifiedIdsToDelete.size() != idsToDelete.size()) {
+            throw new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_BELONG_TO_JD);
+        }
+        toDoListRepository.deleteAllById(verifiedIdsToDelete);
     }
 }
