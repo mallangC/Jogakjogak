@@ -26,6 +26,12 @@ env:
   EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY}}
   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY}}
   OPENAI_API_URL: ${{ secrets.OPENAI_API_URL}}
+  ALIGO_API_URL: ${{ secrets.ALIGO_API_URL}}
+  ALIGO_API_KEY: ${{ secrets.ALIGO_API_KEY}}
+  ALIGO_USER_ID: ${{ secrets.ALIGO_USER_ID}}
+  ALIGO_SENDER_KEY: ${{ secrets.ALIGO_SENDER_KEY}}
+  ALIGO_SENDER_PHONE: ${{ secrets.ALIGO_SENDER_PHONE}}
+  ALIGO_TEMPLATE_CODE: ${{ secrets.ALIGO_TEMPLATE_CODE}}
 
 jobs:
   test:
@@ -114,7 +120,13 @@ jobs:
           echo "JWT_SECRET_KEY=${{ env.JWT_SECRET_KEY}}" >> .env
           echo "GEMINI_API_KEY=${{ env.GEMINI_API_KEY}}" >> .env
           echo "OPENAI_API_KEY=${{ env.OPENAI_API_KEY}}" >> .env
-          echo "OPENAI_API_URL=${{ env.OPENAI_API_URL}}" >> .env       
+          echo "OPENAI_API_URL=${{ env.OPENAI_API_URL}}" >> .env               
+          echo "ALIGO_API_URL=${{ env.ALIGO_API_URL}}" >> .env
+          echo "ALIGO_API_KEY=${{ env.ALIGO_API_KEY}}" >> .env
+          echo "ALIGO_USER_ID=${{ env.ALIGO_USER_ID}}" >> .env
+          echo "ALIGO_SENDER_KEY=${{ env.ALIGO_SENDER_KEY}}" >> .env
+          echo "ALIGO_SENDER_PHONE=${{ env.ALIGO_SENDER_PHONE}}" >> .env
+          echo "ALIGO_TEMPLATE_CODE=${{ env.ALIGO_TEMPLATE_CODE}}" >> .env   
 
         shell: bash
 
