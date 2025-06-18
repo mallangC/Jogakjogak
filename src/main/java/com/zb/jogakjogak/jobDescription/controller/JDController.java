@@ -8,7 +8,6 @@ import com.zb.jogakjogak.jobDescription.domain.responseDto.*;
 import com.zb.jogakjogak.jobDescription.service.JDService;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -147,10 +146,10 @@ public class JDController {
                     direction = Sort.Direction.DESC) Pageable pageable,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User
     ) {
-        Page<AllGetJDResponseDto> jdsPage = jdService.getAllJds(customOAuth2User.getName(), pageable);
+        String memberName = customOAuth2User.getName();
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
-                        new PagedJdResponseDto(jdsPage),
+                        jdService.getAllJds(memberName, pageable),
                         "나의 분석 내용 전체 조회 성공",
                         HttpStatus.OK
                 )

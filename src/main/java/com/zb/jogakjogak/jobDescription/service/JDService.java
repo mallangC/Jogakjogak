@@ -181,7 +181,7 @@ public class JDService {
      * @throws AuthException 회원을 찾을 수 없을 경우 발생하는 예외.
      */
     @Transactional(readOnly = true)
-    public Page<AllGetJDResponseDto> getAllJds(String memberName, Pageable pageable) {
+    public PagedJdResponseDto getAllJds(String memberName, Pageable pageable) {
         Member member = memberRepository.findByUserName(memberName)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
         Page<JD> jdEntitiesPage = jdRepository.findByMemberId(member.getId(), pageable);
@@ -189,8 +189,9 @@ public class JDService {
         List<AllGetJDResponseDto> dtos = jdEntitiesPage.getContent().stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
+        Page<AllGetJDResponseDto> page = new PageImpl<>(dtos, pageable, jdEntitiesPage.getTotalElements());
 
-        return new PageImpl<>(dtos, pageable, jdEntitiesPage.getTotalElements());
+        return new PagedJdResponseDto(page, member.getResume());
     }
 
     /**

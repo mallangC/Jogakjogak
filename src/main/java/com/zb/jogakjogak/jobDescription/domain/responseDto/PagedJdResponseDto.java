@@ -1,5 +1,7 @@
 package com.zb.jogakjogak.jobDescription.domain.responseDto;
 
+import com.zb.jogakjogak.resume.domain.responseDto.ResumeResponseDto;
+import com.zb.jogakjogak.resume.entity.Resume;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PagedJdResponseDto {
+    private ResumeResponseDto resume;
     private List<AllGetJDResponseDto> jds;
     private int totalPages;
     private long totalElements;
@@ -23,7 +26,7 @@ public class PagedJdResponseDto {
     private boolean isFirst;
     private boolean isLast;
 
-    public PagedJdResponseDto(Page<AllGetJDResponseDto> page) {
+    public PagedJdResponseDto(Page<AllGetJDResponseDto> page, Resume resume) {
         this.jds = page.getContent();
         this.totalPages = page.getTotalPages();
         this.totalElements = page.getTotalElements();
@@ -33,5 +36,6 @@ public class PagedJdResponseDto {
         this.hasPrevious = page.hasPrevious();
         this.isFirst = page.isFirst();
         this.isLast = page.isLast();
+        this.resume = (resume != null) ? new ResumeResponseDto(resume) : null;
     }
 }
