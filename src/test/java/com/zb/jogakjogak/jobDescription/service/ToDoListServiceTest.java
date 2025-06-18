@@ -8,7 +8,6 @@ import com.zb.jogakjogak.global.exception.ToDoListException;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.BulkToDoListUpdateRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListUpdateRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListDeleteResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListGetByCategoryResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
@@ -320,7 +319,7 @@ class ToDoListServiceTest {
                 .deletedToDoListIds(Collections.emptyList())
                 .build();
         assertThrowsToDoListNotFound(() ->
-                toDoListService.bulkUpdateToDoLists(jdId, bulkReq));
+                toDoListService.bulkUpdateToDoLists(jdId, bulkReq, mockMember.getName()));
     }
 
     @Test
@@ -362,7 +361,7 @@ class ToDoListServiceTest {
                 .deletedToDoListIds(Collections.emptyList())
                 .build();
         assertThrowsToDoListNotFound(() ->
-                toDoListService.bulkUpdateToDoLists(jdId, bulkReqWrongJd));
+                toDoListService.bulkUpdateToDoLists(jdId, bulkReqWrongJd, mockMember.getName()));
 
         List<Long> deletedIdsWrongJd = Collections.singletonList(toDoListId);
         BulkToDoListUpdateRequestDto bulkReqDeleteWrongJd = BulkToDoListUpdateRequestDto.builder()
@@ -372,7 +371,7 @@ class ToDoListServiceTest {
                 .build();
         when(toDoListRepository.findAllById(deletedIdsWrongJd)).thenReturn(Collections.singletonList(toDoListForBulkBelongingToAnotherJd));
         assertThrowsToDoListNotBelongToJd(() ->
-                toDoListService.bulkUpdateToDoLists(jdId, bulkReqDeleteWrongJd));
+                toDoListService.bulkUpdateToDoLists(jdId, bulkReqDeleteWrongJd,mockMember.getName()));
 
         ToDoListUpdateRequestDto wrongJdInDto = ToDoListUpdateRequestDto.builder()
                 .id(toDoListId)
@@ -389,7 +388,7 @@ class ToDoListServiceTest {
                 .deletedToDoListIds(Collections.emptyList())
                 .build();
         assertThrowsToDoListNotBelongToJd(() ->
-                toDoListService.bulkUpdateToDoLists(jdId, bulkReqInitialWrongJd));
+                toDoListService.bulkUpdateToDoLists(jdId, bulkReqInitialWrongJd,mockMember.getName()));
     }
 
     @Test
@@ -425,7 +424,7 @@ class ToDoListServiceTest {
 
 
         Long deletedToDoListId = 103L;
-        ToDoList toDoListToDelete = mock(ToDoList.class); // <-- Mock this entity
+        ToDoList toDoListToDelete = mock(ToDoList.class);
         when(toDoListToDelete.getId()).thenReturn(deletedToDoListId);
         when(toDoListToDelete.getJd()).thenReturn(mockJd);
         when(toDoListToDelete.getCategory()).thenReturn(targetCategory);
@@ -479,15 +478,16 @@ class ToDoListServiceTest {
         when(finalResultUpdatedAnother.getJd()).thenReturn(mockJd);
 
         when(toDoListRepository.findByJdAndCategory(mockJd, targetCategory)).thenReturn(Arrays.asList(finalResultNew, finalResultUpdatedAnother));
-
+        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
 
         // When
-        ToDoListGetByCategoryResponseDto result = toDoListService.bulkUpdateToDoLists(jdId, request);
+        ToDoListGetByCategoryResponseDto result = toDoListService.bulkUpdateToDoLists(jdId, request,mockMember.getName());
 
         // Then
         verify(jdRepository, times(1)).findById(jdId);
 
         verify(toDoListRepository, times(1)).findById(anotherExistingId);
+        verify(memberRepository, times(1)).findByUserName(mockMember.getName());
         verify(anotherExistingToDoList, times(1)).updateFromBulkUpdateToDoLists(any(ToDoListUpdateRequestDto.class));
         verify(toDoListRepository, times(1)).save(any(ToDoList.class));
         verify(toDoListRepository, times(1)).findAllById(Collections.singletonList(deletedToDoListId));
@@ -513,9 +513,10 @@ class ToDoListServiceTest {
                 .updatedOrCreateToDoLists(Collections.emptyList())
                 .deletedToDoListIds(Collections.emptyList())
                 .build();
+        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
 
         // When & Then
-        assertThrowsJdNotFound(() -> toDoListService.bulkUpdateToDoLists(jdId, request));
+        assertThrowsJdNotFound(() -> toDoListService.bulkUpdateToDoLists(jdId, request, mockMember.getName()));
 
         verify(toDoListRepository, never()).save(any(ToDoList.class));
         verify(toDoListRepository, never()).deleteAllById(anyList());
@@ -579,18 +580,19 @@ class ToDoListServiceTest {
 
 
         when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
+        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
         when(toDoListRepository.findAllById(Collections.singletonList(deletedIdWrongOwner)))
                 .thenReturn(Collections.singletonList(toDoListWrongOwner));
 
 
         // When & Then for Scenario 1
-        assertThrowsToDoListNotBelongToJd(() -> toDoListService.bulkUpdateToDoLists(jdId, requestWrongJdInDto));
+        assertThrowsToDoListNotBelongToJd(() -> toDoListService.bulkUpdateToDoLists(jdId, requestWrongJdInDto, mockMember.getName()));
 
         // When & Then for Scenario 2
-        assertThrowsToDoListNotBelongToJd(() -> toDoListService.bulkUpdateToDoLists(jdId, requestWrongCategoryInDto));
+        assertThrowsToDoListNotBelongToJd(() -> toDoListService.bulkUpdateToDoLists(jdId, requestWrongCategoryInDto,mockMember.getName()));
 
         // When & Then for Scenario 3
-        assertThrowsToDoListNotBelongToJd(() -> toDoListService.bulkUpdateToDoLists(jdId, requestDeleteWrongOwner));
+        assertThrowsToDoListNotBelongToJd(() -> toDoListService.bulkUpdateToDoLists(jdId, requestDeleteWrongOwner, mockMember.getName()));
 
         // Verify no changes were persisted
         verify(toDoListRepository, never()).save(any(ToDoList.class));
