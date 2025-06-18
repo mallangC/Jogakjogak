@@ -2,16 +2,18 @@ spring:
   application:
    name: jogakjogak
 
-  datasource-main:
-    jdbc-url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  datasource-meta:
-    jdbc-url: ${DB_META_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+  datasource:
+    main:
+      jdbc-url: ${DB_URL}
+      username: ${DB_USERNAME}
+      password: ${DB_PASSWORD}
+      driver-class-name: com.mysql.cj.jdbc.Driver
+
+    meta:
+      jdbc-url: ${DB_META_URL}
+      username: ${DB_USERNAME}
+      password: ${DB_PASSWORD}
+      driver-class-name: com.mysql.cj.jdbc.Driver
 
   flyway:
     url: ${DB_URL}
@@ -25,7 +27,7 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     database-platform: org.hibernate.dialect.MySQL8Dialect
     properties:
       hibernate:

@@ -26,7 +26,7 @@ import java.util.HashMap;
 public class MainDBConfig {
 
     @Bean
-    @ConfigurationProperties(prefix = "spring.datasource-main")
+    @ConfigurationProperties(prefix = "spring.datasource.main")
     public DataSource mainDBSource(){
 
         return DataSourceBuilder.create().build();
@@ -44,7 +44,7 @@ public class MainDBConfig {
         em. setJpaVendorAdapter(new HibernateJpaVendorAdapter());
 
         HashMap<String, Object> properties = new HashMap<>();
-        properties.put("hibernate.hbm2ddl.auto", "create");
+        properties.put("hibernate.hbm2ddl.auto", "update");
         properties.put("hibernate.show_sql", "true");
         properties.put("hibernate.dialect", "org.hibernate.dialect.MySQL8Dialect");
         em.setJpaPropertyMap(properties);
