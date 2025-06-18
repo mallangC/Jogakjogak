@@ -67,6 +67,14 @@ kakao:
 jwt:
   secret-key: ${JWT_SECRET_KEY}
 
+aligo:
+  api-url: ${ALIGO_API_URL}
+  api-key: ${ALIGO_API_KEY}
+  user-id: ${ALIGO_USER_ID}
+  sender-key: ${ALIGO_SENDER_KEY}
+  sender-phone: ${ALIGO_SENDER_PHONE}
+  template-code: ${ALIGO_TEMPLATE_CODE}
+
 openai:
   api:
     key: ${OPENAI_API_KEY}
