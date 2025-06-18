@@ -259,21 +259,17 @@ class ToDoListServiceTest {
     void deleteToDoList_success() {
         // Given
         ToDoList mockToDoList = mock(ToDoList.class);
-        when(mockToDoList.getId()).thenReturn(toDoListId);
         when(mockToDoList.getJd()).thenReturn(mockJd);
 
         when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
+        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
         when(toDoListRepository.findById(toDoListId)).thenReturn(Optional.of(mockToDoList));
 
         // When
-        ToDoListDeleteResponseDto result = toDoListService.deleteToDoList(jdId, toDoListId);
+        toDoListService.deleteToDoList(jdId, toDoListId, mockMember.getName());
 
         // Then
-        verify(jdRepository).findById(jdId);
         verify(toDoListRepository).delete(mockToDoList);
-
-        assertNotNull(result);
-        assertEquals(toDoListId, result.getChecklist_id());
     }
 
     @Test
@@ -315,7 +311,7 @@ class ToDoListServiceTest {
                 toDoListService.getToDoList(jdId, toDoListId, mockMember.getName()));
 
         assertThrowsToDoListNotFound(() ->
-                toDoListService.deleteToDoList(jdId, toDoListId));
+                toDoListService.deleteToDoList(jdId, toDoListId, mockMember.getName()));
         verify(toDoListRepository, never()).delete(any(ToDoList.class));
 
         BulkToDoListUpdateRequestDto bulkReq = BulkToDoListUpdateRequestDto.builder()
@@ -357,7 +353,7 @@ class ToDoListServiceTest {
                 toDoListService.getToDoList(jdId, toDoListId, mockMember.getName()));
 
         assertThrowsToDoListNotFound(() ->
-                toDoListService.deleteToDoList(jdId, toDoListId));
+                toDoListService.deleteToDoList(jdId, toDoListId, mockMember.getName()));
         verify(toDoListRepository, never()).delete(any(ToDoList.class));
 
         BulkToDoListUpdateRequestDto bulkReqWrongJd = BulkToDoListUpdateRequestDto.builder()
