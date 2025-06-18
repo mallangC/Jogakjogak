@@ -109,13 +109,16 @@ public class JDController {
      * @return 삭제된 JD의 응답 Dto
      */
     @DeleteMapping("/jds/{jd_id}")
-    public ResponseEntity<HttpApiResponse<JDDeleteResponseDto>> deleteJd(
-            @PathVariable("jd_id") Long jdId) {
+    public ResponseEntity<HttpApiResponse<String>> deleteJd(
+            @PathVariable("jd_id") Long jdId,
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        String memberName = customOAuth2User.getName();
+        jdService.deleteJd(jdId, memberName);
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
-                        jdService.deleteJd(jdId),
+                        "",
                         "나의 분석 내용 삭제 성공",
-                        HttpStatus.OK
+                        HttpStatus.NO_CONTENT
                 )
         );
     }

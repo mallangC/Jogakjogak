@@ -163,16 +163,22 @@ public class JDService {
      * 선택한 JD를 삭제하는 메서드
      *
      * @param jdId 삭제하려는 JD의 아이디
+     * @param memberName 로그인한 유저
      * @return 삭제된 JD의 응답 Dto
      */
-    public JDDeleteResponseDto deleteJd(Long jdId) {
+    public void deleteJd(Long jdId, String memberName) {
+
+        Member member = memberRepository.findByUserName(memberName)
+                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
+
         JD jd = jdRepository.findById(jdId).orElseThrow(
                 () -> new JDException(JDErrorCode.JD_NOT_FOUND)
         );
-        jdRepository.deleteById(jdId);
-        return JDDeleteResponseDto.builder()
-                .jd_id(jdId)
-                .build();
+
+        if(!Objects.equals(member.getId(), jd.getMember().getId())){
+            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
+        }
+        jdRepository.deleteById(jd.getId());
     }
 
     /**
