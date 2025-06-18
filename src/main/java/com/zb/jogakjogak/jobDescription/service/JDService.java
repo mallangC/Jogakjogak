@@ -134,7 +134,6 @@ public class JDService {
      * @param memberName 로그인한 유저
      * @return 조회된 jd의 응답 dto
      */
-    @Transactional(readOnly = true)
     public JDResponseDto getJd(Long jdId, String memberName) {
 
         JD jd = getAuthorizedJd(jdId, memberName);
