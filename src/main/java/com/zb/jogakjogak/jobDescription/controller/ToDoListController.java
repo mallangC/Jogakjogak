@@ -131,11 +131,12 @@ public class ToDoListController {
     @GetMapping
     public ResponseEntity<HttpApiResponse<ToDoListGetByCategoryResponseDto>> getToDoListsByCategory(
             @PathVariable Long jdId,
-            @RequestParam(name = "category") ToDoListType category) {
-
+            @RequestParam(name = "category") ToDoListType category,
+            @AuthenticationPrincipal CustomOAuth2User customUser) {
+        String memberName = customUser.getName();
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
-                        toDoListService.getToDoListsByJdAndCategory(jdId, category),
+                        toDoListService.getToDoListsByJdAndCategory(jdId, category, memberName),
                         "카테고리별 투두리스트 조회 성공",
                         HttpStatus.OK
                 )

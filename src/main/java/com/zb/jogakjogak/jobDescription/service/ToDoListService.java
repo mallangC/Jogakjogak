@@ -225,10 +225,16 @@ public class ToDoListService {
      * @return 조회된 ToDoList들의 응답 DTO 리스트
      */
     @Transactional(readOnly = true)
-    public ToDoListGetByCategoryResponseDto getToDoListsByJdAndCategory(Long jdId, ToDoListType category) {
+    public ToDoListGetByCategoryResponseDto getToDoListsByJdAndCategory(Long jdId, ToDoListType category, String memberName) {
 
-        JD jd = jdRepository.findById(jdId)
-                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
+        Member member = memberRepository.findByUserName(memberName)
+                .orElseThrow(()-> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
+
+        JD jd = findJdById(jdId);
+
+        if(!Objects.equals(jd.getMember().getId(),member.getId())){
+            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
+        }
 
         List<ToDoList> toDoLists = toDoListRepository.findByJdAndCategory(jd, category);
 
