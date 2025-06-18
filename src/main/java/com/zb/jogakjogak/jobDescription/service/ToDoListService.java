@@ -1,9 +1,6 @@
 package com.zb.jogakjogak.jobDescription.service;
 
-import com.zb.jogakjogak.global.exception.JDErrorCode;
-import com.zb.jogakjogak.global.exception.JDException;
-import com.zb.jogakjogak.global.exception.ToDoListErrorCode;
-import com.zb.jogakjogak.global.exception.ToDoListException;
+import com.zb.jogakjogak.global.exception.*;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.BulkToDoListUpdateRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListUpdateRequestDto;
@@ -15,11 +12,14 @@ import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repository.JDRepository;
 import com.zb.jogakjogak.jobDescription.repository.ToDoListRepository;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
+import com.zb.jogakjogak.security.entity.Member;
+import com.zb.jogakjogak.security.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,6 +28,7 @@ public class ToDoListService {
 
     private final JDRepository jdRepository;
     private final ToDoListRepository toDoListRepository;
+    private final MemberRepository memberRepository;
 
     /**
      * 특정 JD에 새로운 ToDoList를 추가하는 메서드
@@ -37,8 +38,17 @@ public class ToDoListService {
      * @return 새로 생성된 ToDoList의 응답 DTO
      */
     @Transactional
-    public ToDoListResponseDto createToDoList(Long jdId, ToDoListDto toDoListDto) {
+    public ToDoListResponseDto createToDoList(Long jdId, ToDoListDto toDoListDto, String memberName) {
+
+        Member member = memberRepository.findByUserName(memberName)
+                .orElseThrow(()-> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
+
         JD jd = findJdById(jdId);
+
+        if(!Objects.equals(jd.getMember().getId(), member.getId())){
+            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
         ToDoList toDoList = ToDoList.fromDto(toDoListDto, jd);
         jd.addToDoList(toDoList);
         ToDoList savedToDoList = toDoListRepository.save(toDoList);

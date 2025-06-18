@@ -8,10 +8,12 @@ import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListGetByCategory
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.service.ToDoListService;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
+import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,9 +35,11 @@ public class ToDoListController {
     @PostMapping
     public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> createToDoList(
             @PathVariable Long jdId,
-            @RequestBody @Valid ToDoListDto toDoListDto) {
+            @RequestBody @Valid ToDoListDto toDoListDto,
+            @AuthenticationPrincipal CustomOAuth2User customUser) {
 
-        ToDoListResponseDto response = toDoListService.createToDoList(jdId, toDoListDto);
+        String memberName = customUser.getName();
+        ToDoListResponseDto response = toDoListService.createToDoList(jdId, toDoListDto, memberName);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 new HttpApiResponse<>(
