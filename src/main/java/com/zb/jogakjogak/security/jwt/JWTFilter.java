@@ -23,7 +23,6 @@ public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
     private static final Set<String> WHITELIST = Set.of(
-            "/",
             "/actuator/health",
             "/api/member/reissue",
             "/api/member/logout",
