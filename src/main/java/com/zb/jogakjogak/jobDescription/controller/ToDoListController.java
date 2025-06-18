@@ -106,12 +106,15 @@ public class ToDoListController {
      * @return 삭제된 ToDoList의 응답 DTO
      */
     @DeleteMapping("/{toDoListId}")
-    public ResponseEntity<HttpApiResponse<ToDoListDeleteResponseDto>> deleteToDoList(
+    public ResponseEntity<HttpApiResponse<String>> deleteToDoList(
             @PathVariable Long jdId,
-            @PathVariable Long toDoListId) {
+            @PathVariable Long toDoListId,
+            @AuthenticationPrincipal CustomOAuth2User customUser) {
+        String memberName = customUser.getName();
+        toDoListService.deleteToDoList(jdId, toDoListId, memberName);
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
-                        toDoListService.deleteToDoList(jdId, toDoListId),
+                        "",
                         "체크리스트 삭제 성공",
                         HttpStatus.OK
                 )

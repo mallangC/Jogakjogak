@@ -102,16 +102,18 @@ public class ToDoListService {
      *
      * @param jdId       ToDoList가 속한 JD의 ID
      * @param toDoListId 조회할 ToDoList의 ID
-     * @return 삭제된 ToDoList의 응답 DTO
      */
-    public ToDoListDeleteResponseDto deleteToDoList(Long jdId, Long toDoListId) {
+    public void deleteToDoList(Long jdId, Long toDoListId, String memberName) {
 
+        Member member = memberRepository.findByUserName(memberName)
+                .orElseThrow(()-> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
+        JD jd = findJdById(jdId);
+        if(!Objects.equals(jd.getMember().getId(),member.getId())){
+            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
+        }
         ToDoList toDoList = findToDoListAndValidateOwnership(jdId, toDoListId);
 
         toDoListRepository.delete(toDoList);
-        return ToDoListDeleteResponseDto.builder()
-                .checklist_id(toDoList.getId())
-                .build();
     }
 
     /**
