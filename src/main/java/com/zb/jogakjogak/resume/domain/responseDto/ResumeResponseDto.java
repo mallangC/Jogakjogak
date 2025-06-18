@@ -20,6 +20,7 @@ public class ResumeResponseDto {
     private LocalDateTime updatedAt;
 
     public ResumeResponseDto(Resume resume) {
+        this.resumeId = resume.getId();
         this.title = resume.getTitle();
         this.content = resume.getContent();
         this.createdAt = resume.getCreatedAt();
