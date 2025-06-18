@@ -233,14 +233,16 @@ class ToDoListServiceTest {
     @DisplayName("ToDoList 성공적으로 조회")
     void getToDoList_success() {
         // Given
+        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
         when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
         when(toDoListRepository.findById(toDoListId)).thenReturn(Optional.of(mockToDoList));
 
         // When
-        ToDoListResponseDto result = toDoListService.getToDoList(jdId, toDoListId);
+        ToDoListResponseDto result = toDoListService.getToDoList(jdId, toDoListId, mockMember.getName());
 
         // Then
-        verify(jdRepository, times(1)).findById(jdId);
+        verify(jdRepository, times(2)).findById(jdId);
+        verify(memberRepository, times(1)).findByUserName(mockMember.getName());
 
         assertNotNull(result);
         assertEquals(toDoListId, result.getChecklist_id());
@@ -310,7 +312,7 @@ class ToDoListServiceTest {
         verify(toDoListRepository, never()).save(any(ToDoList.class));
 
         assertThrowsToDoListNotFound(() ->
-                toDoListService.getToDoList(jdId, toDoListId));
+                toDoListService.getToDoList(jdId, toDoListId, mockMember.getName()));
 
         assertThrowsToDoListNotFound(() ->
                 toDoListService.deleteToDoList(jdId, toDoListId));
@@ -352,7 +354,7 @@ class ToDoListServiceTest {
         verify(toDoListRepository, never()).save(any(ToDoList.class));
 
         assertThrowsToDoListNotFound(() ->
-                toDoListService.getToDoList(jdId, toDoListId));
+                toDoListService.getToDoList(jdId, toDoListId, mockMember.getName()));
 
         assertThrowsToDoListNotFound(() ->
                 toDoListService.deleteToDoList(jdId, toDoListId));
