@@ -5,10 +5,12 @@ import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeDeleteResponseDto;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeResponseDto;
 import com.zb.jogakjogak.resume.service.ResumeService;
+import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 public class ResumeController {
 
     private final ResumeService resumeService;
-
     /**
      * 이력서 등록을 위한 컨틀로러 메소드
      *
@@ -25,10 +26,14 @@ public class ResumeController {
      * @return data(이력서 id, 이력서 이름, 이력서 내용), 성공 여부 메세지, 상태코드
      */
     @PostMapping
-    public ResponseEntity<HttpApiResponse<ResumeResponseDto>> register(@Valid @RequestBody ResumeRequestDto requestDto) {
+    public ResponseEntity<HttpApiResponse<ResumeResponseDto>> register(
+            @Valid @RequestBody ResumeRequestDto requestDto,
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+
+        String username = customOAuth2User.getName();
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
-                        resumeService.register(requestDto),
+                        resumeService.register(requestDto, username),
                         "이력서 등록 완료",
                         HttpStatus.CREATED
                 )

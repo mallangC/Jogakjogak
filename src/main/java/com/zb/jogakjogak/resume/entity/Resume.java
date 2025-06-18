@@ -2,6 +2,7 @@ package com.zb.jogakjogak.resume.entity;
 
 import com.zb.jogakjogak.global.BaseEntity;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
+import com.zb.jogakjogak.security.entity.Member;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,17 +20,20 @@ public class Resume extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false, length = 30)
-    private String name;
+    private String title;
     @Column(nullable = false, length = 5000)
     private String content;
-    private boolean isBookMark;
+
+    @OneToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     /**
      * 사용자가 이력서를 수정할 때 사용하는 메서드
      * @param requestDto 수정할 이력서 이름, 수정할 이력서 내용
      */
     public void modify(ResumeRequestDto requestDto) {
-        this.name = requestDto.getName();
+        this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
     }
 }

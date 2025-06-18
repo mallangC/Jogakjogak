@@ -2,6 +2,8 @@ package com.zb.jogakjogak.resume.service;
 
 
 import com.github.javafaker.Faker;
+import com.zb.jogakjogak.global.exception.AuthException;
+import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.global.exception.ResumeErrorCode;
 import com.zb.jogakjogak.global.exception.ResumeException;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
@@ -9,6 +11,9 @@ import com.zb.jogakjogak.resume.domain.responseDto.ResumeDeleteResponseDto;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeResponseDto;
 import com.zb.jogakjogak.resume.entity.Resume;
 import com.zb.jogakjogak.resume.repository.ResumeRepository;
+import com.zb.jogakjogak.security.Role;
+import com.zb.jogakjogak.security.entity.Member;
+import com.zb.jogakjogak.security.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,6 +38,9 @@ class ResumeServiceTest {
     @Mock
     private ResumeRepository resumeRepository;
 
+    @Mock
+    private MemberRepository memberRepository;
+
     @InjectMocks
     private ResumeService resumeService;
 
@@ -48,13 +56,12 @@ class ResumeServiceTest {
 
         sampleResume = Resume.builder()
                 .id(1L)
-                .name(faker.job().title())
+                .title(faker.job().title())
                 .content("기존 내용")
-                .isBookMark(false)
                 .build();
 
         sampleRequestDto = ResumeRequestDto.builder()
-                .name("새로운 이름")
+                .title("새로운 이름")
                 .content("새로운 내용")
                 .build();
     }
@@ -62,33 +69,99 @@ class ResumeServiceTest {
     @DisplayName("이력서 등록 테스트")
     @Test
     void createResume_success() {
-        //Given
+        // Given
+        String fixedUserName = "testUser123";
         String testName = "테스트 이력서";
         String testContent = "이것은 테스트 내용입니다.";
+
+        Member mockMember = Member.builder()
+                .id(1L)
+                .userName(fixedUserName)
+                .email("test@example.com")
+                .password("password123")
+                .role(Role.USER)
+                .resume(null)
+                .build();
+
         ResumeRequestDto requestDto = ResumeRequestDto.builder()
-                .name(testName)
+                .title(testName)
                 .content(testContent)
                 .build();
 
         Resume mockResume = Resume.builder()
                 .id(1L)
-                .name(testName)
+                .title(testName)
                 .content(testContent)
-                .isBookMark(false)
+                .member(mockMember)
                 .build();
 
+        given(memberRepository.findByUserName(fixedUserName)).willReturn(Optional.of(mockMember));
         given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
 
-        //When
-        ResumeResponseDto responseDto = resumeService.register(requestDto);
 
-        //Then
+        // When
+        ResumeResponseDto responseDto = resumeService.register(requestDto, fixedUserName);
+
+        // Then
         assertThat(responseDto).isNotNull();
         assertThat(responseDto.getResumeId()).isEqualTo(1L);
-        assertThat(responseDto.getName()).isEqualTo(testName);
+        assertThat(responseDto.getTitle()).isEqualTo(testName);
         assertThat(responseDto.getContent()).isEqualTo(testContent);
 
+        verify(memberRepository, times(1)).findByUserName(fixedUserName);
         verify(resumeRepository, times(1)).save(any(Resume.class));
+    }
+
+    @DisplayName("이력서 등록 실패 - 회원이 이미 이력서를 가지고 있을 때")
+    @Test
+    void createResume_alreadyHaveResume_throwsAuthException() {
+        // Given
+        String fixedUserName = "testUserWithResume";
+        ResumeRequestDto requestDto = ResumeRequestDto.builder()
+                .title("새 이력서")
+                .content("새 내용")
+                .build();
+
+        Member memberWithResume = Member.builder()
+                .id(2L)
+                .userName(fixedUserName)
+                .email("test2@example.com")
+                .password("pass")
+                .role(Role.USER)
+                .resume(Resume.builder().id(300L).build())
+                .build();
+
+        given(memberRepository.findByUserName(fixedUserName)).willReturn(Optional.of(memberWithResume));
+
+        // When & Then
+        AuthException exception = assertThrows(AuthException.class, () -> {
+            resumeService.register(requestDto, fixedUserName);
+        });
+
+        assertThat(exception.getMemberErrorCode()).isEqualTo(MemberErrorCode.ALREADY_HAVE_RESUME);
+        verify(resumeRepository, never()).save(any(Resume.class));
+    }
+
+    // 회원이 존재하지 않는 경우 테스트 (추가)
+    @DisplayName("이력서 등록 실패 - 회원이 존재하지 않을 때")
+    @Test
+    void createResume_memberNotFound_throwsAuthException() {
+        // Given
+        String nonExistentUserName = "nonExistentUser";
+        ResumeRequestDto requestDto = ResumeRequestDto.builder()
+                .title("새 이력서")
+                .content("새 내용")
+                .build();
+
+        given(memberRepository.findByUserName(nonExistentUserName)).willReturn(Optional.empty());
+
+        // When & Then
+        AuthException exception = assertThrows(AuthException.class, () -> {
+            resumeService.register(requestDto, nonExistentUserName);
+        });
+
+        assertThat(exception.getMemberErrorCode()).isEqualTo(MemberErrorCode.NOT_FOUND_MEMBER);
+        verify(resumeRepository, never()).save(any(Resume.class)); // save 호출 안 됨 확인
     }
 
 
@@ -104,12 +177,12 @@ class ResumeServiceTest {
         //Then
         verify(resumeRepository, times(1)).findById(1L);
 
-        assertEquals(sampleRequestDto.getName(), sampleResume.getName());
+        assertEquals(sampleRequestDto.getTitle(), sampleResume.getTitle());
         assertEquals(sampleRequestDto.getContent(), sampleResume.getContent());
 
         assertNotNull(result);
         assertEquals(sampleResume.getId(), result.getResumeId());
-        assertEquals(sampleRequestDto.getName(), result.getName());
+        assertEquals(sampleRequestDto.getTitle(), result.getTitle());
         assertEquals(sampleRequestDto.getContent(), result.getContent());
     }
 
@@ -146,7 +219,7 @@ class ResumeServiceTest {
 
         assertNotNull(result);
         assertEquals(sampleResume.getId(), result.getResumeId());
-        assertEquals(sampleResume.getName(), result.getName());
+        assertEquals(sampleResume.getTitle(), result.getTitle());
         assertEquals(sampleResume.getContent(), result.getContent());
     }
 

@@ -17,7 +17,7 @@ public class LLMService {
     private final String MODEL_NAME = "gemini-2.0-flash";
 
 
-    public String generateTodoListJson(String resumeContent, String jobDescriptionContent) {
+    public String generateTodoListJson(String resumeContent, String jobDescriptionContent, String jobName) {
 
         if (API_KEY == null || API_KEY.isEmpty()) {
             throw new IllegalStateException("Gemini API 키가 이상합니다 확인해주세요.");
@@ -39,7 +39,7 @@ public class LLMService {
                       - "CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL" (내용 강조/재구성 제안): 이력서/자기소개서의 내용 중 JD에 맞춰 강조하거나 재구성해야 할 부분, 혹은 실제 경험을 기반으로 한 구체적인 피드백.
                       - "EMPLOYMENT_SCHEDULE_RELATED" (취업 일정 관련): 코딩 테스트 준비, 면접 준비, 추가 학습 등 취업 일정과 관련된 계획.
                     
-                    - 'title': 해당 To-Do 항목의 간략하고 명확한 제목입니다. **명령형 동사로 시작하는 행동 중심의 키워드 구문이어야 하며, 공백 포함 20자 이내로 작성하세요.** (예: "이력서 프로젝트 경험 재구성", "클라우드 경험 구체화", "코딩 테스트 대비") 질문형이나 설명형 문구는 금지됩니다.
+                    - 'title': 해당 To-Do 항목의 간략하고 명확한 제목입니다. **명령형 동사로 시작하는 행동 중심의 키워드 구문이어야 하며, 공백 포함 15자 이내로 작성하세요.** (예: "이력서 프로젝트 경험 재구성", "클라우드 경험 구체화", "코딩 테스트 대비") 질문형이나 설명형 문구는 금지됩니다.
                     
                     - 'content': 해당 To-Do Item의 한글 설명입니다. **이 설명은 지원자가 실제 취해야 할 구체적인 행동, 학습 내용, 강조할 포인트, 예상 결과 등을 포함하여 상세하고 명확하며, 최소 30자 이상, 최대 250자 이내의 충분한 길이로 작성되어야 합니다.** 최대한 비전문가도 알 수 있도록 쉽게 설명하며, 필요한 경우 설명에 숫자 기반의 성과 지표(예: 매출, 사용자 수 등)를 포함하여 구체성을 높이세요. 이 설명은 독립적인 문장으로 구성되어 투두팁이나 상세 모달에 바로 쓸 수 있는 형태여야 합니다.
                     
@@ -82,9 +82,10 @@ public class LLMService {
 
             // 사용자 프롬프트 구성
             String userPromptContent = String.format(
-                    "이력서: %s\n채용 공고: %s\n\n위 이력서와 채용 공고를 기반으로, 지원자가 부족한 부분을 보완하고 채용 공고에 더 잘 맞출 수 있도록 돕는 To-Do 리스트를 JSON 형식으로 생성해 주세요.",
+                    "이력서: %s\n채용 공고: %s\n직무 이름: %s\n\n위 이력서, 채용 공고, 그리고 직무 이름을 기반으로, 지원자가 부족한 부분을 보완하고 해당 직무의 채용 공고에 더 잘 맞출 수 있도록 돕는 To-Do 리스트를 JSON 형식으로 생성해 주세요.",
                     resumeContent,
-                    jobDescriptionContent
+                    jobDescriptionContent,
+                    jobName
             );
 
             // 메시지(Content) 구성

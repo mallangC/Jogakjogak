@@ -33,7 +33,7 @@ class ResumeRequestDtoTest {
         String longContent = "A".repeat(5001);
 
         ResumeRequestDto requestDto = ResumeRequestDto.builder()
-                .name("유효한 이름")
+                .title("유효한 이름")
                 .content(longContent)
                 .build();
 
@@ -54,7 +54,7 @@ class ResumeRequestDtoTest {
         String validContent = "B".repeat(5000);
 
         ResumeRequestDto requestDto = ResumeRequestDto.builder()
-                .name("유효한 이름")
+                .title("유효한 이름")
                 .content(validContent)
                 .build();
 
@@ -70,7 +70,7 @@ class ResumeRequestDtoTest {
     void testNameIsBlank() {
         // Given
         ResumeRequestDto requestDto = ResumeRequestDto.builder()
-                .name("")
+                .title("")
                 .content("유효한 내용입니다.")
                 .build();
 
@@ -80,7 +80,7 @@ class ResumeRequestDtoTest {
         // Then
         assertThat(violations).hasSize(1);
         ConstraintViolation<ResumeRequestDto> violation = violations.iterator().next();
-        assertThat(violation.getPropertyPath().toString()).isEqualTo("name");
+        assertThat(violation.getPropertyPath().toString()).isEqualTo("title");
         assertThat(violation.getMessage()).isEqualTo("이력서 이름은 필수 입력 사항입니다.");
     }
 
@@ -89,7 +89,7 @@ class ResumeRequestDtoTest {
     void testNameIsNull() {
         // Given
         ResumeRequestDto requestDto = ResumeRequestDto.builder()
-                .name(null) // null 값
+                .title(null)
                 .content("유효한 내용입니다.")
                 .build();
 
@@ -99,7 +99,7 @@ class ResumeRequestDtoTest {
         // Then
         assertThat(violations).hasSize(1);
         ConstraintViolation<ResumeRequestDto> violation = violations.iterator().next();
-        assertThat(violation.getPropertyPath().toString()).isEqualTo("name");
+        assertThat(violation.getPropertyPath().toString()).isEqualTo("title");
         assertThat(violation.getMessage()).isEqualTo("이력서 이름은 필수 입력 사항입니다.");
     }
 
@@ -108,7 +108,7 @@ class ResumeRequestDtoTest {
     void testAllFieldsValid() {
         // Given
         ResumeRequestDto requestDto = ResumeRequestDto.builder()
-                .name("완벽한 이름")
+                .title("완벽한 이름")
                 .content("이것은 유효한 길이의 이력서 내용입니다.")
                 .build();
 

@@ -19,11 +19,13 @@ import java.util.stream.Collectors;
 public class JDResponseDto {
     private Long jd_id;
     private String title;
+    private boolean isBookmark;
     private String companyName;
     private String job;
     private String content;
     private String jdUrl;
     private String memo;
+    private Long memberId;
     private boolean isAlarmOn;
     private LocalDateTime applyAt;
     private LocalDate endedAt;
@@ -43,6 +45,7 @@ public class JDResponseDto {
         return JDResponseDto.builder()
                 .jd_id(jd.getId())
                 .title(jd.getTitle())
+                .isBookmark(jd.isBookmark())
                 .companyName(jd.getCompanyName())
                 .job(jd.getJob())
                 .content(jd.getContent())
@@ -54,6 +57,7 @@ public class JDResponseDto {
                 .createdAt(jd.getCreatedAt())
                 .updatedAt(jd.getUpdatedAt())
                 .toDoLists(mappedToDoLists)
+                .memberId(jd.getMember().getId())
                 .build();
     }
 }
