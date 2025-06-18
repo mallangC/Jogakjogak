@@ -16,6 +16,9 @@ import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repository.JDRepository;
 import com.zb.jogakjogak.jobDescription.repository.ToDoListRepository;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
+import com.zb.jogakjogak.security.Role;
+import com.zb.jogakjogak.security.entity.Member;
+import com.zb.jogakjogak.security.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,6 +51,9 @@ class ToDoListServiceTest {
     @Mock
     private JDRepository jdRepository;
 
+    @Mock
+    private MemberRepository memberRepository;
+
     private Long jdId;
     @Mock
     private JD mockJd;
@@ -59,6 +65,7 @@ class ToDoListServiceTest {
     private ToDoListUpdateRequestDto updateToDoListUpdateReqDto;
     private ToDoListType targetCategory;
     private Faker faker;
+    private Member mockMember;
 
     @BeforeEach
     void setUp() {
@@ -66,6 +73,12 @@ class ToDoListServiceTest {
         toDoListId = 101L;
         faker = new Faker();
         targetCategory = ToDoListType.STRUCTURAL_COMPLEMENT_PLAN;
+
+        mockMember = Member.builder()
+                .id(1L)
+                .role(Role.USER)
+                .userName(faker.name().fullName())
+                .build();
 
         mockJd = JD.builder()
                 .id(jdId)
@@ -76,6 +89,7 @@ class ToDoListServiceTest {
                 .content(faker.lorem().paragraph())
                 .endedAt(faker.date().future(365, TimeUnit.DAYS).toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
                 .applyAt(null)
+                .member(mockMember)
                 .memo(faker.lorem().sentence())
                 .build();
 
@@ -149,9 +163,10 @@ class ToDoListServiceTest {
                     .jd(originalToDoList.getJd())
                     .build();
         });
+        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
 
         // When
-        ToDoListResponseDto result = toDoListService.createToDoList(jdId, createToDoListDto);
+        ToDoListResponseDto result = toDoListService.createToDoList(jdId, createToDoListDto, mockMember.getName());
 
         // Then
         verify(jdRepository, times(1)).findById(jdId);
@@ -170,11 +185,12 @@ class ToDoListServiceTest {
     @DisplayName("ToDoList 생성 실패 - JD를 찾을 수 없음")
     void createToDoList_jdNotFound() {
         // Given
+        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
         when(jdRepository.findById(jdId)).thenReturn(Optional.empty());
 
         // When & Then
         JDException exception = assertThrows(JDException.class, () ->
-                toDoListService.createToDoList(jdId, createToDoListDto)
+                toDoListService.createToDoList(jdId, createToDoListDto, mockMember.getName())
         );
 
         assertEquals(JDErrorCode.JD_NOT_FOUND, exception.getErrorCode());
