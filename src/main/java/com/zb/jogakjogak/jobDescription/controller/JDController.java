@@ -1,7 +1,6 @@
 package com.zb.jogakjogak.jobDescription.controller;
 
 import com.zb.jogakjogak.global.HttpApiResponse;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.ApplyStatusRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.BookmarkRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
@@ -17,9 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -93,11 +89,13 @@ public class JDController {
      */
     @PatchMapping("/jds/{jd_id}/alarm")
     public ResponseEntity<HttpApiResponse<JDAlarmResponseDto>> alarm(
-            @PathVariable Long jdId,
-            @RequestBody JDAlarmRequestDto dto) {
+            @PathVariable("jd_id") Long jdId,
+            @RequestBody JDAlarmRequestDto dto,
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        String memberName = customOAuth2User.getName();
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
-                        jdService.alarm(jdId, dto),
+                        jdService.alarm(jdId, dto, memberName),
                         "알람 설정 완료",
                         HttpStatus.OK
                 )
@@ -112,7 +110,7 @@ public class JDController {
      */
     @DeleteMapping("/jds/{jd_id}")
     public ResponseEntity<HttpApiResponse<JDDeleteResponseDto>> deleteJd(
-            @PathVariable Long jdId) {
+            @PathVariable("jd_id") Long jdId) {
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
                         jdService.deleteJd(jdId),

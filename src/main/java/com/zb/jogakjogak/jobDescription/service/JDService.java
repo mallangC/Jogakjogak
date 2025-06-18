@@ -179,12 +179,21 @@ public class JDService {
      * JD 알림 설정을 끄고 키는 메서드
      *
      * @param jdId 알림 설정하려는 jd의 아이디
+     * @param dto  alarm true/false 정보를 가진 dto
+     * @param memberName 로그인한 유저
      * @return 알림 설정을 변경한 JD 응답 dto
      */
     @Transactional
-    public JDAlarmResponseDto alarm(Long jdId, JDAlarmRequestDto dto) {
+    public JDAlarmResponseDto alarm(Long jdId, JDAlarmRequestDto dto, String memberName) {
+        Member member = memberRepository.findByUserName(memberName)
+                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
+
         JD jd = jdRepository.findById(jdId)
                 .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
+
+        if(!Objects.equals(member.getId(), jd.getMember().getId())){
+            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
+        }
 
         jd.isAlarmOn(dto.isAlarmOn());
         return JDAlarmResponseDto.builder()
