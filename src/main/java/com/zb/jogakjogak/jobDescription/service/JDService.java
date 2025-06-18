@@ -146,7 +146,6 @@ public class JDService {
      *
      * @param jdId       삭제하려는 JD의 아이디
      * @param memberName 로그인한 유저
-     * @return 삭제된 JD의 응답 Dto
      */
     public void deleteJd(Long jdId, String memberName) {
 
@@ -282,6 +281,6 @@ public class JDService {
         if (!Objects.equals(member.getId(), jd.getMember().getId())) {
             throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
         }
-        return jd; 
+        return jd;
     }
 }
