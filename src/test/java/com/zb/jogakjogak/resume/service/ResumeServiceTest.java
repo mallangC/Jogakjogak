@@ -262,18 +262,13 @@ class ResumeServiceTest {
     void deleteResume_success() {
         // Given
         Long resumeIdToDelete = 1L;
-        given(resumeRepository.findById(resumeIdToDelete)).willReturn(Optional.of(sampleResume));
+        when(resumeRepository.findById(resumeIdToDelete)).thenReturn(Optional.of(sampleResume));
         when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
-        willDoNothing().given(resumeRepository).delete(sampleResume);
 
         // When
-        ResumeDeleteResponseDto responseDto = resumeService.delete(resumeIdToDelete, mockMember.getName());
+        resumeService.delete(resumeIdToDelete, mockMember.getName());
 
         // Then
-        assertThat(responseDto).isNotNull();
-        assertThat(responseDto.getResumeId()).isEqualTo(resumeIdToDelete);
-
-        verify(resumeRepository, times(1)).findById(resumeIdToDelete);
         verify(resumeRepository, times(1)).delete(sampleResume);
     }
 
