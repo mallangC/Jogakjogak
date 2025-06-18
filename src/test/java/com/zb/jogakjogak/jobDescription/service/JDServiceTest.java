@@ -353,13 +353,15 @@ class JDServiceTest {
         JD mockJd = JD.builder()
                 .id(jdId)
                 .title("알람 테스트 JD")
+                .member(mockMember)
                 .isAlarmOn(initialAlarmStatus)
                 .build();
 
         when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
+        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
 
         // When
-        JDAlarmResponseDto result = jdService.alarm(jdId, requestDto);
+        JDAlarmResponseDto result = jdService.alarm(jdId, requestDto, mockMember.getName());
 
         // Then
         assertNotNull(result);
@@ -381,9 +383,10 @@ class JDServiceTest {
                 .build();
 
         when(jdRepository.findById(nonExistentJdId)).thenReturn(Optional.empty());
+        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
 
         // When & Then
-        JDException thrown = assertThrows(JDException.class, () -> jdService.alarm(nonExistentJdId, requestDto));
+        JDException thrown = assertThrows(JDException.class, () -> jdService.alarm(nonExistentJdId, requestDto, mockMember.getName()));
         assertEquals(JDErrorCode.JD_NOT_FOUND, thrown.getErrorCode());
 
         verify(jdRepository, times(1)).findById(nonExistentJdId);
