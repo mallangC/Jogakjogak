@@ -178,9 +178,16 @@ class ResumeServiceTest {
     @DisplayName("이력서 수정 성공 테스트 - 200 OK 예상")
     void modify_success() {
         //Given
+        Resume saveResume = Resume.builder()
+                .id(1L)
+                .title(sampleRequestDto.getTitle())
+                .content(sampleRequestDto.getContent())
+                .member(mockMember)
+                .build();
+
         when(resumeRepository.findById(1L)).thenReturn(Optional.of(sampleResume));
         when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
-
+        when(resumeRepository.save(any(Resume.class))).thenReturn(saveResume);
         //When
         ResumeResponseDto result = resumeService.modify(1L, sampleRequestDto, mockMember.getName());
 
