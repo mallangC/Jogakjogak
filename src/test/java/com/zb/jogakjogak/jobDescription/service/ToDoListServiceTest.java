@@ -597,14 +597,12 @@ class ToDoListServiceTest {
         verify(toDoListRepository, never()).deleteAllById(anyList());
     }
 
-    // --- New Test Methods for getToDoListsByJdAndCategory ---
 
     @Test
     @DisplayName("Get ToDoLists By Category: 성공적으로 조회")
     void getToDoListsByJdAndCategory_success() {
         // Given
-        // Prepare some mock ToDoLists that belong to the target category and JD
-        ToDoList toDoList1 = mock(ToDoList.class); // Mock the entity
+        ToDoList toDoList1 = mock(ToDoList.class);
         when(toDoList1.getId()).thenReturn(1L);
         when(toDoList1.getCategory()).thenReturn(targetCategory);
         when(toDoList1.getTitle()).thenReturn("ToDo 1");
@@ -613,7 +611,7 @@ class ToDoListServiceTest {
         when(toDoList1.isDone()).thenReturn(false);
         when(toDoList1.getJd()).thenReturn(mockJd);
 
-        ToDoList toDoList2 = mock(ToDoList.class); // Mock the entity
+        ToDoList toDoList2 = mock(ToDoList.class);
         when(toDoList2.getId()).thenReturn(2L);
         when(toDoList2.getCategory()).thenReturn(targetCategory);
         when(toDoList2.getTitle()).thenReturn("ToDo 2");
@@ -625,13 +623,15 @@ class ToDoListServiceTest {
         List<ToDoList> mockToDoLists = Arrays.asList(toDoList1, toDoList2);
 
         when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
+        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
         when(toDoListRepository.findByJdAndCategory(mockJd, targetCategory)).thenReturn(mockToDoLists);
 
         // When
-        ToDoListGetByCategoryResponseDto result = toDoListService.getToDoListsByJdAndCategory(jdId, targetCategory);
+        ToDoListGetByCategoryResponseDto result = toDoListService.getToDoListsByJdAndCategory(jdId, targetCategory, mockMember.getName());
 
         // Then
         verify(jdRepository, times(1)).findById(jdId);
+        verify(memberRepository, times(1)).findByUserName(mockMember.getName());
         verify(toDoListRepository, times(1)).findByJdAndCategory(mockJd, targetCategory);
 
         assertNotNull(result);
@@ -649,12 +649,14 @@ class ToDoListServiceTest {
     @DisplayName("Get ToDoLists By Category: JD를 찾을 수 없을 때 실패")
     void getToDoListsByJdAndCategory_fail_jdNotFound() {
         // Given
+        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
         when(jdRepository.findById(jdId)).thenReturn(Optional.empty());
 
         // When & Then
-        assertThrowsJdNotFound(() -> toDoListService.getToDoListsByJdAndCategory(jdId, targetCategory));
+        assertThrowsJdNotFound(() -> toDoListService.getToDoListsByJdAndCategory(jdId, targetCategory, mockMember.getName()));
 
         verify(toDoListRepository, never()).findByJdAndCategory(any(JD.class), any(ToDoListType.class));
+        verify(memberRepository, times(1)).findByUserName(mockMember.getName());
     }
 
     @Test
@@ -662,14 +664,16 @@ class ToDoListServiceTest {
     void getToDoListsByJdAndCategory_success_emptyList() {
         // Given
         when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
+        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
         when(toDoListRepository.findByJdAndCategory(mockJd, targetCategory)).thenReturn(Collections.emptyList());
 
         // When
-        ToDoListGetByCategoryResponseDto result = toDoListService.getToDoListsByJdAndCategory(jdId, targetCategory);
+        ToDoListGetByCategoryResponseDto result = toDoListService.getToDoListsByJdAndCategory(jdId, targetCategory, mockMember.getName());
 
         // Then
         verify(jdRepository, times(1)).findById(jdId);
         verify(toDoListRepository, times(1)).findByJdAndCategory(mockJd, targetCategory);
+        verify(memberRepository, times(1)).findByUserName(mockMember.getName());
 
         assertNotNull(result);
         assertEquals(jdId, result.getJdId());
