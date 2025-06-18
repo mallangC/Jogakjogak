@@ -245,9 +245,10 @@ class JDServiceTest {
         mockJd.addToDoList(toDoList1);
         mockJd.addToDoList(toDoList2);
         when(jdRepository.findByIdWithToDoLists(jdId)).thenReturn(Optional.of(mockJd));
+        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
 
         // When
-        JDResponseDto result = jdService.getJd(jdId);
+        JDResponseDto result = jdService.getJd(jdId, mockMember.getName());
 
         // Then
         assertNotNull(result);
@@ -285,9 +286,10 @@ class JDServiceTest {
         // Given
         Long nonExistentJdId = 999L;
         when(jdRepository.findByIdWithToDoLists(nonExistentJdId)).thenReturn(Optional.empty());
+        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
 
         // When & Then
-        JDException thrown = assertThrows(JDException.class, () -> jdService.getJd(nonExistentJdId));
+        JDException thrown = assertThrows(JDException.class, () -> jdService.getJd(nonExistentJdId, mockMember.getName()));
         assertEquals(JDErrorCode.JD_NOT_FOUND, thrown.getErrorCode());
 
         // Verify

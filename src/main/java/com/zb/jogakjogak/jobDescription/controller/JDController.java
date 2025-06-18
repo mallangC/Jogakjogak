@@ -68,14 +68,17 @@ public class JDController {
      * JD 분석 내용 단건 조회하는 컨트롤러 메서드
      *
      * @param jdId 조회하려는 jd의 아이디
+     * @param customOAuth2User 로그인 한 유저의 정보
      * @return 조회된 jd의 응답 dto
      */
     @GetMapping("/jds/{jd_id}")
     public ResponseEntity<HttpApiResponse<JDResponseDto>> getJd(
-            @PathVariable("jd_id") Long jdId) {
+            @PathVariable("jd_id") Long jdId,
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        String memberName = customOAuth2User.getName();
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
-                        jdService.getJd(jdId),
+                        jdService.getJd(jdId, memberName),
                         "나의 분석 내용 단일 조회 완료",
                         HttpStatus.OK
                 )

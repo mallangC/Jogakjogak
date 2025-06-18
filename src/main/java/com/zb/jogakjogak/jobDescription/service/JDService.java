@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -144,11 +145,18 @@ public class JDService {
      * @param jdId 조회하려는 jd의 아이디
      * @return 조회된 jd의 응답 dto
      */
-    public JDResponseDto getJd(Long jdId) {
+    public JDResponseDto getJd(Long jdId, String memberName) {
+
+        Member member = memberRepository.findByUserName(memberName)
+                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
+
         JD jd = jdRepository.findByIdWithToDoLists(jdId)
                 .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
-        return JDResponseDto.fromEntity(jd);
 
+        if(!Objects.equals(member.getId(), jd.getMember().getId())){
+            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
+        }
+        return JDResponseDto.fromEntity(jd);
     }
 
     /**
