@@ -62,14 +62,13 @@ public class ToDoList extends BaseEntity {
             title = "제목 없음";
         }
 
-        String content = dto.getContent();
-        if (content == null || content.isEmpty()) {
+        if (escapedContent.isEmpty()) {
             logger.warn("LLM 응답에서 ToDoList content가 누락되었습니다. 기본값으로 설정합니다.");
-            content = "내용 없음";
+            escapedContent = "내용 없음";
         }
         return ToDoList.builder()
-                .category(dto.getCategory())
-                .title(dto.getTitle())
+                .category(category)
+                .title(title)
                 .content(escapedContent)
                 .memo(dto.getMemo())
                 .isDone(dto.isDone())
