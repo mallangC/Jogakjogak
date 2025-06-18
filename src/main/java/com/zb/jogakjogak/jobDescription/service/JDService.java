@@ -120,19 +120,6 @@ public class JDService {
                 .build();
 
         for (ToDoListDto dto : parsedAnalysisResult) {
-            if (dto.getCategory() == null) {
-                System.err.println("경고: LLM 응답에서 ToDoList category가 누락되었습니다. 기본값으로 설정합니다.");
-                dto.setCategory(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN);
-            }
-            if (dto.getTitle() == null || dto.getTitle().isEmpty()) {
-                System.err.println("경고: LLM 응답에서 ToDoList title이 누락되었습니다. 기본값으로 설정합니다.");
-                dto.setTitle("제목 없음");
-            }
-            if (dto.getContent() == null || dto.getContent().isEmpty()) {
-                System.err.println("경고: LLM 응답에서 ToDoList content가 누락되었습니다. 기본값으로 설정합니다.");
-                dto.setContent("내용 없음");
-            }
-
             ToDoList toDoList = ToDoList.fromDto(dto, jd);
             jd.addToDoList(toDoList);
         }
