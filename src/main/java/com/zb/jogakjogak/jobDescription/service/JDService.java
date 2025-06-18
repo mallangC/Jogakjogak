@@ -41,6 +41,7 @@ public class JDService {
      * open ai를 이용하여 JD와 이력서를 분석하여 To Do List를 만들어주는 서비스 메서드
      *
      * @param jdRequestDto 제목, JD의 URL, 마감일
+     * @param memberName   로그인한 유저
      * @return 제목, JD의 URL, To Do List, 사용자 메모, 마감일
      */
     public JDResponseDto analyze(JDRequestDto jdRequestDto, String memberName) {
@@ -85,6 +86,7 @@ public class JDService {
      * gemini ai를 이용하여 JD와 이력서를 분석하여 To Do List를 만들어주는 서비스 메서드
      *
      * @param jdRequestDto 제목, JD의 URL, 마감일
+     * @param memberName   로그인한 유저
      * @return 제목, JD의 URL, To Do List, 사용자 메모, 마감일
      */
     public JDResponseDto llmAnalyze(JDRequestDto jdRequestDto, String memberName) {
@@ -142,7 +144,8 @@ public class JDService {
     /**
      * JD 분석 내용 단건 조회하는 서비스 메서드
      *
-     * @param jdId 조회하려는 jd의 아이디
+     * @param jdId       조회하려는 jd의 아이디
+     * @param memberName 로그인한 유저
      * @return 조회된 jd의 응답 dto
      */
     public JDResponseDto getJd(Long jdId, String memberName) {
@@ -153,7 +156,7 @@ public class JDService {
         JD jd = jdRepository.findByIdWithToDoLists(jdId)
                 .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
 
-        if(!Objects.equals(member.getId(), jd.getMember().getId())){
+        if (!Objects.equals(member.getId(), jd.getMember().getId())) {
             throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
         }
         return JDResponseDto.fromEntity(jd);
@@ -162,7 +165,7 @@ public class JDService {
     /**
      * 선택한 JD를 삭제하는 메서드
      *
-     * @param jdId 삭제하려는 JD의 아이디
+     * @param jdId       삭제하려는 JD의 아이디
      * @param memberName 로그인한 유저
      * @return 삭제된 JD의 응답 Dto
      */
@@ -175,7 +178,7 @@ public class JDService {
                 () -> new JDException(JDErrorCode.JD_NOT_FOUND)
         );
 
-        if(!Objects.equals(member.getId(), jd.getMember().getId())){
+        if (!Objects.equals(member.getId(), jd.getMember().getId())) {
             throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
         }
         jdRepository.deleteById(jd.getId());
@@ -184,8 +187,8 @@ public class JDService {
     /**
      * JD 알림 설정을 끄고 키는 메서드
      *
-     * @param jdId 알림 설정하려는 jd의 아이디
-     * @param dto  alarm true/false 정보를 가진 dto
+     * @param jdId       알림 설정하려는 jd의 아이디
+     * @param dto        alarm true/false 정보를 가진 dto
      * @param memberName 로그인한 유저
      * @return 알림 설정을 변경한 JD 응답 dto
      */
@@ -197,7 +200,7 @@ public class JDService {
         JD jd = jdRepository.findById(jdId)
                 .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
 
-        if(!Objects.equals(member.getId(), jd.getMember().getId())){
+        if (!Objects.equals(member.getId(), jd.getMember().getId())) {
             throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
         }
 
@@ -257,8 +260,9 @@ public class JDService {
 
     /**
      * 즐겨찾기 상태를 업데이트하는 메서드.
-     * @param jdId 업데이트할 JD의 고유 ID
-     * @param dto 업데이트할 즐겨찾기 상태를 담고 있는 dto
+     *
+     * @param jdId       업데이트할 JD의 고유 ID
+     * @param dto        업데이트할 즐겨찾기 상태를 담고 있는 dto
      * @param memberName 요청을 보낸 사용자의 고유 이름
      * @return 업데이트된 JD의 즐겨찾기 상태를 포함하는 dto
      */
@@ -283,7 +287,7 @@ public class JDService {
     /**
      * 지원 완료 상태를 토글하는 비즈니스 로직을 수행합니다
      *
-     * @param jdId 상태를 토글할 JD의 고유 ID
+     * @param jdId       상태를 토글할 JD의 고유 ID
      * @param memberName 요청을 보낸 사용자의 고유 이름
      * @return 지원 완료 상태를 포함하는 dto
      */

@@ -27,7 +27,8 @@ public class JDController {
     /**
      * open ai를 이용하여 JD와 이력서를 분석하여 To Do List를 만들어주는 컨트롤러 메서드
      *
-     * @param jdRequestDto 제목, JD의 URL, 마감일
+     * @param jdRequestDto     제목, JD의 URL, 마감일
+     * @param customOAuth2User 현재 인증된 사용자의 OAuth2 정보를 포함하는 Principal 객체.
      * @return 제목, JD의 URL, To Do List, 사용자 메모, 마감일
      */
     @PostMapping("/jd")
@@ -43,7 +44,8 @@ public class JDController {
     /**
      * gemini ai를 이용하여 JD와 이력서를 분석하여 To Do List를 만들어주는 컨트롤러 메서드
      *
-     * @param jdRequestDto 제목, JD의 URL, 마감일
+     * @param jdRequestDto     제목, JD의 URL, 마감일
+     * @param customOAuth2User 현재 인증된 사용자의 OAuth2 정보를 포함하는 Principal 객체.
      * @return 제목, JD의 URL, To Do List, 사용자 메모, 마감일
      */
     @PostMapping("/jds")
@@ -63,8 +65,8 @@ public class JDController {
     /**
      * JD 분석 내용 단건 조회하는 컨트롤러 메서드
      *
-     * @param jdId 조회하려는 jd의 아이디
-     * @param customOAuth2User 로그인 한 유저의 정보
+     * @param jdId             조회하려는 jd의 아이디
+     * @param customOAuth2User 현재 인증된 사용자의 OAuth2 정보를 포함하는 Principal 객체.
      * @return 조회된 jd의 응답 dto
      */
     @GetMapping("/jds/{jd_id}")
@@ -84,7 +86,8 @@ public class JDController {
     /**
      * JD 알림 설정을 끄고 키는 메서드
      *
-     * @param jdId 알림 설정하려는 jd의 아이디
+     * @param jdId             알림 설정하려는 jd의 아이디
+     * @param customOAuth2User 현재 인증된 사용자의 OAuth2 정보를 포함하는 Principal 객체.
      * @return 알림 설정을 변경한 JD 응답 dto
      */
     @PatchMapping("/jds/{jd_id}/alarm")
@@ -105,7 +108,8 @@ public class JDController {
     /**
      * 선택한 JD를 삭제하는 메서드
      *
-     * @param jdId 삭제하려는 JD의 아이디
+     * @param jdId             삭제하려는 JD의 아이디
+     * @param customOAuth2User 현재 인증된 사용자의 OAuth2 정보를 포함하는 Principal 객체.
      * @return 삭제된 JD의 응답 Dto
      */
     @DeleteMapping("/jds/{jd_id}")
@@ -182,7 +186,7 @@ public class JDController {
      * JD의 현재 지원 상태(applyAt이 null이면 미완료, 값이 있으면 완료)에 따라 상태를 전환합니다.
      * 사용자는 자신이 생성한 JD에 대해서만 지원 완료 상태를 변경할 수 있습니다.
      *
-     * @param jdId 상태를 토글할 JD의 고유 ID (경로 변수)
+     * @param jdId             상태를 토글할 JD의 고유 ID (경로 변수)
      * @param customOAuth2User 현재 인증된 사용자의 정보를 담고 있는 객체.
      * @return 토글된 지원 완료 상태 ResponseDto
      */
