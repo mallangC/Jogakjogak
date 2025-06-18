@@ -205,14 +205,16 @@ class ToDoListServiceTest {
         // Given
         when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
         when(toDoListRepository.findById(toDoListId)).thenReturn(Optional.of(mockToDoList));
+        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
         when(toDoListRepository.save(any(ToDoList.class))).thenAnswer(invocation -> invocation.<ToDoList>getArgument(0));
 
 
         // When
-        ToDoListResponseDto result = toDoListService.updateToDoList(jdId, toDoListId, updateToDoListDto);
+        ToDoListResponseDto result = toDoListService.updateToDoList(jdId, toDoListId, updateToDoListDto, mockMember.getName());
 
         // Then
-        verify(jdRepository, times(1)).findById(jdId);
+        verify(jdRepository, times(2)).findById(jdId);
+        verify(memberRepository, times(1)).findByUserName(mockMember.getName());
         verify(toDoListRepository, times(1)).findById(toDoListId);
         verify(toDoListRepository, times(1)).save(any(ToDoList.class));
 
@@ -299,11 +301,12 @@ class ToDoListServiceTest {
     void updateGetDelete_fail_toDoListNotFound() {
         // Given
         when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
+        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
         when(toDoListRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         // When & Then
         assertThrowsToDoListNotFound(() ->
-                toDoListService.updateToDoList(jdId, toDoListId, updateToDoListDto));
+                toDoListService.updateToDoList(jdId, toDoListId, updateToDoListDto, mockMember.getName()));
         verify(toDoListRepository, never()).save(any(ToDoList.class));
 
         assertThrowsToDoListNotFound(() ->
@@ -338,16 +341,14 @@ class ToDoListServiceTest {
                 .memo(faker.lorem().sentence())
                 .build();
 
-        ToDoList toDoListBelongingToAnotherJd = mock(ToDoList.class);
-
         ToDoList toDoListForBulkBelongingToAnotherJd = mock(ToDoList.class);
         when(toDoListForBulkBelongingToAnotherJd.getJd()).thenReturn(anotherMockJd);
-
+        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
         when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
 
 
         assertThrowsToDoListNotFound(() ->
-                toDoListService.updateToDoList(jdId, toDoListId, updateToDoListDto));
+                toDoListService.updateToDoList(jdId, toDoListId, updateToDoListDto, mockMember.getName()));
         verify(toDoListRepository, never()).save(any(ToDoList.class));
 
         assertThrowsToDoListNotFound(() ->
