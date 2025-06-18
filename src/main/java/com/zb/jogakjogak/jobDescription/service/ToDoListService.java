@@ -158,10 +158,16 @@ public class ToDoListService {
      * @return 수정된 ToDoList들의 응답 DTO 리스트
      */
     @Transactional
-    public ToDoListGetByCategoryResponseDto bulkUpdateToDoLists(Long jdId, BulkToDoListUpdateRequestDto request) {
+    public ToDoListGetByCategoryResponseDto bulkUpdateToDoLists(Long jdId, BulkToDoListUpdateRequestDto request, String memberName) {
+
+        Member member = memberRepository.findByUserName(memberName)
+                .orElseThrow(()-> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         JD jd = jdRepository.findById(jdId)
                 .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
+        if(!Objects.equals(jd.getMember().getId(),member.getId())){
+            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
+        }
 
         ToDoListType targetCategory = request.getCategory();
         if (targetCategory == null) {
