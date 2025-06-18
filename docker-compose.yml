@@ -6,6 +6,7 @@ services:
     container_name: jogak-backend
     environment:
       DB_URL: ${DB_URL}
+      DB_META_URL: ${DB_META_URL}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       KAKAO_CLIENT_ID: ${KAKAO_CLIENT_ID}
@@ -15,5 +16,11 @@ services:
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       OPENAI_API_URL: ${OPENAI_API_URL}
+      ALIGO_API_URL: ${ALIGO_API_URL}
+      ALIGO_API_KEY: ${ALIGO_API_KEY}
+      ALIGO_USER_ID: ${ALIGO_USER_ID}
+      ALIGO_SENDER_KEY: ${ALIGO_SENDER_KEY}
+      ALIGO_SENDER_PHONE: ${ALIGO_SENDER_PHONE}
+      ALIGO_TEMPLATE_CODE: ${ALIGO_TEMPLATE_CODE}
     ports:
       - "8080:8080"
