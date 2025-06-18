@@ -2,11 +2,26 @@ spring:
   application:
    name: jogakjogak
 
-  datasource:
-    url: ${DB_URL}
+  datasource-main:
+    jdbc-url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+  datasource-meta:
+    jdbc-url: ${DB_META_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  flyway:
+    url: ${DB_URL}
+    user: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    locations: classpath:db/migration
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
 
   jpa:
     show-sql: true
@@ -51,6 +66,14 @@ kakao:
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}
+
+aligo:
+  api-url: ${ALIGO_API_URL}
+  api-key: ${ALIGO_API_KEY}
+  user-id: ${ALIGO_USER_ID}
+  sender-key: ${ALIGO_SENDER_KEY}
+  sender-phone: ${ALIGO_SENDER_PHONE}
+  template-code: ${ALIGO_TEMPLATE_CODE}
 
 openai:
   api:
