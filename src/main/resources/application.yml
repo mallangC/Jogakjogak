@@ -66,3 +66,11 @@ gemini:
   api:
     key: ${GEMINI_API_KEY}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health"
+  endpoint:
+    health:
+      show-details: "always"
