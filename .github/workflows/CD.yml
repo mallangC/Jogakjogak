@@ -10,6 +10,7 @@ permissions:
 
 env:
   DB_URL: ${{ secrets.DB_URL }}
+  DB_META_URL: ${{ secrets.DB_META_URL }}
   DB_USERNAME: ${{ secrets.DB_USERNAME }}
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
   KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID}}
@@ -104,6 +105,7 @@ jobs:
       - name: Create .env file from secrets
         run: |
           echo "DB_URL=${{ env.DB_URL }}" > .env
+          echo "DB_META_URL=${{ env.DB_META_URL }}" >> .env
           echo "DB_USERNAME=${{ env.DB_USERNAME }}" >> .env
           echo "DB_PASSWORD=${{ env.DB_PASSWORD }}" >> .env
           echo "KAKAO_CLIENT_ID=${{ env.KAKAO_CLIENT_ID}}" >> .env
