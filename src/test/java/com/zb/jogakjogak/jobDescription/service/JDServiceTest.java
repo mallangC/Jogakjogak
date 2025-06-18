@@ -244,7 +244,7 @@ class JDServiceTest {
                 .build();
         mockJd.addToDoList(toDoList1);
         mockJd.addToDoList(toDoList2);
-        when(jdRepository.findByIdWithToDoLists(jdId)).thenReturn(Optional.of(mockJd));
+        when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
         when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
 
         // When
@@ -277,7 +277,8 @@ class JDServiceTest {
         assertEquals(mockJd.getId(), firstToDo.getJdId());
 
         // Verify
-        verify(jdRepository, times(1)).findByIdWithToDoLists(jdId);
+        verify(jdRepository, times(1)).findById(jdId);
+        verify(memberRepository, times(1)).findByUserName(mockMember.getName());
     }
 
     @Test
@@ -285,7 +286,7 @@ class JDServiceTest {
     void getJd_notFound() {
         // Given
         Long nonExistentJdId = 999L;
-        when(jdRepository.findByIdWithToDoLists(nonExistentJdId)).thenReturn(Optional.empty());
+        when(jdRepository.findById(nonExistentJdId)).thenReturn(Optional.empty());
         when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
 
         // When & Then
@@ -293,7 +294,9 @@ class JDServiceTest {
         assertEquals(JDErrorCode.JD_NOT_FOUND, thrown.getErrorCode());
 
         // Verify
-        verify(jdRepository, times(1)).findByIdWithToDoLists(nonExistentJdId);
+        verify(memberRepository, times(1)).findByUserName(mockMember.getName());
+        verify(jdRepository, times(1)).findById(nonExistentJdId);
+        verify(jdRepository, never()).findByIdWithToDoLists(anyLong());
     }
 
     @Test
