@@ -109,6 +109,7 @@ public class JDService {
         JD jd = JD.builder()
                 .title(jdRequestDto.getTitle())
                 .isBookmark(false)
+                .isAlarmOn(false)
                 .companyName(jdRequestDto.getCompanyName())
                 .job(jdRequestDto.getJob())
                 .content(jdRequestDto.getContent())
