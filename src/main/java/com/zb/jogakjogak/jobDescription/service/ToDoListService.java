@@ -64,7 +64,14 @@ public class ToDoListService {
      * @return 수정된 ToDoList의 응답 DTO
      */
     @Transactional
-    public ToDoListResponseDto updateToDoList(Long jdId, Long toDoListId, ToDoListDto toDoListDto) {
+    public ToDoListResponseDto updateToDoList(Long jdId, Long toDoListId, ToDoListDto toDoListDto, String memberName) {
+
+        Member member = memberRepository.findByUserName(memberName)
+                .orElseThrow(()-> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
+        JD jd = findJdById(jdId);
+        if(!Objects.equals(jd.getMember().getId(),member.getId())){
+            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
+        }
         ToDoList toDoList = findToDoListAndValidateOwnership(jdId, toDoListId);
         toDoList.updateFromDto(toDoListDto);
         ToDoList updatedToDoList = toDoListRepository.save(toDoList);

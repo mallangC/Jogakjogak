@@ -62,8 +62,10 @@ public class ToDoListController {
     public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> updateToDoList(
             @PathVariable Long jdId,
             @PathVariable Long toDoListId,
-            @RequestBody @Valid ToDoListDto toDoListDto) {
-        ToDoListResponseDto response = toDoListService.updateToDoList(jdId, toDoListId, toDoListDto);
+            @RequestBody @Valid ToDoListDto toDoListDto,
+            @AuthenticationPrincipal CustomOAuth2User customUser) {
+        String memberName = customUser.getName();
+        ToDoListResponseDto response = toDoListService.updateToDoList(jdId, toDoListId, toDoListDto, memberName);
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
                         response,
