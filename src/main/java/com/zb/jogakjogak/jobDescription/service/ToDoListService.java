@@ -85,7 +85,14 @@ public class ToDoListService {
      * @param toDoListId 조회할 ToDoList의 ID
      * @return 조회된 ToDoList의 응답 DTO
      */
-    public ToDoListResponseDto getToDoList(Long jdId, Long toDoListId) {
+    public ToDoListResponseDto getToDoList(Long jdId, Long toDoListId, String memberName) {
+        Member member = memberRepository.findByUserName(memberName)
+                .orElseThrow(()-> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
+        JD jd = findJdById(jdId);
+        if(!Objects.equals(jd.getMember().getId(),member.getId())){
+            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
         ToDoList toDoList = findToDoListAndValidateOwnership(jdId, toDoListId);
         return ToDoListResponseDto.fromEntity(toDoList);
     }

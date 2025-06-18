@@ -9,6 +9,7 @@ import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.service.ToDoListService;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
+import com.zb.jogakjogak.security.entity.Member;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -85,10 +86,12 @@ public class ToDoListController {
     @GetMapping("/{toDoListId}")
     public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> getToDoList(
             @PathVariable Long jdId,
-            @PathVariable Long toDoListId) {
+            @PathVariable Long toDoListId,
+            @AuthenticationPrincipal CustomOAuth2User customUser) {
+        String memberName = customUser.getName();
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
-                        toDoListService.getToDoList(jdId, toDoListId),
+                        toDoListService.getToDoList(jdId, toDoListId, memberName),
                         "체크리스트 조회 성공",
                         HttpStatus.OK
                 )
