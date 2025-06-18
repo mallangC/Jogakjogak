@@ -67,14 +67,17 @@ class JDServiceTest {
     private Member mockMember;
     private Pageable pageable;
     private JD testJd;
+    private Resume mockResume;
 
     @BeforeEach
     void setUp() {
         faker = new Faker();
 
-        Resume mockResume = Resume.builder()
+        mockResume = Resume.builder()
                 .id(1L)
-                .content(faker.lorem().paragraph(5))
+                .title("테스트 이력서")
+                .content("테스트 내용")
+                .member(mockMember)
                 .build();
 
         mockMember = Member.builder()
@@ -427,23 +430,29 @@ class JDServiceTest {
         when(jdRepository.findByMemberId(mockMember.getId(), pageable)).thenReturn(jdPage);
 
         // When
-        Page<AllGetJDResponseDto> resultPage = jdService.getAllJds(mockMember.getUserName(), pageable);
+        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember.getUserName(), pageable);
 
         // Then
         verify(memberRepository, times(1)).findByUserName(mockMember.getUserName());
         verify(jdRepository, times(1)).findByMemberId(mockMember.getId(), pageable);
 
         assertNotNull(resultPage);
-        assertEquals(2, resultPage.getContent().size());
+        assertNotNull(resultPage.getJds());
+        assertEquals(2, resultPage.getJds().size());
         assertEquals(2, resultPage.getTotalElements());
         assertEquals(1, resultPage.getTotalPages());
 
-        AllGetJDResponseDto dto1 = resultPage.getContent().get(0);
+        assertNotNull(resultPage.getResume());
+        assertEquals(mockResume.getTitle(), resultPage.getResume().getTitle());
+        assertEquals(mockResume.getContent(), resultPage.getResume().getContent());
+
+
+        AllGetJDResponseDto dto1 = resultPage.getJds().get(0);
         assertEquals(101L, dto1.getJd_id());
         assertEquals(2L, dto1.getTotal_pieces());
         assertEquals(1L, dto1.getCompleted_pieces());
 
-        AllGetJDResponseDto dto2 = resultPage.getContent().get(1);
+        AllGetJDResponseDto dto2 = resultPage.getJds().get(1);
         assertEquals(102L, dto2.getJd_id());
         assertEquals(1L, dto2.getTotal_pieces());
         assertEquals(1L, dto2.getCompleted_pieces());
@@ -475,16 +484,19 @@ class JDServiceTest {
         when(jdRepository.findByMemberId(mockMember.getId(), pageable)).thenReturn(emptyJdPage);
 
         // When
-        Page<AllGetJDResponseDto> resultPage = jdService.getAllJds(mockMember.getUserName(), pageable);
+        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember.getUserName(), pageable);
 
         // Then
         verify(memberRepository, times(1)).findByUserName(mockMember.getUserName());
         verify(jdRepository, times(1)).findByMemberId(mockMember.getId(), pageable);
 
         assertNotNull(resultPage);
-        assertTrue(resultPage.getContent().isEmpty());
+        assertNotNull(resultPage.getJds());
+        assertTrue(resultPage.getJds().isEmpty());
         assertEquals(0, resultPage.getTotalElements());
         assertEquals(0, resultPage.getTotalPages());
+        assertNotNull(resultPage.getResume());
+        assertEquals(mockResume.getTitle(), resultPage.getResume().getTitle());
     }
 
     @Test
@@ -575,7 +587,7 @@ class JDServiceTest {
     void updateBookmarkStatus_fail_unauthorizedAccess() {
         // Given
         BookmarkRequestDto dto = BookmarkRequestDto.builder().isBookmark(true).build();
-        Member requestMember  = Member.builder().id(200L).userName("otherUser").build();
+        Member requestMember = Member.builder().id(200L).userName("otherUser").build();
         when(jdRepository.findById(anyLong())).thenReturn(Optional.of(testJd));
         when(memberRepository.findByUserName(requestMember.getUserName())).thenReturn(Optional.of(requestMember));
 
