@@ -93,8 +93,8 @@ public class JDService {
         Member member = memberRepository.findByUserName(memberName)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
-        if (member.getResume().getContent() == null) {
-            throw new ResumeException(ResumeErrorCode.NOT_FOUND_RESUME);
+        if (member.getResume() == null) {
+            throw new ResumeException(ResumeErrorCode.RESUME_NOT_FOUND_PLEASE_REGISTER);
         }
 
         String analysisJsonString = llmService.generateTodoListJson(member.getResume().getContent(), jdRequestDto.getContent(), jdRequestDto.getJob());
