@@ -20,13 +20,11 @@ spring:
     locations: classpath:db/migration
     driver-class-name: com.mysql.cj.jdbc.Driver
     enabled: true
-    baseline-on-migrate: true
-    baseline-version: 0
 
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: none
     database-platform: org.hibernate.dialect.MySQL8Dialect
     properties:
       hibernate:
@@ -97,3 +95,6 @@ management:
   endpoint:
     health:
       show-details: "always"
+logging:
+  level:
+    org.flywaydb: DEBUG
