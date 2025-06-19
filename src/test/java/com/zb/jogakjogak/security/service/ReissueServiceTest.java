@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Optional;
 
@@ -45,7 +46,7 @@ class ReissueServiceTest {
         RefreshToken existingToken = RefreshToken.builder()
                 .username(userName)
                 .token(refreshToken)
-                .expiration(new Date().toString())
+                .expiration(LocalDateTime.now().plusDays(7))
                 .build();
 
         when(jwtUtil.getUserName(refreshToken)).thenReturn(userName);
