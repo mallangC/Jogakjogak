@@ -294,7 +294,7 @@ class JDServiceTest {
 
         // When & Then
         JDException thrown = assertThrows(JDException.class, () -> jdService.getJd(nonExistentJdId, mockMember.getName()));
-        assertEquals(JDErrorCode.JD_NOT_FOUND, thrown.getErrorCode());
+        assertEquals(JDErrorCode.NOT_FOUND_JD, thrown.getErrorCode());
 
         // Verify
         verify(memberRepository, times(1)).findByUserName(mockMember.getName());
@@ -336,7 +336,7 @@ class JDServiceTest {
 
         // When & Then
         JDException thrown = assertThrows(JDException.class, () -> jdService.deleteJd(nonExistentJdId, mockMember.getName()));
-        assertEquals(JDErrorCode.JD_NOT_FOUND, thrown.getErrorCode());
+        assertEquals(JDErrorCode.NOT_FOUND_JD, thrown.getErrorCode());
 
         // Verify
         verify(jdRepository, times(1)).findById(nonExistentJdId);
@@ -392,7 +392,7 @@ class JDServiceTest {
 
         // When & Then
         JDException thrown = assertThrows(JDException.class, () -> jdService.alarm(nonExistentJdId, requestDto, mockMember.getName()));
-        assertEquals(JDErrorCode.JD_NOT_FOUND, thrown.getErrorCode());
+        assertEquals(JDErrorCode.NOT_FOUND_JD, thrown.getErrorCode());
 
         verify(jdRepository, times(1)).findById(nonExistentJdId);
     }
