@@ -245,7 +245,7 @@ public class JDService {
      */
     @Transactional
     public BookmarkResponseDto updateBookmarkStatus(Long jdId, BookmarkRequestDto dto, String memberName) {
-        Member member = memberRepository.findByUserName(memberName)
+        Member member = memberRepository.findByUsername(memberName)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
         JD jd = jdRepository.findById(jdId)
                 .orElseThrow(() -> new JDException(JDErrorCode.NOT_FOUND_JD));
@@ -270,7 +270,7 @@ public class JDService {
      */
     @Transactional
     public ApplyStatusResponseDto toggleApplyStatus(Long jdId, String memberName) {
-        Member member = memberRepository.findByUserName(memberName)
+        Member member = memberRepository.findByUsername(memberName)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
         JD updateJd = jdRepository.findById(jdId)
                 .orElseThrow(() -> new JDException(JDErrorCode.NOT_FOUND_JD));

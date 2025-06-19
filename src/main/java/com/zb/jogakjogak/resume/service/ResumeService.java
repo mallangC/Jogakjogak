@@ -143,7 +143,7 @@ public class ResumeService {
      * @return 조회된 Member 엔티티
      */
     private Member getMemberByUsername(String username) {
-        return memberRepository.findByUserName(username)
+        return memberRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
     }
 
