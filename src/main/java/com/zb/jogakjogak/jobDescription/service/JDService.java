@@ -257,15 +257,7 @@ public class JDService {
     @Transactional
     public ApplyStatusResponseDto toggleApplyStatus(Long jdId, String memberName) {
 
-        Member member = memberRepository.findByUsername(memberName)
-                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
-        JD updateJd = jdRepository.findById(jdId)
-                .orElseThrow(() -> new JDException(JDErrorCode.NOT_FOUND_JD));
-
-        if (!updateJd.getMember().getId().equals(member.getId())) {
-            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
-        }
-
+        JD jd = getAuthorizedJd(jdId, memberName);
 
         JD updateJd = getAuthorizedJd(jdId, memberName);
         if (updateJd.getApplyAt() == null) {
