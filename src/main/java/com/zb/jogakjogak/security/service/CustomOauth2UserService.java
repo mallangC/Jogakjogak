@@ -1,8 +1,6 @@
 package com.zb.jogakjogak.security.service;
 
 
-import com.zb.jogakjogak.global.exception.AuthException;
-import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.security.Role;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.dto.KakaoResponseDto;
@@ -35,12 +33,12 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         KakaoResponseDto kakaoResponseDto = new KakaoResponseDto(oAuth2User.getAttributes());
         String userName = kakaoResponseDto.getProvider() + " " + kakaoResponseDto.getProviderId();
 
-        Optional<Member> existMember = memberRepository.findByUserName(userName);
+        Optional<Member> existMember = memberRepository.findByUsername(userName);
         Member member;
         if (existMember.isEmpty()) {
             member = Member.builder()
-                    .userName(userName)
-                    .nickName(kakaoResponseDto.getNickName())
+                    .username(userName)
+                    .nickname(kakaoResponseDto.getNickName())
                     .email(kakaoResponseDto.getEmail())
                     .name(kakaoResponseDto.getName())
                     .phoneNumber(kakaoResponseDto.getPhoneNumber())

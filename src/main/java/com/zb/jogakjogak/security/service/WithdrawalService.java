@@ -17,12 +17,12 @@ public class WithdrawalService {
     private final KakaoService kakaoService;
 
     public void withdrawMember(String userName) {
-        Member member = memberRepository.findByUserName(userName)
+        Member member = memberRepository.findByUsername(userName)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
         if(member == null){
             throw new AuthException(MemberErrorCode.NOT_FOUND_MEMBER);
         }
-        String kakaoId = member.getUserName().split(" ")[1];
+        String kakaoId = member.getUsername().split(" ")[1];
         kakaoService.unlinkKakaoMember(kakaoId);
 
         refreshTokenRepository.deleteByUsername(userName);

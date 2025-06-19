@@ -5,13 +5,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.zb.jogakjogak.global.exception.*;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.BookmarkRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
-import com.zb.jogakjogak.jobDescription.domain.responseDto.AllGetJDResponseDto;
-import com.zb.jogakjogak.jobDescription.domain.responseDto.JDAlarmResponseDto;
-import com.zb.jogakjogak.jobDescription.domain.responseDto.JDDeleteResponseDto;
-import com.zb.jogakjogak.jobDescription.domain.responseDto.JDResponseDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.*;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repository.JDRepository;
@@ -45,10 +43,12 @@ public class JDService {
      * @return 제목, JD의 URL, To Do List, 사용자 메모, 마감일
      */
     public JDResponseDto analyze(JDRequestDto jdRequestDto, String memberName) {
-        Member member = memberRepository.findByUserName(memberName)
+
+        Member member = memberRepository.findByUsername(memberName)
                 .orElseThrow(()-> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
-        if(member.getResume().getContent() == null){
+
+        if (member.getResume().getContent() == null) {
             throw new ResumeException(ResumeErrorCode.NOT_FOUND_RESUME);
         }
 
@@ -90,10 +90,11 @@ public class JDService {
      */
     public JDResponseDto llmAnalyze(JDRequestDto jdRequestDto, String memberName) {
 
-        Member member = memberRepository.findByUserName(memberName)
+        Member member = memberRepository.findByUsername(memberName)
                 .orElseThrow(()-> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
-        if(member.getResume().getContent() == null){
+
+        if (member.getResume().getContent() == null) {
             throw new ResumeException(ResumeErrorCode.NOT_FOUND_RESUME);
         }
 
@@ -142,24 +143,26 @@ public class JDService {
 
     /**
      * JD 분석 내용 단건 조회하는 서비스 메서드
+     *
      * @param jdId 조회하려는 jd의 아이디
      * @return 조회된 jd의 응답 dto
      */
     public JDResponseDto getJd(Long jdId) {
         JD jd = jdRepository.findByIdWithToDoLists(jdId)
-                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
+                .orElseThrow(() -> new JDException(JDErrorCode.NOT_FOUND_JD));
         return JDResponseDto.fromEntity(jd);
 
     }
 
     /**
      * 선택한 JD를 삭제하는 메서드
+     *
      * @param jdId 삭제하려는 JD의 아이디
      * @return 삭제된 JD의 응답 Dto
      */
     public JDDeleteResponseDto deleteJd(Long jdId) {
         JD jd = jdRepository.findById(jdId).orElseThrow(
-                () -> new JDException(JDErrorCode.JD_NOT_FOUND)
+                () -> new JDException(JDErrorCode.NOT_FOUND_JD)
         );
         jdRepository.deleteById(jdId);
         return JDDeleteResponseDto.builder()
@@ -169,13 +172,14 @@ public class JDService {
 
     /**
      * JD 알림 설정을 끄고 키는 메서드
+     *
      * @param jdId 알림 설정하려는 jd의 아이디
      * @return 알림 설정을 변경한 JD 응답 dto
      */
     @Transactional
     public JDAlarmResponseDto alarm(Long jdId, JDAlarmRequestDto dto) {
         JD jd = jdRepository.findById(jdId)
-                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
+                .orElseThrow(() -> new JDException(JDErrorCode.NOT_FOUND_JD));
 
         jd.isAlarmOn(dto.isAlarmOn());
         return JDAlarmResponseDto.builder()
@@ -183,17 +187,19 @@ public class JDService {
                 .jdId(jd.getId())
                 .build();
     }
+
     /**
      * 특정 사용자의 모든 JD (Job Description) 목록을 페이징하여 조회합니다.
      *
      * @param memberName 조회할 사용자의 이름.
      * @param pageable   페이징 및 정렬 정보를 담는 객체.
-     * @return           페이징처리된 목록을 포함하는 객체.
+     * @return 페이징처리된 목록을 포함하는 객체.
      * @throws AuthException 회원을 찾을 수 없을 경우 발생하는 예외.
      */
     public Page<AllGetJDResponseDto> getAllJds(String memberName, Pageable pageable) {
-        Member member = memberRepository.findByUserName(memberName)
+        Member member = memberRepository.findByUsername(memberName)
                 .orElseThrow(()-> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
+
         Page<JD> jdEntitiesPage = jdRepository.findByMemberId(member.getId(), pageable);
 
         List<AllGetJDResponseDto> dtos = jdEntitiesPage.getContent().stream()
@@ -202,12 +208,13 @@ public class JDService {
 
         return new PageImpl<>(dtos, pageable, jdEntitiesPage.getTotalElements());
     }
+
     /**
      * JD엔티티를 AllGetJDResponseDto로 변환합니다.
      * 이 과정에서 JD에 연결된 ToDoList의 총 개수와 완료된 개수를 계산하여 DTO에 포함합니다.
      *
      * @param jd 변환할 JD 엔티티.
-     * @return   변환된 AllGetJDResponseDto 객체.
+     * @return 변환된 AllGetJDResponseDto 객체.
      */
     private AllGetJDResponseDto convertToDto(JD jd) {
         long totalPieces = jd.getToDoLists().size();
@@ -226,6 +233,61 @@ public class JDService {
                 .createdAt(jd.getCreatedAt())
                 .updatedAt(jd.getUpdatedAt())
                 .endedAt(jd.getEndedAt())
+                .build();
+    }
+
+    /**
+     * 즐겨찾기 상태를 업데이트하는 메서드.
+     * @param jdId 업데이트할 JD의 고유 ID
+     * @param dto 업데이트할 즐겨찾기 상태를 담고 있는 dto
+     * @param memberName 요청을 보낸 사용자의 고유 이름
+     * @return 업데이트된 JD의 즐겨찾기 상태를 포함하는 dto
+     */
+    @Transactional
+    public BookmarkResponseDto updateBookmarkStatus(Long jdId, BookmarkRequestDto dto, String memberName) {
+        Member member = memberRepository.findByUsername(memberName)
+                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
+        JD jd = jdRepository.findById(jdId)
+                .orElseThrow(() -> new JDException(JDErrorCode.NOT_FOUND_JD));
+
+        if (!jd.getMember().getId().equals(member.getId())) {
+            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
+        }
+        jd.updateBookmarkStatus(dto.isBookmark());
+        JD saveJd = jdRepository.save(jd);
+        return BookmarkResponseDto.builder()
+                .jd_id(jdId)
+                .isBookmark(saveJd.isBookmark())
+                .build();
+    }
+
+    /**
+     * 지원 완료 상태를 토글하는 비즈니스 로직을 수행합니다
+     *
+     * @param jdId 상태를 토글할 JD의 고유 ID
+     * @param memberName 요청을 보낸 사용자의 고유 이름
+     * @return 지원 완료 상태를 포함하는 dto
+     */
+    @Transactional
+    public ApplyStatusResponseDto toggleApplyStatus(Long jdId, String memberName) {
+        Member member = memberRepository.findByUsername(memberName)
+                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
+        JD updateJd = jdRepository.findById(jdId)
+                .orElseThrow(() -> new JDException(JDErrorCode.NOT_FOUND_JD));
+
+        if (!updateJd.getMember().getId().equals(member.getId())) {
+            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        if (updateJd.getApplyAt() == null) {
+            updateJd.markJdAsApplied();
+        } else {
+            updateJd.unMarkJdAsApplied();
+        }
+        jdRepository.save(updateJd);
+        return ApplyStatusResponseDto.builder()
+                .jd_id(jdId)
+                .applyAt(updateJd.getApplyAt())
                 .build();
     }
 }

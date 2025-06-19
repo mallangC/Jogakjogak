@@ -1,4 +1,4 @@
-package com.zb.jogakjogak.bizmessage.config;
+package com.zb.jogakjogak.notification.config;
 
 
 import org.springframework.boot.context.properties.ConfigurationProperties;

@@ -23,9 +23,9 @@ public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
     private static final Set<String> WHITELIST = Set.of(
-            "/",
             "/api/member/reissue",
             "/api/member/logout",
+            "/oauth2",
             "/login/oauth2",
             "/v3/api-docs",
             "/swagger-ui",
@@ -72,7 +72,7 @@ public class JWTFilter extends OncePerRequestFilter {
         String role = jwtUtil.getRole(accessToken);
 
         Member member = Member.builder()
-                .userName(userName)
+                .username(userName)
                 .password(null)
                 .role(Role.valueOf(role))
                 .build();

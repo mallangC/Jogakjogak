@@ -2,7 +2,6 @@ package com.zb.jogakjogak.security.dto;
 
 import com.zb.jogakjogak.security.entity.Member;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
@@ -35,7 +34,7 @@ public class CustomOAuth2User implements OAuth2User {
 
     @Override
     public String getName() {
-        return member.getUserName();
+        return member.getUsername();
     }
 
     public String getRealName(){
@@ -55,6 +54,6 @@ public class CustomOAuth2User implements OAuth2User {
     }
 
     public String getNickName(){
-        return member.getNickName();
+        return member.getNickname();
     }
 }

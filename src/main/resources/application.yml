@@ -76,19 +76,25 @@ spring:
             user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
             user-name-attribute: sub
 
+  mail:
+    protocol: smtp
+    host: smtp.gmail.com
+    port: 587
+    username: ${EMAIL_ID}
+    password: ${EMAIL_PASSWORD}
+    default-encoding: utf-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 kakao:
   admin-key: ${KAKAO_ADMIN_KEY}
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}
-
-aligo:
-  api-url: ${ALIGO_API_URL}
-  api-key: ${ALIGO_API_KEY}
-  user-id: ${ALIGO_USER_ID}
-  sender-key: ${ALIGO_SENDER_KEY}
-  sender-phone: ${ALIGO_SENDER_PHONE}
-  template-code: ${ALIGO_TEMPLATE_CODE}
 
 openai:
   api:
