@@ -118,7 +118,7 @@ public class ToDoListService {
      * 회원과 JD의 권한을 확인하고, 유효한 JD 객체를 반환하는 헬퍼 메서드.
      */
     private JD getAuthorizedJd(Long jdId, String memberName) {
-        Member member = memberRepository.findByUserName(memberName)
+        Member member = memberRepository.findByUsername(memberName)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         JD jd = jdRepository.findById(jdId)
