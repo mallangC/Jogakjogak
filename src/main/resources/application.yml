@@ -13,32 +13,20 @@ spring:
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
-#  flyway:
-#    url: ${DB_URL}
-#    user: ${DB_USERNAME}
-#    password: ${DB_PASSWORD}
-#    locations: classpath:db/migration
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#    enabled: true
-#    baseline-on-migrate: true
-#    baseline-version: 0
-#
-#  flyway.batch:
-#    url: ${DB_META_URL}
-#    user: ${DB_USERNAME}
-#    password: ${DB_PASSWORD}
-#    locations: classpath:db/migration/meta
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#    enabled: true
-#    baseline-on-migrate: true
-#    baseline-version: 0
+  flyway:
+    url: ${DB_URL}
+    user: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    locations: classpath:db/migration
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
 
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: update
-      naming:
-        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+      ddl-auto: create-drop
     database-platform: org.hibernate.dialect.MySQL8Dialect
     properties:
       hibernate:
@@ -47,7 +35,7 @@ spring:
     job:
       enabled: false
     jdbc:
-      initialize-schema: never
+      initialize-schema: always
 
   security:
     oauth2:
