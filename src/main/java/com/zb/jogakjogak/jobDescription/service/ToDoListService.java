@@ -100,7 +100,7 @@ public class ToDoListService {
      */
     private JD findJdById(Long jdId) {
         return jdRepository.findById(jdId)
-                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
+                .orElseThrow(() -> new JDException(JDErrorCode.NOT_FOUND_JD));
     }
 
     /**
@@ -135,7 +135,7 @@ public class ToDoListService {
     public ToDoListGetByCategoryResponseDto bulkUpdateToDoLists(Long jdId, BulkToDoListUpdateRequestDto request) {
 
         JD jd = jdRepository.findById(jdId)
-                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
+                .orElseThrow(() -> new JDException(JDErrorCode.NOT_FOUND_JD));
 
         ToDoListType targetCategory = request.getCategory();
         if (targetCategory == null) {
@@ -202,7 +202,7 @@ public class ToDoListService {
     public ToDoListGetByCategoryResponseDto getToDoListsByJdAndCategory(Long jdId, ToDoListType category) {
 
         JD jd = jdRepository.findById(jdId)
-                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
+                .orElseThrow(() -> new JDException(JDErrorCode.NOT_FOUND_JD));
 
         List<ToDoList> toDoLists = toDoListRepository.findByJdAndCategory(jd, category);
 
