@@ -101,7 +101,7 @@ class CustomOauth2UserServiceTest {
     @DisplayName("신규 회원가입 시 회원정보 저장 및 CustomOAuth2User 반환")
     void loadUser_NewMember_test() throws Exception {
         // given
-        given(memberRepository.findByUserName("kakao 123456789")).willReturn(Optional.empty());
+        given(memberRepository.findbyusername("kakao 123456789")).willReturn(Optional.empty());
         given(memberRepository.save(any(Member.class))).willAnswer(invocation -> invocation.getArgument(0));
 
         OAuth2User result = invokeProcessUser(oAuth2User, "kakao");
@@ -142,7 +142,7 @@ class CustomOauth2UserServiceTest {
                 .role(Role.USER)
                 .build();
 
-        given(memberRepository.findByUserName(anyString())).willReturn(Optional.of(existingMember));
+        given(memberRepository.findbyusername(anyString())).willReturn(Optional.of(existingMember));
         given(memberRepository.save(any(Member.class))).willAnswer(invocation -> invocation.getArgument(0));
 
         // when
@@ -167,7 +167,7 @@ class CustomOauth2UserServiceTest {
         KakaoResponseDto kakaoResponseDto = new KakaoResponseDto(oAuth2User.getAttributes());
 
         String userName = registrationId + " " + kakaoResponseDto.getProviderId();
-        Optional<Member> optionalMember = memberRepository.findByUserName(userName);
+        Optional<Member> optionalMember = memberRepository.findbyusername(userName);
 
         Member member;
         if (optionalMember.isEmpty()) {

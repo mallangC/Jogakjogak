@@ -30,7 +30,7 @@ public class ResumeService {
      * @return 이력서 id, 이력서 이름, 이력서 번호
      */
     public ResumeResponseDto register(ResumeRequestDto requestDto, String username) {
-        Member member = memberRepository.findByUserName(username)
+        Member member = memberRepository.findbyusername(username)
                 .orElseThrow(()-> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         if (member.getResume() != null) {

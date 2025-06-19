@@ -95,7 +95,7 @@ class ResumeServiceTest {
                 .member(mockMember)
                 .build();
 
-        given(memberRepository.findByUserName(fixedUserName)).willReturn(Optional.of(mockMember));
+        given(memberRepository.findbyusername(fixedUserName)).willReturn(Optional.of(mockMember));
         given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
 
 
@@ -108,7 +108,7 @@ class ResumeServiceTest {
         assertThat(responseDto.getTitle()).isEqualTo(testName);
         assertThat(responseDto.getContent()).isEqualTo(testContent);
 
-        verify(memberRepository, times(1)).findByUserName(fixedUserName);
+        verify(memberRepository, times(1)).findbyusername(fixedUserName);
         verify(resumeRepository, times(1)).save(any(Resume.class));
     }
 
@@ -131,7 +131,7 @@ class ResumeServiceTest {
                 .resume(Resume.builder().id(300L).build())
                 .build();
 
-        given(memberRepository.findByUserName(fixedUserName)).willReturn(Optional.of(memberWithResume));
+        given(memberRepository.findbyusername(fixedUserName)).willReturn(Optional.of(memberWithResume));
 
         // When & Then
         AuthException exception = assertThrows(AuthException.class, () -> {
@@ -153,7 +153,7 @@ class ResumeServiceTest {
                 .content("새 내용")
                 .build();
 
-        given(memberRepository.findByUserName(nonExistentUserName)).willReturn(Optional.empty());
+        given(memberRepository.findbyusername(nonExistentUserName)).willReturn(Optional.empty());
 
         // When & Then
         AuthException exception = assertThrows(AuthException.class, () -> {
