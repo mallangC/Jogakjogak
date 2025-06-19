@@ -73,7 +73,7 @@ class WithdrawalServiceTest {
 
     private Member createMockMember(String userName) {
         Member member = mock(Member.class);
-        when(member.getUserName()).thenReturn(userName);
+        when(member.getUsername()).thenReturn(userName);
         return member;
     }
 }

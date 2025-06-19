@@ -117,8 +117,8 @@ class CustomOauth2UserServiceTest {
         verify(memberRepository, times(1)).save(memberCaptor.capture());
 
         Member savedMember = memberCaptor.getValue();
-        assertThat(savedMember.getUserName()).isEqualTo("kakao 123456789");
-        assertThat(savedMember.getNickName()).isEqualTo("테스트유저");
+        assertThat(savedMember.getUsername()).isEqualTo("kakao 123456789");
+        assertThat(savedMember.getNickname()).isEqualTo("테스트유저");
         assertThat(savedMember.getEmail()).isEqualTo("test@kakao.com");
         assertThat(savedMember.getName()).isEqualTo("홍길동");
         assertThat(savedMember.getPhoneNumber()).isEqualTo("010-1234-5678");
@@ -131,8 +131,8 @@ class CustomOauth2UserServiceTest {
     void loadUser_ExistingMember_test() throws Exception {
         // given
         Member existingMember = Member.builder()
-                .userName("kakao 123456789")
-                .nickName("기존닉네임")
+                .username("kakao 123456789")
+                .nickname("기존닉네임")
                 .email("old@email.com")
                 .name("기존이름")
                 .phoneNumber("010-0000-0000")
@@ -156,7 +156,7 @@ class CustomOauth2UserServiceTest {
         verify(memberRepository, times(1)).save(memberCaptor.capture());
 
         Member updatedMember = memberCaptor.getValue();
-        assertThat(updatedMember.getNickName()).isEqualTo("테스트유저");
+        assertThat(updatedMember.getNickname()).isEqualTo("테스트유저");
         assertThat(updatedMember.getEmail()).isEqualTo("test@kakao.com");
         assertThat(updatedMember.getName()).isEqualTo("홍길동");
         assertThat(updatedMember.getPhoneNumber()).isEqualTo("010-1234-5678");
@@ -173,8 +173,8 @@ class CustomOauth2UserServiceTest {
         if (optionalMember.isEmpty()) {
             // 신규 회원 생성 로직
             member = Member.builder()
-                    .userName(userName)
-                    .nickName(kakaoResponseDto.getNickName())
+                    .username(userName)
+                    .nickname(kakaoResponseDto.getNickName())
                     .email(kakaoResponseDto.getEmail())
                     .name(kakaoResponseDto.getName())
                     .phoneNumber(kakaoResponseDto.getPhoneNumber())

@@ -77,7 +77,7 @@ class JDServiceTest {
 
         mockMember = Member.builder()
                 .id(1L)
-                .userName("testUser")
+                .username("testUser")
                 .email("test@example.com")
                 .password("password123")
                 .role(Role.USER)
@@ -381,7 +381,7 @@ class JDServiceTest {
     @DisplayName("JD 목록 성공적으로 조회 및 ToDoList 개수 계산")
     void getAllJds_Success() {
         // Given
-        when(memberRepository.findByUserName(mockMember.getUserName())).thenReturn(Optional.of(mockMember));
+        when(memberRepository.findByUserName(mockMember.getUsername())).thenReturn(Optional.of(mockMember));
 
         ToDoList todo1 = ToDoList.builder()
                 .id(1L).category(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN).title("투두1").content("내용1").isDone(true).build();
@@ -410,10 +410,10 @@ class JDServiceTest {
         when(jdRepository.findByMemberId(mockMember.getId(), pageable)).thenReturn(jdPage);
 
         // When
-        Page<AllGetJDResponseDto> resultPage = jdService.getAllJds(mockMember.getUserName(), pageable);
+        Page<AllGetJDResponseDto> resultPage = jdService.getAllJds(mockMember.getUsername(), pageable);
 
         // Then
-        verify(memberRepository, times(1)).findByUserName(mockMember.getUserName());
+        verify(memberRepository, times(1)).findByUserName(mockMember.getUsername());
         verify(jdRepository, times(1)).findByMemberId(mockMember.getId(), pageable);
 
         assertNotNull(resultPage);
@@ -452,16 +452,16 @@ class JDServiceTest {
     @DisplayName("회원은 존재하지만 해당 회원의 JD가 없을 때 빈 페이지 반환")
     void getAllJds_NoJdsForMember_ReturnsEmptyPage() {
         // Given
-        when(memberRepository.findByUserName(mockMember.getUserName())).thenReturn(Optional.of(mockMember));
+        when(memberRepository.findByUserName(mockMember.getUsername())).thenReturn(Optional.of(mockMember));
 
         Page<JD> emptyJdPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
         when(jdRepository.findByMemberId(mockMember.getId(), pageable)).thenReturn(emptyJdPage);
 
         // When
-        Page<AllGetJDResponseDto> resultPage = jdService.getAllJds(mockMember.getUserName(), pageable);
+        Page<AllGetJDResponseDto> resultPage = jdService.getAllJds(mockMember.getUsername(), pageable);
 
         // Then
-        verify(memberRepository, times(1)).findByUserName(mockMember.getUserName());
+        verify(memberRepository, times(1)).findByUserName(mockMember.getUsername());
         verify(jdRepository, times(1)).findByMemberId(mockMember.getId(), pageable);
 
         assertNotNull(resultPage);

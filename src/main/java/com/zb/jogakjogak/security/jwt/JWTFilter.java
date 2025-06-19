@@ -72,7 +72,7 @@ public class JWTFilter extends OncePerRequestFilter {
         String role = jwtUtil.getRole(accessToken);
 
         Member member = Member.builder()
-                .userName(userName)
+                .username(userName)
                 .password(null)
                 .role(Role.valueOf(role))
                 .build();

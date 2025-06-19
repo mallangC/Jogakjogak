@@ -1,6 +1,5 @@
 package com.zb.jogakjogak.security.entity;
 
-import com.zb.jogakjogak.global.BaseEntity;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.notification.entity.Notification;
 import com.zb.jogakjogak.resume.entity.Resume;
@@ -28,7 +27,7 @@ public class Member{
     private Long id;
 
     @NotBlank
-    private String userName;
+    private String username;
 
     @Email
     private String email;
@@ -37,7 +36,7 @@ public class Member{
 
     private String name;
 
-    private String nickName;
+    private String nickname;
 
     private String phoneNumber;
 
@@ -73,7 +72,7 @@ public class Member{
 
     public void updateExistingMember(KakaoResponseDto kakaoResponseDto){
         this.email = kakaoResponseDto.getEmail();
-        this.nickName = kakaoResponseDto.getNickName();
+        this.nickname = kakaoResponseDto.getNickName();
         this.phoneNumber = kakaoResponseDto.getPhoneNumber();
         this.name = kakaoResponseDto.getName();
     }

@@ -76,7 +76,7 @@ class ResumeServiceTest {
 
         Member mockMember = Member.builder()
                 .id(1L)
-                .userName(fixedUserName)
+                .username(fixedUserName)
                 .email("test@example.com")
                 .password("password123")
                 .role(Role.USER)
@@ -124,7 +124,7 @@ class ResumeServiceTest {
 
         Member memberWithResume = Member.builder()
                 .id(2L)
-                .userName(fixedUserName)
+                .username(fixedUserName)
                 .email("test2@example.com")
                 .password("pass")
                 .role(Role.USER)
