@@ -1,4 +1,4 @@
-package com.zb.jogakjogak.bizmessage.schedule;
+package com.zb.jogakjogak.notification.schedule;
 
 
 import lombok.RequiredArgsConstructor;
@@ -14,28 +14,16 @@ import java.util.Date;
 
 @Configuration
 @RequiredArgsConstructor
-public class BizMessageSchedule {
+public class NotificationScheduler {
 
     private final JobLauncher jobLauncher;
     private final JobRegistry jobRegistry;
 
     @Scheduled(cron = " 0 0 10 * * *", zone = "Asia/Seoul")
     public void runFirstJob() throws Exception{
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String date = dateFormat.format(new Date());
-
-        /*
-        String runId = UUID.randomUUID().toString(); // 또는 System.currentTimeMillis()
         JobParameters jobParameter = new JobParametersBuilder()
-                .addString("run.id", runId)
+                .addString("timestamp", String.valueOf(new Date().getTime()))
                 .toJobParameters();
-
-         */
-
-        JobParameters jobParameter = new JobParametersBuilder()
-                .addLong("run.id", System.currentTimeMillis())
-                .addString("date", date)
-                .toJobParameters();
-        jobLauncher.run(jobRegistry.getJob("secondJob"), jobParameter);
+        jobLauncher.run(jobRegistry.getJob("sendNotification"), jobParameter);
     }
 }

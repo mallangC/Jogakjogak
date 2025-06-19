@@ -101,7 +101,7 @@ class CustomOauth2UserServiceTest {
     @DisplayName("신규 회원가입 시 회원정보 저장 및 CustomOAuth2User 반환")
     void loadUser_NewMember_test() throws Exception {
         // given
-        given(memberRepository.findByUserName("kakao 123456789")).willReturn(Optional.empty());
+        given(memberRepository.findByUsername("kakao 123456789")).willReturn(Optional.empty());
         given(memberRepository.save(any(Member.class))).willAnswer(invocation -> invocation.getArgument(0));
 
         OAuth2User result = invokeProcessUser(oAuth2User, "kakao");
@@ -117,8 +117,8 @@ class CustomOauth2UserServiceTest {
         verify(memberRepository, times(1)).save(memberCaptor.capture());
 
         Member savedMember = memberCaptor.getValue();
-        assertThat(savedMember.getUserName()).isEqualTo("kakao 123456789");
-        assertThat(savedMember.getNickName()).isEqualTo("테스트유저");
+        assertThat(savedMember.getUsername()).isEqualTo("kakao 123456789");
+        assertThat(savedMember.getNickname()).isEqualTo("테스트유저");
         assertThat(savedMember.getEmail()).isEqualTo("test@kakao.com");
         assertThat(savedMember.getName()).isEqualTo("홍길동");
         assertThat(savedMember.getPhoneNumber()).isEqualTo("010-1234-5678");
@@ -131,8 +131,8 @@ class CustomOauth2UserServiceTest {
     void loadUser_ExistingMember_test() throws Exception {
         // given
         Member existingMember = Member.builder()
-                .userName("kakao 123456789")
-                .nickName("기존닉네임")
+                .username("kakao 123456789")
+                .nickname("기존닉네임")
                 .email("old@email.com")
                 .name("기존이름")
                 .phoneNumber("010-0000-0000")
@@ -142,7 +142,7 @@ class CustomOauth2UserServiceTest {
                 .role(Role.USER)
                 .build();
 
-        given(memberRepository.findByUserName(anyString())).willReturn(Optional.of(existingMember));
+        given(memberRepository.findByUsername(anyString())).willReturn(Optional.of(existingMember));
         given(memberRepository.save(any(Member.class))).willAnswer(invocation -> invocation.getArgument(0));
 
         // when
@@ -156,7 +156,7 @@ class CustomOauth2UserServiceTest {
         verify(memberRepository, times(1)).save(memberCaptor.capture());
 
         Member updatedMember = memberCaptor.getValue();
-        assertThat(updatedMember.getNickName()).isEqualTo("테스트유저");
+        assertThat(updatedMember.getNickname()).isEqualTo("테스트유저");
         assertThat(updatedMember.getEmail()).isEqualTo("test@kakao.com");
         assertThat(updatedMember.getName()).isEqualTo("홍길동");
         assertThat(updatedMember.getPhoneNumber()).isEqualTo("010-1234-5678");
@@ -167,14 +167,14 @@ class CustomOauth2UserServiceTest {
         KakaoResponseDto kakaoResponseDto = new KakaoResponseDto(oAuth2User.getAttributes());
 
         String userName = registrationId + " " + kakaoResponseDto.getProviderId();
-        Optional<Member> optionalMember = memberRepository.findByUserName(userName);
+        Optional<Member> optionalMember = memberRepository.findByUsername(userName);
 
         Member member;
         if (optionalMember.isEmpty()) {
             // 신규 회원 생성 로직
             member = Member.builder()
-                    .userName(userName)
-                    .nickName(kakaoResponseDto.getNickName())
+                    .username(userName)
+                    .nickname(kakaoResponseDto.getNickName())
                     .email(kakaoResponseDto.getEmail())
                     .name(kakaoResponseDto.getName())
                     .phoneNumber(kakaoResponseDto.getPhoneNumber())
