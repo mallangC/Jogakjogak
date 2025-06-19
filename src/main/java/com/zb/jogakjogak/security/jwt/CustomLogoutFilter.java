@@ -34,14 +34,14 @@ public class CustomLogoutFilter extends GenericFilter {
         String refreshToken = extractRefreshTokenFromCookie(request.getCookies());
         jwtUtil.validateToken(refreshToken, Token.REFRESH_TOKEN);
 
-        Optional<RefreshToken> existingToken = refreshEntityRepository.findByRefreshToken(refreshToken);
+        Optional<RefreshToken> existingToken = refreshEntityRepository.findByToken(refreshToken);
         if (existingToken.isEmpty()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
         //로그아웃 진행
-        refreshEntityRepository.deleteByRefreshToken(refreshToken);
+        refreshEntityRepository.deleteByToken(refreshToken);
         //Cookie 값 0
         Cookie cookie = resetRefreshTokenInCookie();
 

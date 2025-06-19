@@ -24,7 +24,8 @@ public class KakaoResponseDto implements OAuth2ResponseDto {
         return (String) ((Map) attribute.get("kakao_account")).get("email");
     }
 
-    public String getNickName() {
+    @Override
+    public String getNickname() {
         return (String) ((Map) attribute.get("properties")).get("nickname");
     }
 

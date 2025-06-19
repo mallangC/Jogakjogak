@@ -5,6 +5,7 @@ import com.zb.jogakjogak.notification.entity.Notification;
 import com.zb.jogakjogak.resume.entity.Resume;
 import com.zb.jogakjogak.security.Role;
 import com.zb.jogakjogak.security.dto.KakaoResponseDto;
+import com.zb.jogakjogak.security.dto.OAuth2ResponseDto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -70,10 +71,10 @@ public class Member{
         this.lastLoginAt = LocalDateTime.now();
     }
 
-    public void updateExistingMember(KakaoResponseDto kakaoResponseDto){
-        this.email = kakaoResponseDto.getEmail();
-        this.nickname = kakaoResponseDto.getNickName();
-        this.phoneNumber = kakaoResponseDto.getPhoneNumber();
-        this.name = kakaoResponseDto.getName();
+    public void updateExistingMember(OAuth2ResponseDto oAuth2ResponseDto){
+        this.email = oAuth2ResponseDto.getEmail();
+        this.nickname = oAuth2ResponseDto.getNickname();
+        this.phoneNumber = oAuth2ResponseDto.getPhoneNumber();
+        this.name = oAuth2ResponseDto.getName();
     }
 }
