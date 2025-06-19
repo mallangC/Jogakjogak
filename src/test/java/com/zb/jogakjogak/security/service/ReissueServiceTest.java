@@ -43,8 +43,8 @@ class ReissueServiceTest {
         String newRefresh = faker.internet().uuid();
 
         RefreshToken existingToken = RefreshToken.builder()
-                .userName(userName)
-                .refreshToken(refreshToken)
+                .username(userName)
+                .token(refreshToken)
                 .expiration(new Date().toString())
                 .build();
 
@@ -52,7 +52,7 @@ class ReissueServiceTest {
         when(jwtUtil.getRole(refreshToken)).thenReturn(role);
         when(jwtUtil.createJwt(eq(userName), eq(role), anyLong(), eq(Token.ACCESS_TOKEN))).thenReturn(newAccess);
         when(jwtUtil.createJwt(eq(userName), eq(role), anyLong(), eq(Token.REFRESH_TOKEN))).thenReturn(newRefresh);
-        when(refreshTokenRepository.findByRefreshToken(refreshToken)).thenReturn(Optional.ofNullable(existingToken));
+        when(refreshTokenRepository.findByToken(refreshToken)).thenReturn(Optional.ofNullable(existingToken));
 
         // when
         ReissueResultDto result = reissueService.reissue(refreshToken);
@@ -77,7 +77,7 @@ class ReissueServiceTest {
         when(jwtUtil.getRole(refreshToken)).thenReturn(role);
         when(jwtUtil.createJwt(eq(userName), eq(role), anyLong(), eq(Token.ACCESS_TOKEN))).thenReturn(newAccess);
         when(jwtUtil.createJwt(eq(userName), eq(role), anyLong(), eq(Token.REFRESH_TOKEN))).thenReturn(newRefresh);
-        when(refreshTokenRepository.findByRefreshToken(refreshToken)).thenReturn(Optional.empty());
+        when(refreshTokenRepository.findByToken(refreshToken)).thenReturn(Optional.empty());
 
         // when
         ReissueResultDto result = reissueService.reissue(refreshToken);

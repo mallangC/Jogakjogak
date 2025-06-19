@@ -3,6 +3,8 @@ package com.zb.jogakjogak.security.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
@@ -14,10 +16,10 @@ public class RefreshToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String userName;
+    private String username;
 
     @Column(length = 1000)
-    private String refreshToken;
+    private String token;
 
-    private String expiration;
+    private LocalDateTime expiration;
 }

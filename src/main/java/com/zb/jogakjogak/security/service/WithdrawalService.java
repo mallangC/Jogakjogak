@@ -25,7 +25,7 @@ public class WithdrawalService {
         String kakaoId = member.getUserName().split(" ")[1];
         kakaoService.unlinkKakaoMember(kakaoId);
 
-        refreshTokenRepository.deleteByUserName(userName);
+        refreshTokenRepository.deleteByUsername(userName);
         memberRepository.delete(member);
     }
 }

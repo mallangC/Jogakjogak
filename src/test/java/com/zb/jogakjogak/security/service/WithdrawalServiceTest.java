@@ -49,7 +49,7 @@ class WithdrawalServiceTest {
         // then
         verify(memberRepository, times(1)).findByUserName(userName);
         verify(kakaoService, times(1)).unlinkKakaoMember(kakaoId);
-        verify(refreshTokenRepository, times(1)).deleteByUserName(userName);
+        verify(refreshTokenRepository, times(1)).deleteByUsername(userName);
         verify(memberRepository, times(1)).delete(mockMember);
     }
 

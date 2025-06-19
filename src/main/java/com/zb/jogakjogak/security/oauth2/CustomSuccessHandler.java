@@ -16,8 +16,8 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 
 @Component
@@ -25,7 +25,7 @@ import java.util.Iterator;
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     private final JWTUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
-    private static final long REFRESH_TOKEN_MS = 604800000L;
+    private static final long REFRESH_TOKEN_DAYS = 7;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -33,8 +33,8 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         CustomOAuth2User customOAuth2User = (CustomOAuth2User) authentication.getPrincipal();
         String username = customOAuth2User.getName();
         String role = getRole(authentication);
-        String refreshToken = jwtUtil.createJwt(username, role,  REFRESH_TOKEN_MS, Token.REFRESH_TOKEN);
-        addRefreshToken(username, refreshToken,  REFRESH_TOKEN_MS);
+        String refreshToken = jwtUtil.createJwt(username, role, REFRESH_TOKEN_DAYS, Token.REFRESH_TOKEN);
+        addRefreshToken(username, refreshToken);
 
         response.addCookie(createCookie("refresh", refreshToken));
         response.sendRedirect("http://localhost:3000/");
@@ -58,13 +58,12 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         return cookie;
     }
 
-    private void addRefreshToken(String userName, String refresh, Long expiredMs) {
+    private void addRefreshToken(String userName, String refresh) {
 
-        Date date = new Date(System.currentTimeMillis() + expiredMs);
         RefreshToken refreshToken = RefreshToken.builder()
-                .userName(userName)
-                .refreshToken(refresh)
-                .expiration(date.toString())
+                .username(userName)
+                .token(refresh)
+                .expiration(LocalDateTime.now().plusDays(REFRESH_TOKEN_DAYS))
                 .build();
         refreshTokenRepository.save(refreshToken);
     }
