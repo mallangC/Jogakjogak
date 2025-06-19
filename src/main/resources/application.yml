@@ -18,9 +18,8 @@ spring:
     user: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     locations: classpath:db/migration
+    driver-class-name: com.mysql.cj.jdbc.Driver
     enabled: true
-    baseline-on-migrate: true
-    baseline-version: 0
 
   jpa:
     show-sql: true
@@ -49,7 +48,7 @@ spring:
               - name
               - phone_number
             authorization-grant-type: authorization_code
-            redirect-uri: http://localhost:8080/login/oauth2/code/kakao
+            redirect-uri: "https://jogakjogak.com/login/oauth2/code/kakao"
             client-name: Kakao
             client-authentication-method: client_secret_post
 
@@ -110,3 +109,14 @@ gemini:
   api:
     key: ${GEMINI_API_KEY}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health"
+  endpoint:
+    health:
+      show-details: "always"
+logging:
+  level:
+    org.flywaydb: DEBUG
