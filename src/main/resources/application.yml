@@ -60,19 +60,25 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
 
+  mail:
+    protocol: smtp
+    host: smtp.gmail.com
+    port: 587
+    username: ${EMAIL_ID}
+    password: ${EMAIL_PASSWORD}
+    default-encoding: utf-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 kakao:
   admin-key: ${KAKAO_ADMIN_KEY}
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}
-
-aligo:
-  api-url: ${ALIGO_API_URL}
-  api-key: ${ALIGO_API_KEY}
-  user-id: ${ALIGO_USER_ID}
-  sender-key: ${ALIGO_SENDER_KEY}
-  sender-phone: ${ALIGO_SENDER_PHONE}
-  template-code: ${ALIGO_TEMPLATE_CODE}
 
 openai:
   api:

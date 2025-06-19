@@ -33,7 +33,9 @@ public class ResumeService {
      * @return 이력서 id, 이력서 이름, 이력서 번호
      */
     public ResumeResponseDto register(ResumeRequestDto requestDto, String username) {
-        Member member = getMemberByUsername(username);
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(()-> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
+
 
         if (member.getResume() != null) {
             throw new AuthException(MemberErrorCode.ALREADY_HAVE_RESUME);
@@ -140,7 +142,7 @@ public class ResumeService {
      * @return 조회된 Member 엔티티
      */
     private Member getMemberByUsername(String username) {
-        return memberRepository.findByUserName(username)
+        return memberRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
     }
 
