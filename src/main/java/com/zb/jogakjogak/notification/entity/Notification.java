@@ -20,8 +20,6 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String content;
-
     private LocalDateTime createdAt;
 
     @ManyToOne
