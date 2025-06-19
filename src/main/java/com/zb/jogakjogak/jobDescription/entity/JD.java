@@ -52,7 +52,7 @@ public class JD extends BaseEntity {
 
     @Column(nullable = false)
     private LocalDate endedAt;
-    
+
     @Builder.Default
     @OneToMany(mappedBy = "jd", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ToDoList> toDoLists = new ArrayList<>();
@@ -71,5 +71,16 @@ public class JD extends BaseEntity {
 
     public void isAlarmOn(boolean isAlarmOn) {
         this.isAlarmOn = isAlarmOn;
+    }
+
+    public void updateBookmarkStatus(boolean isBookmark) {
+        this.isBookmark = isBookmark;
+    }
+
+    public void markJdAsApplied() {
+        this.applyAt = LocalDateTime.now();
+    }
+    public void unMarkJdAsApplied() {
+        this.applyAt = null;
     }
 }

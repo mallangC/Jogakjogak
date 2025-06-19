@@ -177,7 +177,7 @@ class ToDoListServiceTest {
                 toDoListService.createToDoList(jdId, createToDoListDto)
         );
 
-        assertEquals(JDErrorCode.JD_NOT_FOUND, exception.getErrorCode());
+        assertEquals(JDErrorCode.NOT_FOUND_JD, exception.getErrorCode());
         assertEquals("JD를 찾을 수 없습니다.", exception.getMessage());
 
         verify(toDoListRepository, never()).save(any(ToDoList.class));
@@ -665,7 +665,7 @@ class ToDoListServiceTest {
 
     private void assertThrowsJdNotFound(Executable executable) {
         JDException exception = assertThrows(JDException.class, executable);
-        assertEquals(JDErrorCode.JD_NOT_FOUND, exception.getErrorCode());
+        assertEquals(JDErrorCode.NOT_FOUND_JD, exception.getErrorCode());
         assertEquals("JD를 찾을 수 없습니다.", exception.getMessage());
     }
 
