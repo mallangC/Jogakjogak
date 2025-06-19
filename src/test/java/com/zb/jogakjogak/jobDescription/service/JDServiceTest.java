@@ -121,7 +121,7 @@ class JDServiceTest {
     @DisplayName("LLM 분석 서비스 성공 테스트 - JD 및 ToDoList 저장 포함 (Gemini)")
     void llmAnalyze_success() throws JsonProcessingException {
         // given
-        when(memberRepository.findbyusername(anyString())).thenReturn(Optional.of(mockMember));
+        when(memberRepository.findByUsername(anyString())).thenReturn(Optional.of(mockMember));
         when(llmService.generateTodoListJson(anyString(), anyString(), anyString()))
                 .thenReturn(mockLLMAnalysisJsonString);
         when(objectMapper.readValue(eq(mockLLMAnalysisJsonString), any(com.fasterxml.jackson.core.type.TypeReference.class)))
@@ -179,7 +179,7 @@ class JDServiceTest {
     @DisplayName("LLM 분석 서비스 JsonProcessingException 발생 시 JDException 던지는지 테스트 (Gemini)")
     void llmAnalyze_failure_jsonProcessingException() throws JsonProcessingException {
         // given
-        when(memberRepository.findbyusername(anyString())).thenReturn(Optional.of(mockMember));
+        when(memberRepository.findByUsername(anyString())).thenReturn(Optional.of(mockMember));
         when(llmService.generateTodoListJson(anyString(), anyString(), anyString()))
                 .thenReturn("invalid json string from LLM");
 
@@ -381,7 +381,7 @@ class JDServiceTest {
     @DisplayName("JD 목록 성공적으로 조회 및 ToDoList 개수 계산")
     void getAllJds_Success() {
         // Given
-        when(memberRepository.findbyusername(mockMember.getUsername())).thenReturn(Optional.of(mockMember));
+        when(memberRepository.findByUsername(mockMember.getUsername())).thenReturn(Optional.of(mockMember));
 
         ToDoList todo1 = ToDoList.builder()
                 .id(1L).category(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN).title("투두1").content("내용1").isDone(true).build();
@@ -413,7 +413,7 @@ class JDServiceTest {
         Page<AllGetJDResponseDto> resultPage = jdService.getAllJds(mockMember.getUsername(), pageable);
 
         // Then
-        verify(memberRepository, times(1)).findbyusername(mockMember.getUsername());
+        verify(memberRepository, times(1)).findByUsername(mockMember.getUsername());
         verify(jdRepository, times(1)).findByMemberId(mockMember.getId(), pageable);
 
         assertNotNull(resultPage);
@@ -436,7 +436,7 @@ class JDServiceTest {
     @DisplayName("JD 목록 조회 시 회원이 존재하지 않으면 AuthException 발생")
     void getAllJds_MemberNotFound_ThrowsAuthException() {
         // Given
-        when(memberRepository.findbyusername(anyString())).thenReturn(Optional.empty());
+        when(memberRepository.findByUsername(anyString())).thenReturn(Optional.empty());
 
         // When & Then
         AuthException exception = assertThrows(AuthException.class, () ->
@@ -452,7 +452,7 @@ class JDServiceTest {
     @DisplayName("회원은 존재하지만 해당 회원의 JD가 없을 때 빈 페이지 반환")
     void getAllJds_NoJdsForMember_ReturnsEmptyPage() {
         // Given
-        when(memberRepository.findbyusername(mockMember.getUsername())).thenReturn(Optional.of(mockMember));
+        when(memberRepository.findByUsername(mockMember.getUsername())).thenReturn(Optional.of(mockMember));
 
         Page<JD> emptyJdPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
         when(jdRepository.findByMemberId(mockMember.getId(), pageable)).thenReturn(emptyJdPage);
@@ -461,7 +461,7 @@ class JDServiceTest {
         Page<AllGetJDResponseDto> resultPage = jdService.getAllJds(mockMember.getUsername(), pageable);
 
         // Then
-        verify(memberRepository, times(1)).findbyusername(mockMember.getUsername());
+        verify(memberRepository, times(1)).findByUsername(mockMember.getUsername());
         verify(jdRepository, times(1)).findByMemberId(mockMember.getId(), pageable);
 
         assertNotNull(resultPage);

@@ -45,7 +45,7 @@ public class JDService {
      * @return 제목, JD의 URL, To Do List, 사용자 메모, 마감일
      */
     public JDResponseDto analyze(JDRequestDto jdRequestDto, String memberName) {
-        Member member = memberRepository.findbyusername(memberName)
+        Member member = memberRepository.findByUsername(memberName)
                 .orElseThrow(()-> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         if(member.getResume().getContent() == null){
@@ -90,7 +90,7 @@ public class JDService {
      */
     public JDResponseDto llmAnalyze(JDRequestDto jdRequestDto, String memberName) {
 
-        Member member = memberRepository.findbyusername(memberName)
+        Member member = memberRepository.findByUsername(memberName)
                 .orElseThrow(()-> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         if(member.getResume().getContent() == null){
@@ -192,7 +192,7 @@ public class JDService {
      * @throws AuthException 회원을 찾을 수 없을 경우 발생하는 예외.
      */
     public Page<AllGetJDResponseDto> getAllJds(String memberName, Pageable pageable) {
-        Member member = memberRepository.findbyusername(memberName)
+        Member member = memberRepository.findByUsername(memberName)
                 .orElseThrow(()-> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
         Page<JD> jdEntitiesPage = jdRepository.findByMemberId(member.getId(), pageable);
 

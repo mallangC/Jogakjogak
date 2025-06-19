@@ -33,7 +33,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         KakaoResponseDto kakaoResponseDto = new KakaoResponseDto(oAuth2User.getAttributes());
         String userName = kakaoResponseDto.getProvider() + " " + kakaoResponseDto.getProviderId();
 
-        Optional<Member> existMember = memberRepository.findbyusername(userName);
+        Optional<Member> existMember = memberRepository.findByUsername(userName);
         Member member;
         if (existMember.isEmpty()) {
             member = Member.builder()
