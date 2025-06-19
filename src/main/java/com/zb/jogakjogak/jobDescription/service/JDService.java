@@ -146,7 +146,7 @@ public class JDService {
      */
     public JDResponseDto getJd(Long jdId) {
         JD jd = jdRepository.findByIdWithToDoLists(jdId)
-                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
+                .orElseThrow(() -> new JDException(JDErrorCode.NOT_FOUND_JD));
         return JDResponseDto.fromEntity(jd);
 
     }
@@ -159,7 +159,7 @@ public class JDService {
      */
     public JDDeleteResponseDto deleteJd(Long jdId) {
         JD jd = jdRepository.findById(jdId).orElseThrow(
-                () -> new JDException(JDErrorCode.JD_NOT_FOUND)
+                () -> new JDException(JDErrorCode.NOT_FOUND_JD)
         );
         jdRepository.deleteById(jdId);
         return JDDeleteResponseDto.builder()
@@ -176,7 +176,7 @@ public class JDService {
     @Transactional
     public JDAlarmResponseDto alarm(Long jdId, JDAlarmRequestDto dto) {
         JD jd = jdRepository.findById(jdId)
-                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
+                .orElseThrow(() -> new JDException(JDErrorCode.NOT_FOUND_JD));
 
         jd.isAlarmOn(dto.isAlarmOn());
         return JDAlarmResponseDto.builder()
@@ -244,7 +244,7 @@ public class JDService {
         Member member = memberRepository.findByUserName(memberName)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
         JD jd = jdRepository.findById(jdId)
-                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
+                .orElseThrow(() -> new JDException(JDErrorCode.NOT_FOUND_JD));
 
         if (!jd.getMember().getId().equals(member.getId())) {
             throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
@@ -269,7 +269,7 @@ public class JDService {
         Member member = memberRepository.findByUserName(memberName)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
         JD updateJd = jdRepository.findById(jdId)
-                .orElseThrow(() -> new JDException(JDErrorCode.JD_NOT_FOUND));
+                .orElseThrow(() -> new JDException(JDErrorCode.NOT_FOUND_JD));
 
         if (!updateJd.getMember().getId().equals(member.getId())) {
             throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
