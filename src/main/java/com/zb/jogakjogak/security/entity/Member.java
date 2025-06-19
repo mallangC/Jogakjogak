@@ -2,6 +2,7 @@ package com.zb.jogakjogak.security.entity;
 
 import com.zb.jogakjogak.global.BaseEntity;
 import com.zb.jogakjogak.jobDescription.entity.JD;
+import com.zb.jogakjogak.notification.entity.Notification;
 import com.zb.jogakjogak.resume.entity.Resume;
 import com.zb.jogakjogak.security.Role;
 import com.zb.jogakjogak.security.dto.KakaoResponseDto;
@@ -20,7 +21,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Member extends BaseEntity {
+public class Member{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,6 +57,9 @@ public class Member extends BaseEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<JD> jdList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<Notification> notification;
 
     @PrePersist
     public void prePersist(){

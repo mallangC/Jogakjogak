@@ -1,10 +1,9 @@
-package com.zb.jogakjogak.bizmessage.dto;
+package com.zb.jogakjogak.notification.dto;
 
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import retrofit2.http.GET;
 
 @Getter
 @AllArgsConstructor
