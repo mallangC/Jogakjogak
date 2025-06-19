@@ -1,6 +1,8 @@
 package com.zb.jogakjogak.jobDescription.controller;
 
 import com.zb.jogakjogak.global.HttpApiResponse;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.ApplyStatusRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.BookmarkRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.*;
@@ -15,6 +17,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -120,11 +125,11 @@ public class JDController {
      * 클라이언트가 'page', 'size', 'sort' 파라미터를 통해 페이징 및 정렬 조건을 직접 지정할 수도 있습니다.
      *
      * @param pageable         페이징 및 정렬 정보를 담는 객체.
-     * - size: 한 페이지당 항목 수 (기본값 11)
-     * - sort: 정렬 기준 필드 (기본값 "createdAt")
-     * - direction: 정렬 방향 (기본값 DESC, 즉 최신순)
+     *                         - size: 한 페이지당 항목 수 (기본값 11)
+     *                         - sort: 정렬 기준 필드 (기본값 "createdAt")
+     *                         - direction: 정렬 방향 (기본값 DESC, 즉 최신순)
      * @param customOAuth2User 현재 인증된 사용자의 OAuth2 정보를 포함하는 Principal 객체.
-     * @return                 페이징된 JD 목록과 API 응답 상태를 포함하는 ResponseDto
+     * @return 페이징된 JD 목록과 API 응답 상태를 포함하는 ResponseDto
      */
     @GetMapping("/jds")
     public ResponseEntity<HttpApiResponse<PagedJdResponseDto>> getPaginatedJds(
@@ -143,4 +148,56 @@ public class JDController {
                 )
         );
     }
+
+    /**
+     * 지정된 JD(Job Description)의 즐겨찾기 상태를 업데이트합니다.
+     * 사용자는 자신이 생성한 JD에 대해서만 즐겨찾기 상태를 변경할 수 있습니다.
+     *
+     * @param jdId             업데이트할 JD의 고유 ID (경로 변수)
+     * @param dto              즐겨찾기 상태를 포함하는 요청 본문 (true: 즐겨찾기 설정, false: 즐겨찾기 해제)
+     * @param customOAuth2User 현재 인증된 사용자의 정보를 담고 있는 객체.
+     * @return 업데이트된 즐겨찾기 상태 ResponseDto
+     */
+    @PatchMapping("/jds/{jd_id}/bookmark")
+    public ResponseEntity<HttpApiResponse<BookmarkResponseDto>> toggleBookmark
+    (@PathVariable("jd_id") Long jdId,
+     @RequestBody BookmarkRequestDto dto,
+     @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        String memberName = customOAuth2User.getName();
+        return ResponseEntity.ok().body(
+                new HttpApiResponse<>(
+                        jdService.updateBookmarkStatus(jdId, dto, memberName),
+                        "즐겨찾기 설정 완료",
+                        HttpStatus.OK
+                )
+        );
+    }
+
+    /**
+     * 지정된 JD(Job Description)의 지원 완료 상태를 토글합니다.
+     * JD의 현재 지원 상태(applyAt이 null이면 미완료, 값이 있으면 완료)에 따라 상태를 전환합니다.
+     * 사용자는 자신이 생성한 JD에 대해서만 지원 완료 상태를 변경할 수 있습니다.
+     *
+     * @param jdId 상태를 토글할 JD의 고유 ID (경로 변수)
+     * @param customOAuth2User 현재 인증된 사용자의 정보를 담고 있는 객체.
+     * @return 토글된 지원 완료 상태 ResponseDto
+     */
+    @PatchMapping("/jds/{jd_id}/apply")
+    public ResponseEntity<HttpApiResponse<ApplyStatusResponseDto>> toggleApplyStatus(
+            @PathVariable("jd_id") Long jdId,
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        String memberName = customOAuth2User.getName();
+        ApplyStatusResponseDto response = jdService.toggleApplyStatus(jdId, memberName);
+
+        String message = (response.getApplyAt() != null) ? "지원 완료 성공" : "지원 완료 취소 성공";
+
+        return ResponseEntity.ok().body(
+                new HttpApiResponse<>(
+                        response,
+                        message,
+                        HttpStatus.OK
+                )
+        );
+    }
+
 }
