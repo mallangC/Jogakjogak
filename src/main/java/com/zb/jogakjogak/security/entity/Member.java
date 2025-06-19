@@ -26,6 +26,7 @@ public class Member extends BaseEntity {
     private Long id;
 
     @NotBlank
+    @Column(name = "username")
     private String userName;
 
     @Email
@@ -35,6 +36,7 @@ public class Member extends BaseEntity {
 
     private String name;
 
+    @Column(name = "nickname")
     private String nickName;
 
     private String phoneNumber;
