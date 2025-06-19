@@ -1,11 +1,11 @@
 package com.zb.jogakjogak.security.service;
 
 
-import com.zb.jogakjogak.global.exception.AuthException;
-import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.security.Role;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
+import com.zb.jogakjogak.security.dto.GoogleResponseDto;
 import com.zb.jogakjogak.security.dto.KakaoResponseDto;
+import com.zb.jogakjogak.security.dto.OAuth2ResponseDto;
 import com.zb.jogakjogak.security.entity.Member;
 import com.zb.jogakjogak.security.entity.OAuth2Info;
 import com.zb.jogakjogak.security.repository.MemberRepository;
@@ -33,17 +33,25 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
         KakaoResponseDto kakaoResponseDto = new KakaoResponseDto(oAuth2User.getAttributes());
-        String userName = kakaoResponseDto.getProvider() + " " + kakaoResponseDto.getProviderId();
 
-        Optional<Member> existMember = memberRepository.findByUserName(userName);
+        OAuth2ResponseDto oAuth2ResponseDto = null;
+        if(registrationId.equals("kakao")){
+            oAuth2ResponseDto = new KakaoResponseDto(oAuth2User.getAttributes());
+        }else if(registrationId.equals("google")){
+            oAuth2ResponseDto = new GoogleResponseDto(oAuth2User.getAttributes());
+        } else{
+            return null;
+        }
+        String username = oAuth2ResponseDto.getProvider() + " " + oAuth2ResponseDto.getProviderId();
+        Optional<Member> existMember = memberRepository.findByUsername(username);
         Member member;
         if (existMember.isEmpty()) {
             member = Member.builder()
-                    .userName(userName)
-                    .nickName(kakaoResponseDto.getNickName())
-                    .email(kakaoResponseDto.getEmail())
-                    .name(kakaoResponseDto.getName())
-                    .phoneNumber(kakaoResponseDto.getPhoneNumber())
+                    .username(username)
+                    .nickname(oAuth2ResponseDto.getNickname())
+                    .email(oAuth2ResponseDto.getEmail())
+                    .name(oAuth2ResponseDto.getName())
+                    .phoneNumber(oAuth2ResponseDto.getPhoneNumber())
                     .lastLoginAt(LocalDateTime.now())
                     .oauth2Info(new ArrayList<>())
                     .jdList(new ArrayList<>())
@@ -52,15 +60,15 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
                     .build();
             OAuth2Info oAuth2Info = OAuth2Info.builder()
                     .member(member)
-                    .provider(kakaoResponseDto.getProvider())
-                    .providerId(kakaoResponseDto.getProviderId())
+                    .provider(oAuth2ResponseDto.getProvider())
+                    .providerId(oAuth2ResponseDto.getProviderId())
                     .build();
             member.getOauth2Info().add(oAuth2Info);
             memberRepository.save(member);
             return new CustomOAuth2User(member);
         } else{
             member = existMember.get();
-            member.updateExistingMember(kakaoResponseDto);
+            member.updateExistingMember(oAuth2ResponseDto);
             memberRepository.save(member);
             return new CustomOAuth2User(member);
         }

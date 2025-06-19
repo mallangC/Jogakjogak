@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Optional;
 
@@ -43,16 +44,16 @@ class ReissueServiceTest {
         String newRefresh = faker.internet().uuid();
 
         RefreshToken existingToken = RefreshToken.builder()
-                .userName(userName)
-                .refreshToken(refreshToken)
-                .expiration(new Date().toString())
+                .username(userName)
+                .token(refreshToken)
+                .expiration(LocalDateTime.now().plusDays(7))
                 .build();
 
         when(jwtUtil.getUserName(refreshToken)).thenReturn(userName);
         when(jwtUtil.getRole(refreshToken)).thenReturn(role);
         when(jwtUtil.createJwt(eq(userName), eq(role), anyLong(), eq(Token.ACCESS_TOKEN))).thenReturn(newAccess);
         when(jwtUtil.createJwt(eq(userName), eq(role), anyLong(), eq(Token.REFRESH_TOKEN))).thenReturn(newRefresh);
-        when(refreshTokenRepository.findByRefreshToken(refreshToken)).thenReturn(Optional.ofNullable(existingToken));
+        when(refreshTokenRepository.findByToken(refreshToken)).thenReturn(Optional.ofNullable(existingToken));
 
         // when
         ReissueResultDto result = reissueService.reissue(refreshToken);
@@ -77,7 +78,7 @@ class ReissueServiceTest {
         when(jwtUtil.getRole(refreshToken)).thenReturn(role);
         when(jwtUtil.createJwt(eq(userName), eq(role), anyLong(), eq(Token.ACCESS_TOKEN))).thenReturn(newAccess);
         when(jwtUtil.createJwt(eq(userName), eq(role), anyLong(), eq(Token.REFRESH_TOKEN))).thenReturn(newRefresh);
-        when(refreshTokenRepository.findByRefreshToken(refreshToken)).thenReturn(Optional.empty());
+        when(refreshTokenRepository.findByToken(refreshToken)).thenReturn(Optional.empty());
 
         // when
         ReissueResultDto result = reissueService.reissue(refreshToken);
