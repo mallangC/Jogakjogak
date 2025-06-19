@@ -288,7 +288,7 @@ class JDServiceTest {
 
         // When & Then
         JDException thrown = assertThrows(JDException.class, () -> jdService.getJd(nonExistentJdId));
-        assertEquals(JDErrorCode.JD_NOT_FOUND, thrown.getErrorCode());
+        assertEquals(JDErrorCode.NOT_FOUND_JD, thrown.getErrorCode());
 
         // Verify
         verify(jdRepository, times(1)).findByIdWithToDoLists(nonExistentJdId);
@@ -329,7 +329,7 @@ class JDServiceTest {
 
         // When & Then
         JDException thrown = assertThrows(JDException.class, () -> jdService.deleteJd(nonExistentJdId));
-        assertEquals(JDErrorCode.JD_NOT_FOUND, thrown.getErrorCode());
+        assertEquals(JDErrorCode.NOT_FOUND_JD, thrown.getErrorCode());
 
         // Verify
         verify(jdRepository, times(1)).findById(nonExistentJdId);
@@ -382,7 +382,7 @@ class JDServiceTest {
 
         // When & Then
         JDException thrown = assertThrows(JDException.class, () -> jdService.alarm(nonExistentJdId, requestDto));
-        assertEquals(JDErrorCode.JD_NOT_FOUND, thrown.getErrorCode());
+        assertEquals(JDErrorCode.NOT_FOUND_JD, thrown.getErrorCode());
 
         verify(jdRepository, times(1)).findById(nonExistentJdId);
     }
@@ -556,7 +556,7 @@ class JDServiceTest {
         // When & Then
         JDException exception = assertThrows(JDException.class,
                 () -> jdService.updateBookmarkStatus(testJd.getId(), dto, mockMember.getName()));
-        assertEquals(JDErrorCode.JD_NOT_FOUND, exception.getErrorCode());
+        assertEquals(JDErrorCode.NOT_FOUND_JD, exception.getErrorCode());
 
         verify(memberRepository, times(1)).findByUserName(mockMember.getName());
         verify(jdRepository, times(1)).findById(testJd.getId());
@@ -655,7 +655,7 @@ class JDServiceTest {
         // When & Then
         JDException exception = assertThrows(JDException.class,
                 () -> jdService.toggleApplyStatus(testJd.getId(), mockMember.getName()));
-        assertEquals(JDErrorCode.JD_NOT_FOUND, exception.getErrorCode());
+        assertEquals(JDErrorCode.NOT_FOUND_JD, exception.getErrorCode());
 
         verify(memberRepository, times(1)).findByUserName(mockMember.getName());
         verify(jdRepository, times(1)).findById(anyLong());

@@ -12,7 +12,7 @@ public enum JDErrorCode {
     INVALID_API_REQUEST(HttpStatus.BAD_REQUEST, "클라이언트 오류 처리" ),
     API_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류" ),
     FAILED_JSON_PROCESS(HttpStatus.INTERNAL_SERVER_ERROR, "JSON 파싱 오류"),
-    JD_NOT_FOUND(HttpStatus.NOT_FOUND, "JD를 찾을 수 없습니다."),
+    NOT_FOUND_JD(HttpStatus.NOT_FOUND, "JD를 찾을 수 없습니다."),
     UNAUTHORIZED_ACCESS(HttpStatus.UNAUTHORIZED,"해당 JD에 대한 권한이 없습니다." );
 
     private final HttpStatus httpStatus;
