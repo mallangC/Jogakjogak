@@ -188,6 +188,7 @@ class ResumeServiceTest {
         when(resumeRepository.findById(1L)).thenReturn(Optional.of(sampleResume));
         when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
         when(resumeRepository.save(any(Resume.class))).thenReturn(saveResume);
+
         //When
         ResumeResponseDto result = resumeService.modify(1L, sampleRequestDto, mockMember.getName());
 

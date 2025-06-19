@@ -135,6 +135,7 @@ public class JDService {
      * @param memberName 로그인한 유저
      * @return 조회된 jd의 응답 dto
      */
+
     public JDResponseDto getJd(Long jdId, String memberName) {
 
         JD jd = getAuthorizedJd(jdId, memberName);
@@ -164,7 +165,6 @@ public class JDService {
     @Transactional
     public JDAlarmResponseDto alarm(Long jdId, JDAlarmRequestDto dto, String memberName) {
         JD jd = getAuthorizedJd(jdId, memberName);
-
         jd.isAlarmOn(dto.isAlarmOn());
         return JDAlarmResponseDto.builder()
                 .isAlarmOn(jd.isAlarmOn())
@@ -231,6 +231,7 @@ public class JDService {
      */
     @Transactional
     public BookmarkResponseDto updateBookmarkStatus(Long jdId, BookmarkRequestDto dto, String memberName) {
+      
         JD jd = getAuthorizedJd(jdId, memberName);
         jd.updateBookmarkStatus(dto.isBookmark());
         JD saveJd = jdRepository.save(jd);
@@ -249,6 +250,7 @@ public class JDService {
      */
     @Transactional
     public ApplyStatusResponseDto toggleApplyStatus(Long jdId, String memberName) {
+
         JD updateJd = getAuthorizedJd(jdId, memberName);
         if (updateJd.getApplyAt() == null) {
             updateJd.markJdAsApplied();
