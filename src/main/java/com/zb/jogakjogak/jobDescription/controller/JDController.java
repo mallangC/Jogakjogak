@@ -4,6 +4,7 @@ import com.zb.jogakjogak.global.HttpApiResponse;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.BookmarkRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.MemoRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.*;
 import com.zb.jogakjogak.jobDescription.service.JDService;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
@@ -202,6 +203,21 @@ public class JDController {
                 new HttpApiResponse<>(
                         response,
                         message,
+                        HttpStatus.OK
+                )
+        );
+    }
+
+    @PatchMapping("/jds/{jd_id}/memo")
+    public ResponseEntity<HttpApiResponse<MemoResponseDto>> updateMemo(
+            @PathVariable("jd_id") Long jdId,
+            @RequestBody MemoRequestDto dto,
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        String memberName = customOAuth2User.getName();
+        return ResponseEntity.ok().body(
+                new HttpApiResponse<>(
+                        jdService.updateMemo(jdId, dto, memberName),
+                        "메모 수정 성공",
                         HttpStatus.OK
                 )
         );
