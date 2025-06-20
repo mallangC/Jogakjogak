@@ -7,13 +7,22 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: none
     show-sql: true
     database-platform: org.hibernate.dialect.H2Dialect
     open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
 
   flyway:
-    enabled: false
+    enabled: true
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    user: sa
+    password:
+    locations: classpath:db/migration
+    driver-class-name: org.h2.Driver
+    clean-disabled: false
 
 jwt:
   secret-key: MAXwR50nxw54aLCw669TwxtGFO3XYBk8VC/2Ekvui+4=

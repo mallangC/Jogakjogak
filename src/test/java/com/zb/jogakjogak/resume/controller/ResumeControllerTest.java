@@ -20,13 +20,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,8 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.time.LocalDateTime;
 import java.util.Date;
-
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -60,9 +58,6 @@ class ResumeControllerTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    @Autowired
-    private ResumeRepository resumeRepository;
-
     @Value("${jwt.secret-key}")
     private String secretKeyString;
 
@@ -79,11 +74,14 @@ class ResumeControllerTest {
         );
 
         Member testMember = Member.builder()
-                .userName(username)
+                .name(username)
+                .phoneNumber("01000000000")
+                .username(username)
                 .password(faker.internet().password())
                 .email(faker.internet().emailAddress())
-                .nickName(faker.animal().name())
+                .nickname(faker.animal().name())
                 .role(Role.USER)
+                .lastLoginAt(LocalDateTime.now())
                 .build();
         memberRepository.save(testMember);
 
@@ -110,7 +108,7 @@ class ResumeControllerTest {
         Mockito.when(jwtUtil.isExpired(Mockito.anyString())).thenReturn(false);
         Mockito.when(jwtUtil.getToken(Mockito.anyString())).thenReturn("ACCESS_TOKEN");
         Mockito.when(jwtUtil.getUserName(Mockito.anyString())).thenReturn(username);
-        Mockito.when(jwtUtil.getRole(Mockito.anyString())).thenReturn("USER");
+        Mockito.when(jwtUtil.getRole(Mockito.anyString())).thenReturn(Role.USER.toString());
     }
 
 
@@ -147,7 +145,7 @@ class ResumeControllerTest {
                 .content(initialContent));
 
         HttpApiResponse<ResumeResponseDto> response = objectMapper.readValue(registerResult.andReturn().getResponse().getContentAsString()
-                , new TypeReference<HttpApiResponse<ResumeResponseDto>>() {});
+                , new TypeReference<>() {});
         Long resumeId = response.data().getResumeId();
 
         ResumeRequestDto updateRequestDto = new ResumeRequestDto("수정된 이력서 제목", "수정된 내용입니다.");
@@ -177,7 +175,7 @@ class ResumeControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(initialContent));
         HttpApiResponse<ResumeResponseDto> response = objectMapper.readValue(registerResult.andReturn().getResponse().getContentAsString()
-                , new TypeReference<HttpApiResponse<ResumeResponseDto>>() {});
+                , new TypeReference<>() {});
         Long resumeId = response.data().getResumeId();
 
         //When
@@ -206,7 +204,7 @@ class ResumeControllerTest {
                 .content(initialContent));
 
         HttpApiResponse<ResumeResponseDto> response = objectMapper.readValue(registerResult.andReturn().getResponse().getContentAsString()
-                , new TypeReference<HttpApiResponse<ResumeResponseDto>>() {});
+                , new TypeReference<>() {});
         Long resumeId = response.data().getResumeId();
 
         //When
@@ -223,12 +221,6 @@ class ResumeControllerTest {
         mockMvc.perform(get("/api/resume/{resumeId}", resumeId)
                 .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
-    }
-
-    @AfterEach
-    void tearDown() {
-        memberRepository.deleteAll();
-        resumeRepository.deleteAll();
     }
 
 }
