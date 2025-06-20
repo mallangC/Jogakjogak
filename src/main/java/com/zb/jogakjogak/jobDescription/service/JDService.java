@@ -186,7 +186,7 @@ public class JDService {
 
     @Transactional(readOnly = true)
     public PagedJdResponseDto getAllJds(String memberName, Pageable pageable) {
-        Member member = memberRepository.findByUserName(memberName)
+        Member member = memberRepository.findByUsername(memberName)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         Page<JD> jdEntitiesPage = jdRepository.findByMemberId(member.getId(), pageable);
@@ -283,7 +283,7 @@ public class JDService {
      * @throws JDException   If the JD is not found or the member is unauthorized. (JD를 찾을 수 없거나 사용자가 권한이 없을 때 발생하는 예외)
      */
     private JD getAuthorizedJd(Long jdId, String memberName) {
-        Member member = memberRepository.findByUserName(memberName)
+        Member member = memberRepository.findByUsername(memberName)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         JD jd = jdRepository.findById(jdId)
