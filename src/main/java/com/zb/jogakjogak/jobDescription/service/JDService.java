@@ -267,6 +267,17 @@ public class JDService {
                 .build();
     }
 
+    @Transactional
+    public MemoResponseDto updateMemo(Long jdId, MemoRequestDto dto, String memberName) {
+        JD jd = getAuthorizedJd(jdId, memberName);
+        jd.updateMemo(dto);
+        jdRepository.save(jd);
+        return MemoResponseDto.builder()
+                .jd_id(jd.getId())
+                .memo(jd.getMemo())
+                .build();
+    }
+
     /**
      * Helper method to retrieve a JD and ensure the member has access.
      * JD를 검색하고 회원이 접근 권한이 있는지 확인하는 헬퍼 메서드.
