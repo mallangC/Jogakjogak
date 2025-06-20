@@ -95,7 +95,7 @@ class JDServiceTest {
                 .companyName(faker.company().name())
                 .job(faker.job().title())
                 .content(faker.lorem().paragraph())
-                .endedAt(faker.date().future(365, TimeUnit.DAYS).toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
+                .endedAt(faker.date().future(365, TimeUnit.DAYS).toInstant().atZone(ZoneId.systemDefault()).toLocalDate().atStartOfDay())
                 .build();
 
         mockLLMAnalysisJsonString = "[" +
@@ -224,7 +224,7 @@ class JDServiceTest {
                 .memo("테스트 메모")
                 .member(mockMember)
                 .isAlarmOn(true)
-                .endedAt(LocalDate.now().plusDays(10))
+                .endedAt(LocalDate.now().plusDays(10).atStartOfDay())
                 .build();
 
         ToDoList toDoList1 = ToDoList.builder()
@@ -411,14 +411,14 @@ class JDServiceTest {
                 .id(3L).category(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN).title("투두3").content("내용3").isDone(true).build();
 
         JD jd1 = JD.builder()
-                .id(101L).title("백엔드 개발자").companyName("SKC").endedAt(LocalDate.of(2025, 5, 24))
+                .id(101L).title("백엔드 개발자").companyName("SKC").endedAt(LocalDate.of(2025, 5, 24).atStartOfDay())
                 .member(mockMember)
                 .build();
         jd1.addToDoList(todo1);
         jd1.addToDoList(todo2);
 
         JD jd2 = JD.builder()
-                .id(102L).title("UX 디렉터").companyName("메리츠화재").endedAt(LocalDate.of(2025, 1, 20))
+                .id(102L).title("UX 디렉터").companyName("메리츠화재").endedAt(LocalDate.of(2025, 1, 20).atStartOfDay())
                 .member(mockMember)
                 .build();
         jd2.addToDoList(todo3);

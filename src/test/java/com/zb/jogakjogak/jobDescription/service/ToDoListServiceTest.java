@@ -74,7 +74,7 @@ class ToDoListServiceTest {
                 .companyName(faker.company().name())
                 .job(faker.job().position())
                 .content(faker.lorem().paragraph())
-                .endedAt(faker.date().future(365, TimeUnit.DAYS).toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
+                .endedAt(faker.date().future(365, TimeUnit.DAYS).toInstant().atZone(ZoneId.systemDefault()).toLocalDate().atStartOfDay())
                 .applyAt(null)
                 .memo(faker.lorem().sentence())
                 .build();
@@ -318,7 +318,7 @@ class ToDoListServiceTest {
                 .companyName(faker.company().name())
                 .job(faker.job().position())
                 .content(faker.lorem().paragraph())
-                .endedAt(LocalDate.now())
+                .endedAt(LocalDate.now().atStartOfDay())
                 .memo(faker.lorem().sentence())
                 .build();
 
@@ -518,7 +518,7 @@ class ToDoListServiceTest {
                 .companyName(faker.company().name())
                 .job(faker.job().position())
                 .content(faker.lorem().paragraph())
-                .endedAt(LocalDate.now())
+                .endedAt(LocalDate.now().atStartOfDay())
                 .memo(faker.lorem().sentence())
                 .build();
 
