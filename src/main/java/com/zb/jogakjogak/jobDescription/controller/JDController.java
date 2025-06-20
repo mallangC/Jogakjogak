@@ -208,6 +208,15 @@ public class JDController {
         );
     }
 
+    /**
+     * 지정된 JD(Job Description)의 메모를 업데이트합니다.
+     * 사용자는 자신이 생성한 JD에 대해서만 메모를 수정할 수 있습니다.
+     *
+     * @param jdId             메모를 업데이트할 JD의 고유 ID (경로 변수)
+     * @param dto              업데이트할 메모 내용을 담고 있는 요청 DTO
+     * @param customOAuth2User 현재 인증된 사용자의 정보를 담고 있는 객체.
+     * @return 업데이트된 메모 내용을 담고 있는 ResponseDto
+     */
     @PatchMapping("/jds/{jd_id}/memo")
     public ResponseEntity<HttpApiResponse<MemoResponseDto>> updateMemo(
             @PathVariable("jd_id") Long jdId,
