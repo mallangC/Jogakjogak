@@ -9,17 +9,15 @@ CREATE TABLE member
     phone_number  VARCHAR(11) NOT NULL,
     role          VARCHAR(50) NOT NULL,
     registered_at DATETIME    NOT NULL,
-    last_login_at DATETIME    NOT NULL,
-    created_at    DATETIME,
-    updated_at    DATETIME
+    last_login_at DATETIME    NOT NULL
 );
 
 CREATE TABLE refresh_token
 (
-    id            BIGINT PRIMARY KEY AUTO_INCREMENT,
-    username      VARCHAR(50)  NOT NULL,
-    refresh_token VARCHAR(255) NOT NULL,
-    expiration    DATETIME     NOT NULL
+    id         BIGINT PRIMARY KEY AUTO_INCREMENT,
+    username   VARCHAR(50)  NOT NULL,
+    token      VARCHAR(255) NOT NULL,
+    expiration DATETIME     NOT NULL
 );
 
 CREATE TABLE oauth2_info
@@ -73,4 +71,12 @@ CREATE TABLE to_do_list
     created_at DATETIME,
     updated_at DATETIME,
     FOREIGN KEY (jd_id) REFERENCES job_descriptions (id)
+);
+
+CREATE TABLE notification
+(
+    id         BIGINT PRIMARY KEY AUTO_INCREMENT,
+    member_id BIGINT NOT NULL ,
+    created_at DATETIME,
+    FOREIGN KEY (member_id) REFERENCES member(id)
 );

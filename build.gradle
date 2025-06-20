@@ -48,7 +48,7 @@ dependencies {
     testImplementation 'org.mockito:mockito-core'
     testImplementation 'net.datafaker:datafaker:2.0.2'
 
-    //
+    //.env
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 
 
