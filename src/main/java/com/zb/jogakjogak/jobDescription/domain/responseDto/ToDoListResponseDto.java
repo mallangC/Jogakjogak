@@ -5,6 +5,8 @@ import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Builder
 public class ToDoListResponseDto {
@@ -15,6 +17,8 @@ public class ToDoListResponseDto {
     private String memo;
     private boolean isDone;
     private Long jdId;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public static ToDoListResponseDto fromEntity(ToDoList toDoList) {
         return ToDoListResponseDto.builder()
@@ -25,6 +29,8 @@ public class ToDoListResponseDto {
                 .memo(toDoList.getMemo())
                 .isDone(toDoList.isDone())
                 .jdId(toDoList.getJd().getId())
+                .createdAt(toDoList.getCreatedAt())
+                .updatedAt(toDoList.getUpdatedAt())
                 .build();
     }
 }
