@@ -28,9 +28,7 @@ public class Member{
     private Long id;
 
     @NotBlank
-
     private String username;
-
 
     @Email
     private String email;
@@ -40,7 +38,6 @@ public class Member{
     private String name;
 
     private String nickname;
-
 
     private String phoneNumber;
 
