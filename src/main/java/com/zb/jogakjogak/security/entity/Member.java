@@ -1,10 +1,11 @@
 package com.zb.jogakjogak.security.entity;
 
-import com.zb.jogakjogak.global.BaseEntity;
 import com.zb.jogakjogak.jobDescription.entity.JD;
+import com.zb.jogakjogak.notification.entity.Notification;
 import com.zb.jogakjogak.resume.entity.Resume;
 import com.zb.jogakjogak.security.Role;
 import com.zb.jogakjogak.security.dto.KakaoResponseDto;
+import com.zb.jogakjogak.security.dto.OAuth2ResponseDto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -20,14 +21,14 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Member extends BaseEntity {
+public class Member{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank
-    private String userName;
+    private String username;
 
     @Email
     private String email;
@@ -36,7 +37,7 @@ public class Member extends BaseEntity {
 
     private String name;
 
-    private String nickName;
+    private String nickname;
 
     private String phoneNumber;
 
@@ -57,6 +58,9 @@ public class Member extends BaseEntity {
     @Builder.Default
     private List<JD> jdList = new ArrayList<>();
 
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<Notification> notification;
+
     @PrePersist
     public void prePersist(){
         this.registeredAt = LocalDateTime.now();
@@ -67,10 +71,10 @@ public class Member extends BaseEntity {
         this.lastLoginAt = LocalDateTime.now();
     }
 
-    public void updateExistingMember(KakaoResponseDto kakaoResponseDto){
-        this.email = kakaoResponseDto.getEmail();
-        this.nickName = kakaoResponseDto.getNickName();
-        this.phoneNumber = kakaoResponseDto.getPhoneNumber();
-        this.name = kakaoResponseDto.getName();
+    public void updateExistingMember(OAuth2ResponseDto oAuth2ResponseDto){
+        this.email = oAuth2ResponseDto.getEmail();
+        this.nickname = oAuth2ResponseDto.getNickname();
+        this.phoneNumber = oAuth2ResponseDto.getPhoneNumber();
+        this.name = oAuth2ResponseDto.getName();
     }
 }

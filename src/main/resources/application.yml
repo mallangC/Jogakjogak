@@ -18,14 +18,13 @@ spring:
     user: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     locations: classpath:db/migration
+    driver-class-name: com.mysql.cj.jdbc.Driver
     enabled: true
-    baseline-on-migrate: true
-    baseline-version: 0
 
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     database-platform: org.hibernate.dialect.MySQL8Dialect
     properties:
       hibernate:
@@ -49,9 +48,19 @@ spring:
               - name
               - phone_number
             authorization-grant-type: authorization_code
-            redirect-uri: "http://localhost:8080/login/oauth2/code/kakao"
+            redirect-uri: "https://jogakjogak.com/login/oauth2/code/kakao"
             client-name: Kakao
             client-authentication-method: client_secret_post
+
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            redirect-uri: http://localhost:8080/login/oauth2/code/google
+            authorization-grant-type: authorization_code
+            scope:
+              - profile
+              - email
+            client-name: Google
 
         provider:
           kakao:
@@ -60,19 +69,31 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
 
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
+
+  mail:
+    protocol: smtp
+    host: smtp.gmail.com
+    port: 587
+    username: ${EMAIL_ID}
+    password: ${EMAIL_PASSWORD}
+    default-encoding: utf-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 kakao:
   admin-key: ${KAKAO_ADMIN_KEY}
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}
-
-aligo:
-  api-url: ${ALIGO_API_URL}
-  api-key: ${ALIGO_API_KEY}
-  user-id: ${ALIGO_USER_ID}
-  sender-key: ${ALIGO_SENDER_KEY}
-  sender-phone: ${ALIGO_SENDER_PHONE}
-  template-code: ${ALIGO_TEMPLATE_CODE}
 
 openai:
   api:
@@ -88,3 +109,14 @@ gemini:
   api:
     key: ${GEMINI_API_KEY}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health"
+  endpoint:
+    health:
+      show-details: "always"
+logging:
+  level:
+    org.flywaydb: DEBUG

@@ -10,6 +10,7 @@ permissions:
 
 env:
   DB_URL: ${{ secrets.DB_URL }}
+  DB_META_URL: ${{ secrets.DB_META_URL }}
   DB_USERNAME: ${{ secrets.DB_USERNAME }}
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
   KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID}}
@@ -23,6 +24,12 @@ env:
   EC2_HOST: ${{ secrets.EC2_HOST}}
   EC2_USER: ${{ secrets.EC2_USER}}
   EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY}}
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY}}
+  OPENAI_API_URL: ${{ secrets.OPENAI_API_URL}}
+  GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID}}
+  GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET}}
+  EMAIL_ID: ${{ secrets.ALIGO_USER_ID}}
+  EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD}}
 
 jobs:
   test:
@@ -90,15 +97,19 @@ jobs:
           platforms: linux/amd64,linux/arm64
 
   deploy:
+
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: build
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       # .env 파일 생성
       - name: Create .env file from secrets
         run: |
-          # .env 파일 내용을 문자열로 구성
           echo "DB_URL=${{ env.DB_URL }}" > .env
+          echo "DB_META_URL=${{ env.DB_META_URL }}" >> .env
           echo "DB_USERNAME=${{ env.DB_USERNAME }}" >> .env
           echo "DB_PASSWORD=${{ env.DB_PASSWORD }}" >> .env
           echo "KAKAO_CLIENT_ID=${{ env.KAKAO_CLIENT_ID}}" >> .env
@@ -106,6 +117,12 @@ jobs:
           echo "KAKAO_ADMIN_KEY=${{ env.KAKAO_ADMIN_KEY}}" >> .env
           echo "JWT_SECRET_KEY=${{ env.JWT_SECRET_KEY}}" >> .env
           echo "GEMINI_API_KEY=${{ env.GEMINI_API_KEY}}" >> .env
+          echo "OPENAI_API_KEY=${{ env.OPENAI_API_KEY}}" >> .env
+          echo "OPENAI_API_URL=${{ env.OPENAI_API_URL}}" >> .env         
+          echo "GOOGLE_CLIENT_ID=${{ env.GOOGLE_CLIENT_ID}}" >> .env 
+          echo "GOOGLE_CLIENT_SECRET=${{ env.GOOGLE_CLIENT_SECRET}}" >> .env 
+          echo "EMAIL_ID=${{ env.EMAIL_ID}}" >> .env 
+          echo "EMAIL_PASSWORD=${{ env.EMAIL_PASSWORD}}" >> .env    
 
         shell: bash
 
@@ -116,7 +133,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          # 보낼 파일들 (쉼표로 구분)
+          # 보낼 파일들
           source: ".env,docker-compose.yml"
           # EC2 인스턴스 내의 대상 디렉토리
           target: "/home/${{ secrets.EC2_USER }}/jogakjogak"
@@ -129,13 +146,13 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # 대상 디렉토리로 이동
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+            
             cd /home/${{ secrets.EC2_USER }}/jogakjogak
             
-            # Docker 이미지 풀 및 컨테이너 재시작
             docker compose pull
             docker compose up -d --force-recreate
             
-            # 오래된 이미지 정리
             docker image prune -f
+            docker logout
             echo "Deployment to EC2 completed successfully!"

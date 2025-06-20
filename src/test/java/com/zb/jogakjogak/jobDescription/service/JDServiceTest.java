@@ -67,19 +67,22 @@ class JDServiceTest {
     private Member mockMember;
     private Pageable pageable;
     private JD testJd;
+    private Resume mockResume;
 
     @BeforeEach
     void setUp() {
         faker = new Faker();
 
-        Resume mockResume = Resume.builder()
+        mockResume = Resume.builder()
                 .id(1L)
-                .content(faker.lorem().paragraph(5))
+                .title("테스트 이력서")
+                .content("테스트 내용")
+                .member(mockMember)
                 .build();
 
         mockMember = Member.builder()
                 .id(1L)
-                .userName("testUser")
+                .username("testUser")
                 .email("test@example.com")
                 .password("password123")
                 .role(Role.USER)
@@ -131,7 +134,7 @@ class JDServiceTest {
     @DisplayName("LLM 분석 서비스 성공 테스트 - JD 및 ToDoList 저장 포함 (Gemini)")
     void llmAnalyze_success() throws JsonProcessingException {
         // given
-        when(memberRepository.findByUserName(anyString())).thenReturn(Optional.of(mockMember));
+        when(memberRepository.findByUsername(anyString())).thenReturn(Optional.of(mockMember));
         when(llmService.generateTodoListJson(anyString(), anyString(), anyString()))
                 .thenReturn(mockLLMAnalysisJsonString);
         when(objectMapper.readValue(eq(mockLLMAnalysisJsonString), any(com.fasterxml.jackson.core.type.TypeReference.class)))
@@ -189,7 +192,7 @@ class JDServiceTest {
     @DisplayName("LLM 분석 서비스 JsonProcessingException 발생 시 JDException 던지는지 테스트 (Gemini)")
     void llmAnalyze_failure_jsonProcessingException() throws JsonProcessingException {
         // given
-        when(memberRepository.findByUserName(anyString())).thenReturn(Optional.of(mockMember));
+        when(memberRepository.findByUsername(anyString())).thenReturn(Optional.of(mockMember));
         when(llmService.generateTodoListJson(anyString(), anyString(), anyString()))
                 .thenReturn("invalid json string from LLM");
 
@@ -244,10 +247,11 @@ class JDServiceTest {
                 .build();
         mockJd.addToDoList(toDoList1);
         mockJd.addToDoList(toDoList2);
-        when(jdRepository.findByIdWithToDoLists(jdId)).thenReturn(Optional.of(mockJd));
+        when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
+        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
 
         // When
-        JDResponseDto result = jdService.getJd(jdId);
+        JDResponseDto result = jdService.getJd(jdId, mockMember.getName());
 
         // Then
         assertNotNull(result);
@@ -276,7 +280,8 @@ class JDServiceTest {
         assertEquals(mockJd.getId(), firstToDo.getJdId());
 
         // Verify
-        verify(jdRepository, times(1)).findByIdWithToDoLists(jdId);
+        verify(jdRepository, times(1)).findById(jdId);
+        verify(memberRepository, times(1)).findByUsername(mockMember.getName());
     }
 
     @Test
@@ -284,14 +289,17 @@ class JDServiceTest {
     void getJd_notFound() {
         // Given
         Long nonExistentJdId = 999L;
-        when(jdRepository.findByIdWithToDoLists(nonExistentJdId)).thenReturn(Optional.empty());
+        when(jdRepository.findById(nonExistentJdId)).thenReturn(Optional.empty());
+        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
 
         // When & Then
-        JDException thrown = assertThrows(JDException.class, () -> jdService.getJd(nonExistentJdId));
-        assertEquals(JDErrorCode.JD_NOT_FOUND, thrown.getErrorCode());
+        JDException thrown = assertThrows(JDException.class, () -> jdService.getJd(nonExistentJdId, mockMember.getName()));
+        assertEquals(JDErrorCode.NOT_FOUND_JD, thrown.getErrorCode());
 
         // Verify
-        verify(jdRepository, times(1)).findByIdWithToDoLists(nonExistentJdId);
+        verify(memberRepository, times(1)).findByUsername(mockMember.getName());
+        verify(jdRepository, times(1)).findById(nonExistentJdId);
+        verify(jdRepository, never()).findByIdWithToDoLists(anyLong());
     }
 
     @Test
@@ -302,22 +310,20 @@ class JDServiceTest {
         JD mockJd = JD.builder()
                 .id(jdId)
                 .title(faker.book().title())
+                .member(mockMember)
                 .companyName(faker.artist().name())
                 .build();
 
         when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
+        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
         doNothing().when(jdRepository).deleteById(jdId);
 
         // When
-        JDDeleteResponseDto result = jdService.deleteJd(jdId);
+        jdService.deleteJd(jdId, mockMember.getName());
 
         // Then
-        assertNotNull(result);
-        assertEquals(jdId, result.getJd_id());
-
-        // Verify
-        verify(jdRepository, times(1)).findById(jdId);
-        verify(jdRepository, times(1)).deleteById(jdId);
+        verify(jdRepository, times(1)).deleteById(mockJd.getId());
+        verify(memberRepository, times(1)).findByUsername(mockMember.getName());
     }
 
     @Test
@@ -325,11 +331,12 @@ class JDServiceTest {
     void deleteJd_notFound() {
         // Given
         Long nonExistentJdId = 999L;
+        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
         when(jdRepository.findById(nonExistentJdId)).thenReturn(Optional.empty());
 
         // When & Then
-        JDException thrown = assertThrows(JDException.class, () -> jdService.deleteJd(nonExistentJdId));
-        assertEquals(JDErrorCode.JD_NOT_FOUND, thrown.getErrorCode());
+        JDException thrown = assertThrows(JDException.class, () -> jdService.deleteJd(nonExistentJdId, mockMember.getName()));
+        assertEquals(JDErrorCode.NOT_FOUND_JD, thrown.getErrorCode());
 
         // Verify
         verify(jdRepository, times(1)).findById(nonExistentJdId);
@@ -351,13 +358,15 @@ class JDServiceTest {
         JD mockJd = JD.builder()
                 .id(jdId)
                 .title("알람 테스트 JD")
+                .member(mockMember)
                 .isAlarmOn(initialAlarmStatus)
                 .build();
 
         when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
+        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
 
         // When
-        JDAlarmResponseDto result = jdService.alarm(jdId, requestDto);
+        JDAlarmResponseDto result = jdService.alarm(jdId, requestDto, mockMember.getName());
 
         // Then
         assertNotNull(result);
@@ -379,10 +388,11 @@ class JDServiceTest {
                 .build();
 
         when(jdRepository.findById(nonExistentJdId)).thenReturn(Optional.empty());
+        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
 
         // When & Then
-        JDException thrown = assertThrows(JDException.class, () -> jdService.alarm(nonExistentJdId, requestDto));
-        assertEquals(JDErrorCode.JD_NOT_FOUND, thrown.getErrorCode());
+        JDException thrown = assertThrows(JDException.class, () -> jdService.alarm(nonExistentJdId, requestDto, mockMember.getName()));
+        assertEquals(JDErrorCode.NOT_FOUND_JD, thrown.getErrorCode());
 
         verify(jdRepository, times(1)).findById(nonExistentJdId);
     }
@@ -391,7 +401,7 @@ class JDServiceTest {
     @DisplayName("JD 목록 성공적으로 조회 및 ToDoList 개수 계산")
     void getAllJds_Success() {
         // Given
-        when(memberRepository.findByUserName(mockMember.getUserName())).thenReturn(Optional.of(mockMember));
+        when(memberRepository.findByUsername(mockMember.getUsername())).thenReturn(Optional.of(mockMember));
 
         ToDoList todo1 = ToDoList.builder()
                 .id(1L).category(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN).title("투두1").content("내용1").isDone(true).build();
@@ -420,23 +430,30 @@ class JDServiceTest {
         when(jdRepository.findByMemberId(mockMember.getId(), pageable)).thenReturn(jdPage);
 
         // When
-        Page<AllGetJDResponseDto> resultPage = jdService.getAllJds(mockMember.getUserName(), pageable);
+        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember.getUsername(), pageable);
+
 
         // Then
-        verify(memberRepository, times(1)).findByUserName(mockMember.getUserName());
+        verify(memberRepository, times(1)).findByUsername(mockMember.getUsername());
         verify(jdRepository, times(1)).findByMemberId(mockMember.getId(), pageable);
 
         assertNotNull(resultPage);
-        assertEquals(2, resultPage.getContent().size());
+        assertNotNull(resultPage.getJds());
+        assertEquals(2, resultPage.getJds().size());
         assertEquals(2, resultPage.getTotalElements());
         assertEquals(1, resultPage.getTotalPages());
 
-        AllGetJDResponseDto dto1 = resultPage.getContent().get(0);
+        assertNotNull(resultPage.getResume());
+        assertEquals(mockResume.getTitle(), resultPage.getResume().getTitle());
+        assertEquals(mockResume.getContent(), resultPage.getResume().getContent());
+
+
+        AllGetJDResponseDto dto1 = resultPage.getJds().get(0);
         assertEquals(101L, dto1.getJd_id());
         assertEquals(2L, dto1.getTotal_pieces());
         assertEquals(1L, dto1.getCompleted_pieces());
 
-        AllGetJDResponseDto dto2 = resultPage.getContent().get(1);
+        AllGetJDResponseDto dto2 = resultPage.getJds().get(1);
         assertEquals(102L, dto2.getJd_id());
         assertEquals(1L, dto2.getTotal_pieces());
         assertEquals(1L, dto2.getCompleted_pieces());
@@ -446,7 +463,7 @@ class JDServiceTest {
     @DisplayName("JD 목록 조회 시 회원이 존재하지 않으면 AuthException 발생")
     void getAllJds_MemberNotFound_ThrowsAuthException() {
         // Given
-        when(memberRepository.findByUserName(anyString())).thenReturn(Optional.empty());
+        when(memberRepository.findByUsername(anyString())).thenReturn(Optional.empty());
 
         // When & Then
         AuthException exception = assertThrows(AuthException.class, () ->
@@ -462,22 +479,26 @@ class JDServiceTest {
     @DisplayName("회원은 존재하지만 해당 회원의 JD가 없을 때 빈 페이지 반환")
     void getAllJds_NoJdsForMember_ReturnsEmptyPage() {
         // Given
-        when(memberRepository.findByUserName(mockMember.getUserName())).thenReturn(Optional.of(mockMember));
+        when(memberRepository.findByUsername(mockMember.getUsername())).thenReturn(Optional.of(mockMember));
 
         Page<JD> emptyJdPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
         when(jdRepository.findByMemberId(mockMember.getId(), pageable)).thenReturn(emptyJdPage);
 
         // When
-        Page<AllGetJDResponseDto> resultPage = jdService.getAllJds(mockMember.getUserName(), pageable);
+        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember.getUsername(), pageable);
+
 
         // Then
-        verify(memberRepository, times(1)).findByUserName(mockMember.getUserName());
+        verify(memberRepository, times(1)).findByUsername(mockMember.getUsername());
         verify(jdRepository, times(1)).findByMemberId(mockMember.getId(), pageable);
 
         assertNotNull(resultPage);
-        assertTrue(resultPage.getContent().isEmpty());
+        assertNotNull(resultPage.getJds());
+        assertTrue(resultPage.getJds().isEmpty());
         assertEquals(0, resultPage.getTotalElements());
         assertEquals(0, resultPage.getTotalPages());
+        assertNotNull(resultPage.getResume());
+        assertEquals(mockResume.getTitle(), resultPage.getResume().getTitle());
     }
 
     @Test
@@ -485,7 +506,7 @@ class JDServiceTest {
     void updateBookmarkStatus_success_toTrue() {
         // Given
         BookmarkRequestDto dto = BookmarkRequestDto.builder().isBookmark(true).build();
-        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
+        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
         when(jdRepository.findById(anyLong())).thenReturn(Optional.of(testJd));
         when(jdRepository.save(any(JD.class))).thenReturn(testJd);
 
@@ -499,7 +520,7 @@ class JDServiceTest {
         assertTrue(testJd.isBookmark());
 
         // Mock 객체의 메서드 호출 검증
-        verify(memberRepository, times(1)).findByUserName(mockMember.getName());
+        verify(memberRepository, times(1)).findByUsername(mockMember.getName());
         verify(jdRepository, times(1)).findById(testJd.getId());
         verify(jdRepository, times(1)).save(testJd);
     }
@@ -510,7 +531,7 @@ class JDServiceTest {
         // Given
         testJd.updateBookmarkStatus(true);
         BookmarkRequestDto dto = BookmarkRequestDto.builder().isBookmark(false).build();
-        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
+        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
         when(jdRepository.findById(anyLong())).thenReturn(Optional.of(testJd));
         when(jdRepository.save(any(JD.class))).thenReturn(testJd);
 
@@ -523,7 +544,7 @@ class JDServiceTest {
         assertFalse(response.isBookmark());
         assertFalse(testJd.isBookmark());
 
-        verify(memberRepository, times(1)).findByUserName(mockMember.getName());
+        verify(memberRepository, times(1)).findByUsername(mockMember.getName());
         verify(jdRepository, times(1)).findById(testJd.getId());
         verify(jdRepository, times(1)).save(testJd);
     }
@@ -533,14 +554,14 @@ class JDServiceTest {
     void updateBookmarkStatus_fail_memberNotFound() {
         // Given
         BookmarkRequestDto dto = BookmarkRequestDto.builder().isBookmark(true).build();
-        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.empty());
+        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.empty());
 
         // When & Then
         AuthException exception = assertThrows(AuthException.class,
                 () -> jdService.updateBookmarkStatus(testJd.getId(), dto, mockMember.getName()));
         assertEquals(MemberErrorCode.NOT_FOUND_MEMBER, exception.getMemberErrorCode());
 
-        verify(memberRepository, times(1)).findByUserName(mockMember.getName());
+        verify(memberRepository, times(1)).findByUsername(mockMember.getName());
         verify(jdRepository, never()).findById(anyLong());
         verify(jdRepository, never()).save(any(JD.class));
     }
@@ -550,15 +571,15 @@ class JDServiceTest {
     void updateBookmarkStatus_fail_jdNotFound() {
         // Given
         BookmarkRequestDto dto = BookmarkRequestDto.builder().isBookmark(true).build();
-        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
+        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
         when(jdRepository.findById(testJd.getId())).thenReturn(Optional.empty());
 
         // When & Then
         JDException exception = assertThrows(JDException.class,
                 () -> jdService.updateBookmarkStatus(testJd.getId(), dto, mockMember.getName()));
-        assertEquals(JDErrorCode.JD_NOT_FOUND, exception.getErrorCode());
+        assertEquals(JDErrorCode.NOT_FOUND_JD, exception.getErrorCode());
 
-        verify(memberRepository, times(1)).findByUserName(mockMember.getName());
+        verify(memberRepository, times(1)).findByUsername(mockMember.getName());
         verify(jdRepository, times(1)).findById(testJd.getId());
         verify(jdRepository, never()).save(any(JD.class));
     }
@@ -568,17 +589,18 @@ class JDServiceTest {
     void updateBookmarkStatus_fail_unauthorizedAccess() {
         // Given
         BookmarkRequestDto dto = BookmarkRequestDto.builder().isBookmark(true).build();
-        Member requestMember  = Member.builder().id(200L).userName("otherUser").build();
+        Member requestMember = Member.builder().id(200L).username("otherUser").build();
+
         when(jdRepository.findById(anyLong())).thenReturn(Optional.of(testJd));
-        when(memberRepository.findByUserName(requestMember.getUserName())).thenReturn(Optional.of(requestMember));
+        when(memberRepository.findByUsername(requestMember.getUsername())).thenReturn(Optional.of(requestMember));
 
 
         // When & Then
         JDException exception = assertThrows(JDException.class,
-                () -> jdService.updateBookmarkStatus(testJd.getId(), dto, requestMember.getUserName()));
+                () -> jdService.updateBookmarkStatus(testJd.getId(), dto, requestMember.getUsername()));
         assertEquals(JDErrorCode.UNAUTHORIZED_ACCESS, exception.getErrorCode());
 
-        verify(memberRepository, times(1)).findByUserName(requestMember.getUserName().trim());
+        verify(memberRepository, times(1)).findByUsername(requestMember.getUsername().trim());
         verify(jdRepository, times(1)).findById(testJd.getId());
         verify(jdRepository, never()).save(any(JD.class));
     }
@@ -588,7 +610,7 @@ class JDServiceTest {
     @DisplayName("지원 완료 상태 토글 성공 - null에서 현재 시간으로 변경")
     void toggleApplyStatus_success_fromNullToNow() {
         // Given
-        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
+        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
         when(jdRepository.findById(testJd.getId())).thenReturn(Optional.of(testJd));
         when(jdRepository.save(any(JD.class))).thenReturn(testJd);
 
@@ -601,7 +623,7 @@ class JDServiceTest {
         assertNotNull(response.getApplyAt());
         assertNotNull(testJd.getApplyAt());
 
-        verify(memberRepository, times(1)).findByUserName(mockMember.getName());
+        verify(memberRepository, times(1)).findByUsername(mockMember.getName());
         verify(jdRepository, times(1)).findById(anyLong());
         verify(jdRepository, times(1)).save(testJd);
     }
@@ -611,7 +633,7 @@ class JDServiceTest {
     void toggleApplyStatus_success_fromNowToNull() {
         // Given
         testJd.markJdAsApplied();
-        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
+        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
         when(jdRepository.findById(anyLong())).thenReturn(Optional.of(testJd));
         when(jdRepository.save(any(JD.class))).thenReturn(testJd);
 
@@ -624,7 +646,7 @@ class JDServiceTest {
         assertNull(response.getApplyAt());
         assertNull(testJd.getApplyAt());
 
-        verify(memberRepository, times(1)).findByUserName(mockMember.getName());
+        verify(memberRepository, times(1)).findByUsername(mockMember.getName());
         verify(jdRepository, times(1)).findById(anyLong());
         verify(jdRepository, times(1)).save(testJd);
     }
@@ -633,14 +655,14 @@ class JDServiceTest {
     @DisplayName("지원 완료 상태 토글 실패 - 멤버를 찾을 수 없음")
     void toggleApplyStatus_fail_memberNotFound() {
         // Given
-        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.empty());
+        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.empty());
 
         // When & Then
         AuthException exception = assertThrows(AuthException.class,
                 () -> jdService.toggleApplyStatus(testJd.getId(), mockMember.getName()));
         assertEquals(MemberErrorCode.NOT_FOUND_MEMBER, exception.getMemberErrorCode());
 
-        verify(memberRepository, times(1)).findByUserName(mockMember.getName());
+        verify(memberRepository, times(1)).findByUsername(mockMember.getName());
         verify(jdRepository, never()).findById(anyLong());
         verify(jdRepository, never()).save(any(JD.class));
     }
@@ -649,15 +671,15 @@ class JDServiceTest {
     @DisplayName("지원 완료 상태 토글 실패 - JD를 찾을 수 없음")
     void toggleApplyStatus_fail_jdNotFound() {
         // Given
-        when(memberRepository.findByUserName(mockMember.getName())).thenReturn(Optional.of(mockMember));
+        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
         when(jdRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         // When & Then
         JDException exception = assertThrows(JDException.class,
                 () -> jdService.toggleApplyStatus(testJd.getId(), mockMember.getName()));
-        assertEquals(JDErrorCode.JD_NOT_FOUND, exception.getErrorCode());
+        assertEquals(JDErrorCode.NOT_FOUND_JD, exception.getErrorCode());
 
-        verify(memberRepository, times(1)).findByUserName(mockMember.getName());
+        verify(memberRepository, times(1)).findByUsername(mockMember.getName());
         verify(jdRepository, times(1)).findById(anyLong());
         verify(jdRepository, never()).save(any(JD.class));
     }
@@ -666,16 +688,16 @@ class JDServiceTest {
     @DisplayName("지원 완료 상태 토글 실패 - 권한 없음")
     void toggleApplyStatus_fail_unauthorizedAccess() {
         // Given
-        Member otherMember = Member.builder().id(200L).userName("otherUser").build();
-        when(memberRepository.findByUserName(otherMember.getUserName())).thenReturn(Optional.of(otherMember));
+        Member otherMember = Member.builder().id(200L).username("otherUser").build();
+        when(memberRepository.findByUsername(otherMember.getUsername())).thenReturn(Optional.of(otherMember));
         when(jdRepository.findById(anyLong())).thenReturn(Optional.of(testJd));
 
         // When & Then
         JDException exception = assertThrows(JDException.class,
-                () -> jdService.toggleApplyStatus(testJd.getId(), otherMember.getUserName()));
+                () -> jdService.toggleApplyStatus(testJd.getId(), otherMember.getUsername()));
         assertEquals(JDErrorCode.UNAUTHORIZED_ACCESS, exception.getErrorCode());
 
-        verify(memberRepository, times(1)).findByUserName(otherMember.getUserName());
+        verify(memberRepository, times(1)).findByUsername(otherMember.getUsername());
         verify(jdRepository, times(1)).findById(anyLong());
         verify(jdRepository, never()).save(any(JD.class));
     }

@@ -9,7 +9,7 @@ import com.zb.jogakjogak.security.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -18,8 +18,8 @@ public class ReissueService {
 
     private final JWTUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
-    private static final long ACCESS_TOKEN_MS = 86400000L;
-    private static final long REFRESH_TOKEN_MS = 604800000L;
+    private static final long ACCESS_TOKEN_HOURS = 24;
+    private static final long REFRESH_TOKEN_DAYS = 7;
 
     public ReissueResultDto reissue(String refreshToken) {
 
@@ -28,11 +28,11 @@ public class ReissueService {
         String userName = jwtUtil.getUserName(refreshToken);
         String role = jwtUtil.getRole(refreshToken);
 
-        String newAccess = jwtUtil.createJwt(userName, role, ACCESS_TOKEN_MS, Token.ACCESS_TOKEN);
-        String newRefresh = jwtUtil.createJwt(userName, role, REFRESH_TOKEN_MS, Token.REFRESH_TOKEN);
+        String newAccess = jwtUtil.createJwt(userName, role, ACCESS_TOKEN_HOURS * 60 * 60 * 1000L, Token.ACCESS_TOKEN);
+        String newRefresh = jwtUtil.createJwt(userName, role, REFRESH_TOKEN_DAYS * 24 * 60 * 60 * 1000L, Token.REFRESH_TOKEN);
 
         // refresh 토큰 저장 DB에 존재하면 업데이트, 없으면 생성
-        Optional<RefreshToken> existingToken = refreshTokenRepository.findByRefreshToken(refreshToken);
+        Optional<RefreshToken> existingToken = refreshTokenRepository.findByToken(refreshToken);
         if (existingToken.isPresent()) {
             updateExistingRefreshTokenEntity(existingToken.get(), newRefresh);
         } else {
@@ -46,17 +46,16 @@ public class ReissueService {
     }
 
     private void updateExistingRefreshTokenEntity(RefreshToken existingToken, String newRefresh) {
-        existingToken.setRefreshToken(newRefresh);
-        existingToken.setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_MS).toString());
+        existingToken.setToken(newRefresh);
+        existingToken.setExpiration(LocalDateTime.now().plusDays(REFRESH_TOKEN_DAYS));
         refreshTokenRepository.save(existingToken);
     }
 
     private void saveNewRefreshTokenEntity(String userName, String newRefresh) {
-        Date date = new Date(System.currentTimeMillis() + REFRESH_TOKEN_MS);
         RefreshToken refreshToken = RefreshToken.builder()
-                .userName(userName)
-                .refreshToken(newRefresh)
-                .expiration(date.toString())
+                .username(userName)
+                .token(newRefresh)
+                .expiration(LocalDateTime.now().plusDays(REFRESH_TOKEN_DAYS))
                 .build();
         refreshTokenRepository.save(refreshToken);
     }

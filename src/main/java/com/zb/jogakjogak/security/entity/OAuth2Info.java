@@ -9,6 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 @Entity
+@Table(name = "oauth2_info")
 public class OAuth2Info {
 
     @Id

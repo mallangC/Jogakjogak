@@ -3,6 +3,7 @@ package com.zb.jogakjogak.jobDescription.service;
 import com.google.common.collect.ImmutableMap;
 import com.google.genai.Client;
 import com.google.genai.types.*;
+import com.zb.jogakjogak.global.exception.AIServiceException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -150,10 +151,8 @@ public class LLMService {
             // 응답에서 텍스트 추출
             return response.text();
 
-        } catch (Exception e) { // IOException 대신 일반 Exception으로 변경합니다.
-            System.err.println("Error generating content from LLM: " + e.getMessage());
-            e.printStackTrace();
-            return "{\"error\": \"Failed to generate To-Do list due to an LLM error.\"}";
+        } catch (Exception e) {
+            throw new AIServiceException("LLM 서비스 알 수 없는 오류 발생", e);
         }
     }
 }

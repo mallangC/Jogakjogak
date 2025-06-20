@@ -41,15 +41,15 @@ class WithdrawalServiceTest {
 
         Member mockMember = createMockMember(userName);
 
-        when(memberRepository.findByUserName(userName)).thenReturn(Optional.of(mockMember));
+        when(memberRepository.findByUsername(userName)).thenReturn(Optional.of(mockMember));
 
         // when
         withdrawalService.withdrawMember(userName);
 
         // then
-        verify(memberRepository, times(1)).findByUserName(userName);
+        verify(memberRepository, times(1)).findByUsername(userName);
         verify(kakaoService, times(1)).unlinkKakaoMember(kakaoId);
-        verify(refreshTokenRepository, times(1)).deleteByUserName(userName);
+        verify(refreshTokenRepository, times(1)).deleteByUsername(userName);
         verify(memberRepository, times(1)).delete(mockMember);
     }
 
@@ -62,7 +62,7 @@ class WithdrawalServiceTest {
 
         Member mockMember = createMockMember(userName);
 
-        when(memberRepository.findByUserName(userName)).thenReturn(Optional.of(mockMember));
+        when(memberRepository.findByUsername(userName)).thenReturn(Optional.of(mockMember));
 
         // when
         withdrawalService.withdrawMember(userName);
@@ -73,7 +73,7 @@ class WithdrawalServiceTest {
 
     private Member createMockMember(String userName) {
         Member member = mock(Member.class);
-        when(member.getUserName()).thenReturn(userName);
+        when(member.getUsername()).thenReturn(userName);
         return member;
     }
 }

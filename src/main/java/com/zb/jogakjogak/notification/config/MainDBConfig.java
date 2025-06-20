@@ -1,4 +1,4 @@
-package com.zb.jogakjogak.bizmessage.config;
+package com.zb.jogakjogak.notification.config;
 
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -18,7 +18,8 @@ import java.util.HashMap;
 @EnableJpaRepositories(
         basePackages = {"com.zb.jogakjogak.security.repository",
                         "com.zb.jogakjogak.jobDescription.repository",
-                        "com.zb.jogakjogak.resume.repository"
+                        "com.zb.jogakjogak.resume.repository",
+                        "com.zb.jogakjogak.notification.repository"
         },
         entityManagerFactoryRef = "dataEntityManager",
         transactionManagerRef = "dataTransactionManager"
@@ -39,13 +40,16 @@ public class MainDBConfig {
         em.setDataSource(mainDBSource());
         em.setPackagesToScan(new String[]{"com.zb.jogakjogak.security.entity",
                                             "com.zb.jogakjogak.jobDescription.entity",
-                                            "com.zb.jogakjogak.resume.entity"
+                                            "com.zb.jogakjogak.resume.entity",
+                                            "com.zb.jogakjogak.notification.entity"
         });
         em. setJpaVendorAdapter(new HibernateJpaVendorAdapter());
 
         HashMap<String, Object> properties = new HashMap<>();
-        properties.put("hibernate.hbm2ddl.auto", "create");
+        properties.put("hibernate.hbm2ddl.auto", "none");
         properties.put("hibernate.show_sql", "true");
+        properties.put("hibernate.physical_naming_strategy", "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy");
+        properties.put("hibernate.implicit_naming_strategy", "org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy");
         properties.put("hibernate.dialect", "org.hibernate.dialect.MySQL8Dialect");
         em.setJpaPropertyMap(properties);
 
