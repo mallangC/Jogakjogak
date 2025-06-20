@@ -1,11 +1,11 @@
 package com.zb.jogakjogak.jobDescription.entity;
 
 import com.zb.jogakjogak.global.BaseEntity;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.MemoRequestDto;
 import com.zb.jogakjogak.security.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,5 +82,9 @@ public class JD extends BaseEntity {
     }
     public void unMarkJdAsApplied() {
         this.applyAt = null;
+    }
+
+    public void updateMemo(MemoRequestDto dto) {
+        this.memo = dto.getMemo();
     }
 }
