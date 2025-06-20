@@ -28,7 +28,7 @@ env:
   OPENAI_API_URL: ${{ secrets.OPENAI_API_URL}}
   GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID}}
   GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET}}
-  EMAIL_ID: ${{ secrets.ALIGO_USER_ID}}
+  EMAIL_ID: ${{ secrets.EMAIL_ID}}
   EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD}}
 
 jobs:

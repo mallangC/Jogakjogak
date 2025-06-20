@@ -1,6 +1,8 @@
 package com.zb.jogakjogak.notification.config;
 
 
+import org.flywaydb.core.Flyway;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
@@ -62,4 +64,15 @@ public class MainDBConfig {
         transactionManager.setEntityManagerFactory(dataEntityManager().getObject());
         return transactionManager;
     }
+
+    // Main DataSource를 위한 Flyway
+    @Bean(initMethod = "migrate")
+    public Flyway mainFlyway(@Qualifier("mainDBSource") DataSource dataSource) {
+        return Flyway.configure()
+                .dataSource(dataSource)
+                .locations("classpath:db/migration/main")
+                .table("flyway_schema_history_main")
+                .load();
+    }
+
 }
