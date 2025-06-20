@@ -257,8 +257,6 @@ public class JDService {
     @Transactional
     public ApplyStatusResponseDto toggleApplyStatus(Long jdId, String memberName) {
 
-        JD jd = getAuthorizedJd(jdId, memberName);
-
         JD updateJd = getAuthorizedJd(jdId, memberName);
         if (updateJd.getApplyAt() == null) {
             updateJd.markJdAsApplied();
