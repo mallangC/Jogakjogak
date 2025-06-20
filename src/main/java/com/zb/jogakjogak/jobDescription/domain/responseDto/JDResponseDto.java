@@ -28,7 +28,7 @@ public class JDResponseDto {
     private Long memberId;
     private boolean isAlarmOn;
     private LocalDateTime applyAt;
-    private LocalDate endedAt;
+    private LocalDateTime endedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.URL;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
@@ -28,6 +28,6 @@ public class JDRequestDto {
     private String job;
     @NotBlank(message = "채용 공고는 필수 항목입니다.")
     private String content;
-    @NotNull(message = "마감일은 필수 선택 항목입니다.")
-    private LocalDate endedAt;
+    @NotNull(message = "마감일은 필수 항목입니다.")
+    private LocalDateTime endedAt;
 }

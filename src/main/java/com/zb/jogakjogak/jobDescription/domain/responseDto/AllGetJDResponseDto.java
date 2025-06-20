@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -20,7 +19,7 @@ public class AllGetJDResponseDto {
     private Long total_pieces;
     private Long completed_pieces;
     private LocalDateTime applyAt;
-    private LocalDate endedAt;
+    private LocalDateTime endedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

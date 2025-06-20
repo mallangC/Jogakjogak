@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
-public class BookmarkResponseDto {
+public class MemoResponseDto {
     private Long jd_id;
-    private boolean isBookmark;
+    private String memo;
 }

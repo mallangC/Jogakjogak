@@ -5,10 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.zb.jogakjogak.global.exception.*;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.BookmarkRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.*;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.*;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
@@ -46,7 +43,7 @@ public class JDService {
     public JDResponseDto analyze(JDRequestDto jdRequestDto, String memberName) {
 
         Member member = memberRepository.findByUsername(memberName)
-                .orElseThrow(()-> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
+                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
 
         if (member.getResume().getContent() == null) {
@@ -93,7 +90,7 @@ public class JDService {
     public JDResponseDto llmAnalyze(JDRequestDto jdRequestDto, String memberName) {
 
         Member member = memberRepository.findByUsername(memberName)
-                .orElseThrow(()-> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
+                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
 
         if (member.getResume() == null) {
@@ -236,7 +233,7 @@ public class JDService {
      */
     @Transactional
     public BookmarkResponseDto updateBookmarkStatus(Long jdId, BookmarkRequestDto dto, String memberName) {
-     
+
         JD jd = getAuthorizedJd(jdId, memberName);
 
         jd.updateBookmarkStatus(dto.isBookmark());
@@ -267,6 +264,26 @@ public class JDService {
         return ApplyStatusResponseDto.builder()
                 .jd_id(jdId)
                 .applyAt(updateJd.getApplyAt())
+                .build();
+    }
+
+    /**
+     * 지정된 JD(Job Description)의 메모를 업데이트
+     *
+     *
+     * @param jdId       메모를 업데이트할 JD의 고유 ID.
+     * @param dto        업데이트할 메모 내용을 포함하는 dto.
+     * @param memberName 현재 로그인한 사용자의 사용자명
+     * @return 업데이트된 JD의 ID와 새 메모 내용을 포함하는 dto.
+     */
+    @Transactional
+    public MemoResponseDto updateMemo(Long jdId, MemoRequestDto dto, String memberName) {
+        JD jd = getAuthorizedJd(jdId, memberName);
+        jd.updateMemo(dto);
+        jdRepository.save(jd);
+        return MemoResponseDto.builder()
+                .jd_id(jd.getId())
+                .memo(jd.getMemo())
                 .build();
     }
 
