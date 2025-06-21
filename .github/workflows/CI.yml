@@ -46,6 +46,12 @@ jobs:
         if: ${{github.event_name == 'push'}}
         run: ./gradlew build -x test
 
+      - name: Check application-test.yml exists
+        run: cat src/main/resources/application-test.yml || echo "application-test.yml not found"
+
+      - name: Print environment
+        run: printenv
+
       # 테스트 진행
       - name: Test with Gradle
         run: ./gradlew test
