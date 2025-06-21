@@ -52,9 +52,19 @@ jobs:
       - name: Print environment
         run: printenv
 
+      - name: Copy application-test.yml for CI
+        run: |
+          mkdir -p src/main/resources
+          cp src/test/resources/application-test.yml src/main/resources/
+
+      - name: Check application-test.yml exists
+        run: cat src/main/resources/application-test.yml || echo "application-test.yml not found"
+
       # 테스트 진행
       - name: Test with Gradle
         run: ./gradlew test
+        env:
+          SPRING_PROFILES_ACTIVE: test
 
       # 테스트를 기반으로 JaCoCo 리포트 작성
       - name: Generate JaCoCo Report
