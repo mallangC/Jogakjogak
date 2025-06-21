@@ -52,6 +52,7 @@ dependencies {
     testRuntimeOnly 'com.h2database:h2'
     testRuntimeOnly 'com.mysql:mysql-connector-j'
 
+
     //.env
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 
