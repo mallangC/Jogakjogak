@@ -46,7 +46,7 @@ public class ResumeController {
      */
     @PatchMapping("/{resume_id}")
     public ResponseEntity<HttpApiResponse<ResumeResponseDto>> modify(
-            @PathVariable Long resumeId,
+            @PathVariable("resume_id") Long resumeId,
             @Valid @RequestBody ResumeRequestDto requestDto,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         String username = customOAuth2User.getName();

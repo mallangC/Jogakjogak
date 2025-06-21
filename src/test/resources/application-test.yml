@@ -1,21 +1,52 @@
 spring:
-  datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+  datasource-main:
+    jdbc-url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  datasource-meta:
+    jdbc-url: jdbc:h2:mem:metadb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
     username: sa
     password:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: none
     show-sql: true
     database-platform: org.hibernate.dialect.H2Dialect
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
 
   flyway:
-    enabled: false
+    enabled: true
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    user: sa
+    password:
+    locations: classpath:db/migration
+    driver-class-name: org.h2.Driver
+    clean-disabled: false
+
+  # mail 설정 추가
+  mail:
+    protocol: smtp
+    host: smtp.gmail.com
+    port: 587
+    username: test@example.com # 더미 값
+    password: test-email-password # 더미 값
+    default-encoding: utf-8
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
 
 jwt:
-  secret-key: testsecretkeyforjwtasdadfsdfsdfasdffffffffffffffffffffffffasdf@Fasdfsdfsdf
+  secret-key: MAXwR50nxw54aLCw669TwxtGFO3XYBk8VC/2Ekvui+4=
 
 security:
   oauth2:
@@ -34,6 +65,16 @@ security:
           client-name: Kakao
           client-authentication-method: client_secret_post
 
+        google: # Google OAuth 설정 추가
+          client-id: test-google-client-id
+          client-secret: test-google-client-secret
+          redirect-uri: http://localhost:8080/login/oauth2/code/google
+          authorization-grant-type: authorization_code
+          scope:
+            - profile
+            - email
+          client-name: Google
+
     provider:
       kakao:
         authorization-uri: https://kauth.kakao.com/oauth/authorize
@@ -41,9 +82,22 @@ security:
         user-info-uri: https://kapi.kakao.com/v2/user/me
         user-name-attribute: id
 
+      google: # Google OAuth provider 설정 추가
+        authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+        token-uri: https://oauth2.googleapis.com/token
+        user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+        user-name-attribute: sub
+
 openai:
   api:
     key: test-openai-key
     url: https://api.openai.com/v1
     model: gpt-4-turbo
     max-tokens: 1000
+
+gemini: # Gemini API 설정 추가
+  api:
+    key: test-gemini-key # 더미 값
+
+kakao: # KAKAO_ADMIN_KEY
+  admin-key: test-kakao-admin-key # 더미 값
