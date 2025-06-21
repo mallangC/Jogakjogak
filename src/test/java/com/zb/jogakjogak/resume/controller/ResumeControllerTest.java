@@ -6,14 +6,13 @@ import com.github.javafaker.Faker;
 import com.zb.jogakjogak.global.HttpApiResponse;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeResponseDto;
-import com.zb.jogakjogak.resume.repository.ResumeRepository;
 import com.zb.jogakjogak.security.Role;
 import com.zb.jogakjogak.security.entity.Member;
 import com.zb.jogakjogak.security.jwt.JWTUtil;
 import com.zb.jogakjogak.security.repository.MemberRepository;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.junit.jupiter.api.AfterEach;
+import org.springframework.core.env.Environment;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,6 +32,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Date;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -51,6 +51,9 @@ class ResumeControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private Environment environment;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -87,6 +90,9 @@ class ResumeControllerTest {
 
         token = createTestJwtToken(username);
         setupJwtUtilMock();
+
+        System.out.println("===== ACTIVE PROFILE: " + Arrays.toString(environment.getActiveProfiles()));
+
     }
 
 

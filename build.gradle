@@ -121,4 +121,5 @@ tasks.named('test') {
     useJUnitPlatform()
     finalizedBy 'jacocoTestReport'
     jvmArgs "-Xshare:off"
+    systemProperty "spring.profiles.active", "test"
 }
