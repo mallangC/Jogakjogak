@@ -5,7 +5,7 @@ spring:
     username: sa
     password:
 
-  datasource-meta: # 새로 추가된 부분
+  datasource-meta:
     jdbc-url: jdbc:h2:mem:metadb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
     username: sa
@@ -98,3 +98,6 @@ openai:
 gemini: # Gemini API 설정 추가
   api:
     key: test-gemini-key # 더미 값
+
+kakao: # KAKAO_ADMIN_KEY
+  admin-key: test-kakao-admin-key # 더미 값
