@@ -47,7 +47,9 @@ jobs:
         run: ./gradlew build -x test
 
       - name: Check application-test.yml exists
-        run: cat src/test/resources/application-test.yml || echo "application-test.yml not found"
+        run:
+          cat src/test/resources/application-test.yml || echo "application-test.yml not found"
+          cat src/main/resources/application-test.yml || echo "application-test.yml not found"
 
       - name: Print environment
         run: printenv
