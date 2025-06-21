@@ -50,7 +50,6 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testRuntimeOnly 'com.h2database:h2'
-    testRuntimeOnly 'com.mysql:mysql-connector-j'
 
     //.env
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'
@@ -121,5 +120,4 @@ tasks.named('test') {
     useJUnitPlatform()
     finalizedBy 'jacocoTestReport'
     jvmArgs "-Xshare:off"
-    systemProperty "spring.profiles.active", "test"
 }
