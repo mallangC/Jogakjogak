@@ -18,6 +18,21 @@ jobs:
     env:
       SPRING_PROFILES_ACTIVE: test
 
+    services:
+      db:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.TEST_ROOT_PASSWORD}}
+          MYSQL_USER: ${{ secrets.TEST_DB_USERNAME}}
+          MYSQL_PASSWORD: ${{ secrets.TEST_DB_PASSWORD}}
+          MYSQL_INITDB_MULTIPLE_DATABASES: "test_main_db,test_meta_db"
+          options: >-
+            --health-cmd "mysqladmin ping --silent"
+            --health-interval 10s
+            --health-timeout 5s
+            --health-retries 10
+            --network-alias db # 이 별칭으로 다른 스텝에서 접근합니다.
+
     steps:
       - uses: actions/checkout@v4
 
@@ -44,9 +59,13 @@ jobs:
         with:
           gradle-version: '7.6.4'
 
+      - name: Set Database Connection Environment Variables
+        run: |
+          echo "DB_USERNAME=${{ secrets.TEST_DB_USERNAME}}" >> $GITHUB_ENV
+          echo "DB_PASSWORD=${{ secrets.TEST_DB_PASSWORD}}" >> $GITHUB_ENV
+
       # 테스트 전 애플리케이션 빌드
       - name: Build with Gradle
-        if: ${{github.event_name == 'push'}}
         run: ./gradlew build -x test
 
       - name: Check application-test.yml exists
