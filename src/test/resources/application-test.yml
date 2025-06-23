@@ -1,15 +1,15 @@
 spring:
   datasource-main:
-    jdbc-url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    jdbc-url: jdbc:mysql://localhost:3306/test_main_db
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${TEST_DB_USERNAME}
+    password: ${TEST_DB_PASSWORD}
 
   datasource-meta:
-    jdbc-url: jdbc:h2:mem:metadb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    jdbc-url: jdbc:mysql://localhost:3306/test_meta_db
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${TEST_DB_USERNAME}
+    password: ${TEST_DB_PASSWORD}
 
   jpa:
     hibernate:
@@ -23,12 +23,6 @@ spring:
 
   flyway:
     enabled: true
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    user: sa
-    password:
-    locations: classpath:db/migration
-    driver-class-name: org.h2.Driver
-    clean-disabled: false
 
   # mail 설정 추가
   mail:
