@@ -21,14 +21,7 @@ jobs:
     services:
       db:
         image: mysql:8.0
-        options: >-
-          -e MYSQL_ROOT_PASSWORD=rootpassword
-          -e MYSQL_INITDB_MULTIPLE_DATABASES="test_main_db,test_meta_db"
-          --health-cmd "mysql -h localhost -u root -p rootpassword -e 'SELECT 1'"
-          --health-interval 5s
-          --health-timeout 20s
-          --health-retries 30
-          --network-alias db
+
     steps:
       - uses: actions/checkout@v4
 
