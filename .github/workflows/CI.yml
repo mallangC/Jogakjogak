@@ -24,7 +24,6 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: rootpassword
-          MYSQL_INITDB_MULTIPLE_DATABASES: "test_main_db,test_meta_db"
           MYSQLD_OPTS: "--bind-address=0.0.0.0"
         options: >-
           --health-cmd "mysql -h 127.0.0.1 -u root -prootpassword -e 'SELECT 1'"
@@ -33,6 +32,9 @@ jobs:
           --health-retries 60
         ports:
           - 3306:3306
+        volumes:
+          - ./init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+
 
     steps:
       - uses: actions/checkout@v4
@@ -87,7 +89,7 @@ jobs:
             echo "Waiting for test_main_db... ($i/30)"
             sleep 1
           done
-          mysql -h 127.0.0.1 -P 3306 -u root -prootpassword -e 'USE test_main_db;' || { echo "test_main_db is not accessible after max wait time!"; exit 1; }
+          mysql -h 127.0.0.1 -P 3306 -u root -p rootpassword -e 'USE test_main_db;' || { echo "test_main_db is not accessible after max wait time!"; exit 1; }
 
           echo "Waiting for test_meta_db to be accessible..."
           for i in $(seq 1 30); do # Max 30 seconds wait for test_meta_db
@@ -98,7 +100,7 @@ jobs:
             echo "Waiting for test_meta_db... ($i/30)"
             sleep 1
           done
-          mysql -h 127.0.0.1 -P 3306 -u root -prootpassword -e 'USE test_meta_db;' || { echo "test_meta_db is not accessible after max wait time!"; exit 1; }
+          mysql -h 127.0.0.1 -P 3306 -u root -p rootpassword -e 'USE test_meta_db;' || { echo "test_meta_db is not accessible after max wait time!"; exit 1; }
 
       # 테스트 전 애플리케이션 빌드
       - name: Build with Gradle
