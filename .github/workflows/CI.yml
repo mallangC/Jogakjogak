@@ -28,8 +28,8 @@ jobs:
           MYSQLD_OPTS: "--bind-address=0.0.0.0"
         options: >-
           --health-cmd "mysql -h 127.0.0.1 -u root -prootpassword -e 'SELECT 1'"
-          --health-interval 5s 
-          --health-timeout 20s 
+          --health-interval 5s
+          --health-timeout 20s
           --health-retries 60
         ports:
           - 3306:3306
@@ -62,8 +62,8 @@ jobs:
 
       - name: Set Database Connection Environment Variables
         run: |
-          echo "DB_HOST=127.0.0.1" >> $GITHUB_ENV
-          echo "DB_PASSWORD=rootpassword" >> $GITHUB_ENV
+          echo "TEST_DB_USERNAME=root" >> $GITHUB_ENV 
+          echo "TEST_DB_PASSWORD=rootpassword" >> $GITHUB_ENV
 
       # 테스트 전 애플리케이션 빌드
       - name: Build with Gradle
