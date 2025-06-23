@@ -17,15 +17,14 @@ jobs:
 
     env:
       SPRING_PROFILES_ACTIVE: test
-      MYSQL_ROOT_PASSWORD_VAR: ${{ secrets.TEST_DB_PASSWORD }}
 
     services:
       db:
         image: mysql:8.0
         options: >-
-          -e MYSQL_ROOT_PASSWORD=${{ env.MYSQL_ROOT_PASSWORD_VAR }}
+          -e MYSQL_ROOT_PASSWORD=rootpassword
           -e MYSQL_INITDB_MULTIPLE_DATABASES="test_main_db,test_meta_db"
-          --health-cmd "mysql -h localhost -u root -p${{ secrets.TEST_DB_PASSWORD }} -e 'SELECT 1'"
+          --health-cmd "mysql -h localhost -u root -p rootpassword -e 'SELECT 1'"
           --health-interval 5s
           --health-timeout 10s
           --health-retries 15
@@ -59,7 +58,7 @@ jobs:
       - name: Set Database Connection Environment Variables
         run: |
           echo "DB_HOST=db" >> $GITHUB_ENV
-          echo "DB_PASSWORD=${{ env.MYSQL_ROOT_PASSWORD_VAR }}" >> $GITHUB_ENV
+          echo "DB_PASSWORD=rootpassword" >> $GITHUB_ENV
 
       # 테스트 전 애플리케이션 빌드
       - name: Build with Gradle
