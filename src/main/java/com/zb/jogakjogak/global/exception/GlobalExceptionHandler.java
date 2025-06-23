@@ -8,6 +8,25 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(JDException.class)
+    public ResponseEntity<ErrorResponse> handleJDException(JDException e) {
+        JDErrorCode jdErrorCode = e.getErrorCode();
+        ErrorResponse response = new ErrorResponse(jdErrorCode.name(), jdErrorCode.getMessage());
+        return new ResponseEntity<>(response, jdErrorCode.getHttpStatus());
+    }
+    @ExceptionHandler(ResumeException.class)
+    public ResponseEntity<ErrorResponse> handleResumeException(ResumeException e) {
+        ResumeErrorCode resumeErrorCode = e.getErrorCode();
+        ErrorResponse response = new ErrorResponse(resumeErrorCode.name(), resumeErrorCode.getMessage());
+        return new ResponseEntity<>(response, resumeErrorCode.getHttpStatus());
+    }
+    @ExceptionHandler(ToDoListException.class)
+    public ResponseEntity<ErrorResponse> handleToDoListException(ToDoListException e) {
+        ToDoListErrorCode toDoListErrorCode = e.getErrorCode();
+        ErrorResponse response = new ErrorResponse(toDoListErrorCode.name(), toDoListErrorCode.getMessage());
+        return new ResponseEntity<>(response, toDoListErrorCode.getHttpStatus());
+    }
+
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<ErrorResponse> handleCustomException(AuthException e) {
         MemberErrorCode memberErrorCode = e.getMemberErrorCode();

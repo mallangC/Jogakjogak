@@ -1,18 +1,18 @@
 package com.zb.jogakjogak.jobDescription.entity;
 
 import com.zb.jogakjogak.global.BaseEntity;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.MemoRequestDto;
 import com.zb.jogakjogak.security.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Setter
-@Table(name = "job_descriptions")
+@Table(name = "job_description")
 @Getter
 @Builder
 @AllArgsConstructor
@@ -50,8 +50,8 @@ public class JD extends BaseEntity {
     @Column
     private LocalDateTime applyAt;
 
-    @Column(nullable = false)
-    private LocalDate endedAt;
+    @Column(nullable = false, columnDefinition = "DATE")
+    private LocalDateTime endedAt;
 
     @Builder.Default
     @OneToMany(mappedBy = "jd", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -82,5 +82,9 @@ public class JD extends BaseEntity {
     }
     public void unMarkJdAsApplied() {
         this.applyAt = null;
+    }
+
+    public void updateMemo(MemoRequestDto dto) {
+        this.memo = dto.getMemo();
     }
 }

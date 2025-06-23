@@ -15,6 +15,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      SPRING_PROFILES_ACTIVE: test
+
     steps:
       - uses: actions/checkout@v4
 
@@ -46,8 +49,13 @@ jobs:
         if: ${{github.event_name == 'push'}}
         run: ./gradlew build -x test
 
+      - name: Check application-test.yml exists
+        run: cat src/test/resources/application-test.yml || echo "application-test.yml not found"
+
       # 테스트 진행
       - name: Test with Gradle
+        env:
+          SPRING_PROFILES_ACTIVE: test
         run: ./gradlew test
 
       # 테스트를 기반으로 JaCoCo 리포트 작성

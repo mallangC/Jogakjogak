@@ -40,7 +40,7 @@ CREATE TABLE resume
     FOREIGN KEY (member_id) REFERENCES member (id)
 );
 
-CREATE TABLE job_descriptions
+CREATE TABLE job_description
 (
     id           BIGINT PRIMARY KEY AUTO_INCREMENT,
     member_id    BIGINT        NOT NULL,
@@ -70,7 +70,7 @@ CREATE TABLE to_do_list
     is_done    BIT           NOT NULL,
     created_at DATETIME,
     updated_at DATETIME,
-    FOREIGN KEY (jd_id) REFERENCES job_descriptions (id)
+    FOREIGN KEY (jd_id) REFERENCES job_description (id)
 );
 
 CREATE TABLE notification
