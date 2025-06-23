@@ -16,11 +16,11 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      mysql_test_db_1:
+      mysql_main_db:
         image: mysql:8.0 # 첫 번째 MySQL 인스턴스
         env:
           MYSQL_ROOT_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }} # root 비밀번호 (GitHub Secrets 사용 권장)
-          MYSQL_DATABASE: test_db_1 # 첫 번째 데이터베이스 이름
+          MYSQL_DATABASE: test_main_db # 첫 번째 데이터베이스 이름
         ports:
           - 3306:3306 # 호스트 3306 포트와 컨테이너 3306 포트 매핑
         options: >-
@@ -29,11 +29,11 @@ jobs:
           --health-timeout=5s
           --health-retries=10
 
-      mysql_test_db_2:
+      mysql_meta_db:
         image: mysql:8.0 # 두 번째 MySQL 인스턴스
         env:
           MYSQL_ROOT_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
-          MYSQL_DATABASE: test_db_2 # 두 번째 데이터베이스 이름
+          MYSQL_DATABASE: test_meta_db # 두 번째 데이터베이스 이름
         ports:
           - 3307:3306 # 호스트 3307 포트와 컨테이너 3306 포트 매핑
         options: >-
@@ -72,7 +72,7 @@ jobs:
 
       - name: Run Flyway Migrations for test_db_1
         run: |
-          ./gradlew flywayMigrate -Dflyway.url="jdbc:mysql://127.0.0.1:3306/test_db_1" \
+          ./gradlew flywayMigrate -Dflyway.url="jdbc:mysql://127.0.0.1:3306/test_main_db" \
                                  -Dflyway.user="root \
                                  -Dflyway.password=rootpassword
         env:
@@ -81,7 +81,7 @@ jobs:
 
       - name: Run Flyway Migrations for test_db_2
         run: |
-          ./gradlew flywayMigrate -Dflyway.url="jdbc:mysql://127.0.0.1:3307/test_db_2" \
+          ./gradlew flywayMigrate -Dflyway.url="jdbc:mysql://127.0.0.1:3307/test_meta_db" \
                                  -Dflyway.user=root \
                                  -Dflyway.password=rootpassword
         env:
@@ -94,7 +94,6 @@ jobs:
         env:
           TEST_DB_USERNAME: root
           TEST_DB_PASSWORD: rootpassword
-
 
       # 테스트를 기반으로 JaCoCo 리포트 작성
       - name: Generate JaCoCo Report
