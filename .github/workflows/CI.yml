@@ -127,11 +127,15 @@ jobs:
         run: |
           echo "Listing all Docker containers:"
           docker ps -a
-          CONTAINER_ID=$(docker ps -a --format "{{.ID}}\t{{.Names}}" | grep 'db$' | awk '{print $1}')
-          if [ -n "$CONTAINER_ID" ]; then
-            echo "--- Logs for container ID: $CONTAINER_ID ---"
-            docker logs --details "$CONTAINER_ID" || true
-            echo "--- End of logs for container ID: $CONTAINER_ID ---"
+          echo "--- Attempting to get logs for all 'mysql:8.0' containers ---"
+          ALL_MYSQL_CONTAINER_IDS=$(docker ps -a -q -f "ancestor=mysql:8.0")
+          if [ -n "$ALL_MYSQL_CONTAINER_IDS" ]; then
+            for CONTAINER_ID in $ALL_MYSQL_CONTAINER_IDS; do
+              echo "--- Logs for container ID: $CONTAINER_ID ---"
+              docker logs --details "$CONTAINER_ID" || true
+              echo "--- End of logs for container ID: $CONTAINER_ID ---"
+            done
           else
-            echo "No 'db' service container found or it exited too quickly to find its ID."
+            echo "No 'mysql:8.0' containers found."
           fi
+          echo "--- End of Docker container logs ---"
