@@ -21,10 +21,9 @@ jobs:
     services:
       db:
         image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
-          MYSQL_INITDB_MULTIPLE_DATABASES: "test_main_db,test_meta_db"
         options: >-
+          -e MYSQL_ROOT_PASSWORD=${{ secrets.TEST_DB_PASSWORD }}
+          -e MYSQL_INITDB_MULTIPLE_DATABASES="test_main_db,test_meta_db"
           --health-cmd "mysqladmin ping -h localhost -u root -p${{ secrets.TEST_DB_PASSWORD }} --silent"
           --health-interval 5s
           --health-timeout 10s
