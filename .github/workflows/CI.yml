@@ -35,7 +35,6 @@ jobs:
         volumes:
           - ./init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
 
-
     steps:
       - uses: actions/checkout@v4
 
