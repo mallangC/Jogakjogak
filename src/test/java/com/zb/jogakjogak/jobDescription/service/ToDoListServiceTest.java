@@ -6,6 +6,7 @@ import com.zb.jogakjogak.global.exception.JDException;
 import com.zb.jogakjogak.global.exception.ToDoListErrorCode;
 import com.zb.jogakjogak.global.exception.ToDoListException;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.BulkToDoListUpdateRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.CreateToDoListRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListUpdateRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListGetByCategoryResponseDto;
@@ -60,7 +61,7 @@ class ToDoListServiceTest {
     private JD mockJd;
     private Long toDoListId;
     private ToDoList mockToDoList;
-    private ToDoListDto createToDoListDto;
+    private CreateToDoListRequestDto createToDoListDto;
     private ToDoListDto updateToDoListDto;
     private ToDoListUpdateRequestDto createToDoListUpdateReqDto;
     private ToDoListUpdateRequestDto updateToDoListUpdateReqDto;
@@ -94,20 +95,18 @@ class ToDoListServiceTest {
                 .memo(faker.lorem().sentence())
                 .build();
 
-        createToDoListDto = new ToDoListDto(
-                faker.options().option(ToDoListType.class),
-                faker.lorem().sentence(3, 5),
-                faker.lorem().paragraph(2),
-                faker.lorem().sentence(1),
-                faker.bool().bool()
-        );
+        createToDoListDto = CreateToDoListRequestDto.builder()
+                .title(faker.job().title())
+                .category(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN)
+                .content(faker.lorem().paragraph())
+                .build();
 
         updateToDoListDto = new ToDoListDto(
                 faker.options().option(ToDoListType.class),
                 faker.lorem().sentence(4, 6),
                 faker.lorem().paragraph(3),
                 faker.lorem().sentence(2),
-                !createToDoListDto.isDone()
+                true
         );
 
         createToDoListUpdateReqDto = ToDoListUpdateRequestDto.builder()
@@ -135,8 +134,8 @@ class ToDoListServiceTest {
                 .category(createToDoListDto.getCategory())
                 .title(createToDoListDto.getTitle())
                 .content(createToDoListDto.getContent())
-                .memo(createToDoListDto.getMemo())
-                .isDone(createToDoListDto.isDone())
+                .memo("")
+                .isDone(false)
                 .jd(mockJd)
                 .build();
     }
@@ -172,10 +171,9 @@ class ToDoListServiceTest {
         assertEquals(createToDoListDto.getCategory(), result.getCategory());
         assertEquals(createToDoListDto.getTitle(), result.getTitle());
         assertEquals(createToDoListDto.getContent(), result.getContent());
-        assertEquals(createToDoListDto.getMemo(), result.getMemo());
-        assertEquals(createToDoListDto.isDone(), result.isDone());
+        assertEquals("", result.getMemo());
+        assertEquals(false, result.isDone());
         assertEquals(jdId, result.getJdId());
-        assertEquals(createToDoListDto.getMemo(), result.getMemo());
     }
 
     @Test
