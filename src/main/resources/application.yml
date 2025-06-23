@@ -14,11 +14,6 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   flyway:
-    url: ${DB_URL}
-    user: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    locations: classpath:db/migration
-    driver-class-name: com.mysql.cj.jdbc.Driver
     enabled: true
 
   jpa:
@@ -33,7 +28,7 @@ spring:
     job:
       enabled: false
     jdbc:
-      initialize-schema: always
+      initialize-schema: never
 
   security:
     oauth2:
