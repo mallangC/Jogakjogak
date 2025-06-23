@@ -42,6 +42,13 @@ public class ToDoListService {
     public ToDoListResponseDto createToDoList(Long jdId, CreateToDoListRequestDto toDoListDto, String memberName) {
 
         JD jd = getAuthorizedJd(jdId, memberName);
+        ToDoListType newCategory = toDoListDto.getCategory();
+        long countForCategory = jd.getToDoLists().stream()
+                .filter(toDoList -> toDoList.getCategory() == newCategory)
+                .count();
+        if (countForCategory >= 10) {
+            throw new ToDoListException(ToDoListErrorCode.TODO_LIST_LIMIT_EXCEEDED_FOR_CATEGORY);
+        }
         ToDoList toDoList = ToDoList.createToDoList(toDoListDto, jd);
         ToDoList savedToDoList = toDoListRepository.save(toDoList);
         return ToDoListResponseDto.fromEntity(savedToDoList);
