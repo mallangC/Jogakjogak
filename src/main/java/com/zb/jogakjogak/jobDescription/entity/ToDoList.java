@@ -78,14 +78,14 @@ public class ToDoList extends BaseEntity {
                 .build();
     }
 
-    public static ToDoList fromDto(ToDoListUpdateRequestDto dto, JD jd) {
+    public static ToDoList fromDto(ToDoListUpdateRequestDto dto, JD jd, ToDoListType category) {
 
         return ToDoList.builder()
-                .category(dto.getCategory())
+                .category(category)
                 .title(dto.getTitle())
                 .content(dto.getContent())
-                .memo(dto.getMemo())
                 .isDone(dto.isDone())
+                .memo("")
                 .jd(jd)
                 .build();
     }
@@ -112,11 +112,11 @@ public class ToDoList extends BaseEntity {
         this.isDone = dto.isDone();
     }
 
-    public void updateFromBulkUpdateToDoLists(ToDoListUpdateRequestDto dto) {
-        this.category = dto.getCategory();
+    public void updateFromBulkUpdateToDoLists(ToDoListUpdateRequestDto dto, ToDoListType category) {
+        this.category = category;
         this.title = dto.getTitle();
         this.content = dto.getContent();
-        this.memo = dto.getMemo() != null ? dto.getMemo() : "";
+        this.memo = "";
         this.isDone = dto.isDone();
     }
 }
