@@ -22,7 +22,7 @@ jobs:
       db:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.TEST_ROOT_PASSWORD}}
+          MYSQL_ROOT_PASSWORD: rootpassword
           MYSQL_USER: ${{ secrets.TEST_DB_USERNAME}}
           MYSQL_PASSWORD: ${{ secrets.TEST_DB_PASSWORD}}
           MYSQL_INITDB_MULTIPLE_DATABASES: "test_main_db,test_meta_db"
