@@ -24,7 +24,7 @@ jobs:
         options: >-
           -e MYSQL_ROOT_PASSWORD=rootpassword
           -e MYSQL_INITDB_MULTIPLE_DATABASES="test_main_db,test_meta_db"
-          --health-cmd "mysql -h localhost -u root -p rootpassword -e 'SELECT 1'"
+          --health-cmd "mysqladmin ping -h localhost -u root -p rootpassword --silent"
           --health-interval 5s
           --health-timeout 10s
           --health-retries 15
