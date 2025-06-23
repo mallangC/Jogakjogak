@@ -21,6 +21,13 @@ jobs:
     services:
       db:
         image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_INITDB_MULTIPLE_DATABASES: "test_main_db,test_meta_db"
+        options: >-
+          --network-alias db # 'db'라는 서비스 이름을 네트워크 별칭으로 명시
+        ports:
+          - 3306:3306
 
     steps:
       - uses: actions/checkout@v4
