@@ -23,13 +23,7 @@ jobs:
       db:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: rootpassword
-          MYSQLD_OPTS: "--bind-address=0.0.0.0"
-        options: >-
-          --health-cmd "mysql -h 127.0.0.1 -u root -prootpassword -e 'SELECT 1'"
-          --health-interval 5s
-          --health-timeout 20s
-          --health-retries 60
+          MYSQL_ROOT_PASSWORD: rootpassword=
         ports:
           - 3306:3306
         volumes:
