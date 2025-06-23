@@ -23,7 +23,7 @@ jobs:
       db:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: rootpassword=
+          MYSQL_ROOT_PASSWORD: rootpassword
         ports:
           - 3306:3306
         volumes:
