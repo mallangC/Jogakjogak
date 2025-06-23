@@ -223,21 +223,6 @@ public class ToDoListService {
         }
     }
     /**
-     * ToDoListUpdateRequestDto의 유효성 (JD ID 및 카테고리 일치)을 검증.
-     *
-     * @param jd             권한이 검증된 JD 엔티티
-     * @param targetCategory 현재 작업 대상 카테고리
-     * @param dto            검증할 ToDoListUpdateRequestDto
-     */
-    private void validateToDoListUpdateRequestDto(JD jd, ToDoListType targetCategory, ToDoListUpdateRequestDto dto) {
-        if (dto.getJdId() == null || !dto.getJdId().equals(jd.getId())) {
-            throw new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_BELONG_TO_JD);
-        }
-        if (dto.getCategory() == null || !dto.getCategory().equals(targetCategory)) {
-            throw new ToDoListException(ToDoListErrorCode.TODO_LIST_CATEGORY_MISMATCH);
-        }
-    }
-    /**
      * 일괄 업데이트 요청에서 삭제될 ToDoList들을 처리.
      *
      * @param jd             권한이 검증된 JD 엔티티
