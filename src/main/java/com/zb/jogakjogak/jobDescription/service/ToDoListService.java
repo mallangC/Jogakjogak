@@ -1,10 +1,7 @@
 package com.zb.jogakjogak.jobDescription.service;
 
 import com.zb.jogakjogak.global.exception.*;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.BulkToDoListUpdateRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.CreateToDoListRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListUpdateRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.*;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListGetByCategoryResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
@@ -64,7 +61,7 @@ public class ToDoListService {
      * @return 수정된 ToDoList의 응답 DTO
      */
     @Transactional
-    public ToDoListResponseDto updateToDoList(Long jdId, Long toDoListId, ToDoListDto toDoListDto, String memberName) {
+    public ToDoListResponseDto updateToDoList(Long jdId, Long toDoListId, UpdateToDoListRequestDto toDoListDto, String memberName) {
 
         JD jd = getAuthorizedJd(jdId, memberName);
         ToDoList toDoList = findToDoListAndValidateOwnership(jd, toDoListId);

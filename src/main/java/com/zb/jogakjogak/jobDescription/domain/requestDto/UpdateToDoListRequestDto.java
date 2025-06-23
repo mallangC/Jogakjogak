@@ -1,5 +1,6 @@
 package com.zb.jogakjogak.jobDescription.domain.requestDto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -13,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CreateToDoListRequestDto {
+public class UpdateToDoListRequestDto {
 
     @NotNull(message = "카테고리는 필수 입력 항목입니다.")
     private ToDoListType category;
@@ -22,4 +23,6 @@ public class CreateToDoListRequestDto {
     private String title;
     @NotBlank(message = "상세 설명은 필수 입력 항목입니다.")
     private String content;
+    @JsonProperty("is_done")
+    private boolean isDone;
 }

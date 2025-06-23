@@ -3,7 +3,7 @@ package com.zb.jogakjogak.jobDescription.controller;
 import com.zb.jogakjogak.global.HttpApiResponse;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.BulkToDoListUpdateRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.CreateToDoListRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.UpdateToDoListRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListGetByCategoryResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.service.ToDoListService;
@@ -62,7 +62,7 @@ public class ToDoListController {
     public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> updateToDoList(
             @PathVariable Long jdId,
             @PathVariable Long toDoListId,
-            @RequestBody @Valid ToDoListDto toDoListDto,
+            @RequestBody @Valid UpdateToDoListRequestDto toDoListDto,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
         String memberName = customUser.getName();
         ToDoListResponseDto response = toDoListService.updateToDoList(jdId, toDoListId, toDoListDto, memberName);
