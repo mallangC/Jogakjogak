@@ -129,10 +129,15 @@ jobs:
 
       # 모든 스텝 종료 후 컨테이너 로그 출력 (에러 발생 시 유용)
       - name: Print Docker container logs (for debugging)
-        if: always()
+        if: always() # 실패해도 항상 로그 출력
         run: |
           echo "Listing all Docker containers:"
           docker ps -a
-          echo "--- Logs for 'db' service container ---"
-          docker logs db || true
-          echo "--- End of logs for 'db' ---"
+          CONTAINER_ID=$(docker ps -a --format "{{.ID}}\t{{.Names}}" | grep 'db$' | awk '{print $1}')
+          if [ -n "$CONTAINER_ID" ]; then
+            echo "--- Logs for container ID: $CONTAINER_ID ---"
+            docker logs --details "$CONTAINER_ID" || true
+            echo "--- End of logs for container ID: $CONTAINER_ID ---"
+          else
+            echo "No 'db' service container found or it exited too quickly to find its ID."
+          fi
