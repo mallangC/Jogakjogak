@@ -19,7 +19,7 @@ jobs:
       mysql_main_db:
         image: mysql:8.0 # 첫 번째 MySQL 인스턴스
         env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }} # root 비밀번호 (GitHub Secrets 사용 권장)
+          MYSQL_ROOT_PASSWORD: rootpassword
           MYSQL_DATABASE: test_main_db # 첫 번째 데이터베이스 이름
         ports:
           - 3306:3306 # 호스트 3306 포트와 컨테이너 3306 포트 매핑
@@ -32,7 +32,7 @@ jobs:
       mysql_meta_db:
         image: mysql:8.0 # 두 번째 MySQL 인스턴스
         env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+          MYSQL_ROOT_PASSWORD: rootpassword
           MYSQL_DATABASE: test_meta_db # 두 번째 데이터베이스 이름
         ports:
           - 3307:3306 # 호스트 3307 포트와 컨테이너 3306 포트 매핑
@@ -56,12 +56,10 @@ jobs:
       - name: Wait for MySQL services to be ready
         run: |
           echo "Waiting for MySQL databases to be ready..."
-          # 첫 번째 DB 헬스 체크
           while ! mysqladmin ping -h 127.0.0.1 -P 3306 -u root -p rootpassword --silent; do
             sleep 1
           done
           echo "mysql_test_db_1 is ready!"
-          # 두 번째 DB 헬스 체크
           while ! mysqladmin ping -h 127.0.0.1 -P 3307 -u root -p rootpassword --silent; do
             sleep 1
           done
@@ -76,8 +74,8 @@ jobs:
                                  -Dflyway.user="root \
                                  -Dflyway.password=rootpassword
         env:
-          TEST_DB_USERNAME: ${{ secrets.TEST_DB_USERNAME }}
-          TEST_DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+          TEST_DB_USERNAME: rootpassword
+          TEST_DB_PASSWORD: rootpassword
 
       - name: Run Flyway Migrations for test_db_2
         run: |
