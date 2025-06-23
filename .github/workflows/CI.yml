@@ -17,15 +17,14 @@ jobs:
 
     env:
       SPRING_PROFILES_ACTIVE: test
+      MYSQL_ROOT_PASSWORD: ${{secrets.TEST_DB_PASSWORD}}
 
     services:
       db:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_ROOT_PASSWORD: ${{ env.MYSQL_ROOT_PASSWORD }}
           MYSQL_INITDB_MULTIPLE_DATABASES: "test_main_db,test_meta_db"
-          MYSQL_USER: ${{ secrets.TEST_DB_USERNAME}}
-          MYSQL_PASSWORD: ${{ secrets.TEST_DB_PASSWORD}}
         options: >-
           --health-cmd "mysqladmin ping --silent"
           --health-interval 10s
@@ -62,7 +61,6 @@ jobs:
       - name: Set Database Connection Environment Variables
         run: |
           echo "DB_HOST=db" >> $GITHUB_ENV
-          echo "DB_USERNAME=${{ secrets.TEST_DB_USERNAME}}" >> $GITHUB_ENV
           echo "DB_PASSWORD=${{ secrets.TEST_DB_PASSWORD}}" >> $GITHUB_ENV
 
       # 테스트 전 애플리케이션 빌드
