@@ -2,6 +2,7 @@ package com.zb.jogakjogak.jobDescription.entity;
 
 
 import com.zb.jogakjogak.global.BaseEntity;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.CreateToDoListRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListUpdateRequestDto;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
@@ -87,6 +88,18 @@ public class ToDoList extends BaseEntity {
                 .jd(jd)
                 .build();
     }
+
+    public static ToDoList createToDoList(CreateToDoListRequestDto toDoListDto, JD jd) {
+        return ToDoList.builder()
+                .category(toDoListDto.getCategory())
+                .title(toDoListDto.getTitle())
+                .content(toDoListDto.getContent())
+                .memo("")
+                .isDone(false)
+                .jd(jd)
+                .build();
+    }
+
     public void setJd(JD jd) {
         this.jd = jd;
     }
