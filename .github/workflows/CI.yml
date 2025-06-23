@@ -11,14 +11,13 @@ permissions:
   contents: read
   pull-requests: write
 
+env:
+  SPRING_PROFILES_ACTIVE: test
+  MYSQL_ROOT_PASSWORD_VAR: ${{ secrets.TEST_DB_PASSWORD }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    env:
-      SPRING_PROFILES_ACTIVE: test
-      MYSQL_ROOT_PASSWORD_VAR: ${{ secrets.TEST_DB_PASSWORD }}
-
     services:
       db:
         image: mysql:8.0
