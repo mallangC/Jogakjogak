@@ -2,6 +2,7 @@ package com.zb.jogakjogak.jobDescription.service;
 
 import com.zb.jogakjogak.global.exception.*;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.BulkToDoListUpdateRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.CreateToDoListRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListUpdateRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListGetByCategoryResponseDto;
@@ -38,11 +39,10 @@ public class ToDoListService {
      * @return 새로 생성된 ToDoList의 응답 DTO
      */
     @Transactional
-    public ToDoListResponseDto createToDoList(Long jdId, ToDoListDto toDoListDto, String memberName) {
+    public ToDoListResponseDto createToDoList(Long jdId, CreateToDoListRequestDto toDoListDto, String memberName) {
 
         JD jd = getAuthorizedJd(jdId, memberName);
-        ToDoList toDoList = ToDoList.fromDto(toDoListDto, jd);
-        jd.addToDoList(toDoList);
+        ToDoList toDoList = ToDoList.createToDoList(toDoListDto, jd);
         ToDoList savedToDoList = toDoListRepository.save(toDoList);
         return ToDoListResponseDto.fromEntity(savedToDoList);
     }
