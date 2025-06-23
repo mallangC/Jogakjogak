@@ -93,6 +93,19 @@ jobs:
           
           exit 1
 
+      - name: Clean Databases with Flyway
+        run: |
+          ./gradlew flywayClean -Pspring.datasource-main.url=jdbc:mysql://127.0.0.1:3306/test_main_db \
+                                -Pspring.datasource-main.username=root \
+                                -Pspring.datasource-main.password=rootpassword
+          ./gradlew flywayClean -Pspring.datasource-meta.url=jdbc:mysql://127.0.0.1:3306/test_meta_db \
+                                -Pspring.datasource-meta.username=root \
+                                -Pspring.datasource-meta.password=rootpassword
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PASSWORD: rootpassword
+
+
       # 테스트 전 애플리케이션 빌드
       - name: Build with Gradle
         run: ./gradlew build -x test

@@ -119,8 +119,4 @@ tasks.named('test') {
     useJUnitPlatform()
     finalizedBy 'jacocoTestReport'
     jvmArgs "-Xshare:off"
-    systemProperties 'logging.level.org.springframework.jdbc': 'DEBUG',
-            'logging.level.org.flywaydb': 'DEBUG',
-            'logging.level.com.mysql.cj.jdbc': 'DEBUG',
-            'logging.level.org.hibernate': 'DEBUG'
 }
