@@ -25,7 +25,6 @@ jobs:
           MYSQL_ROOT_PASSWORD: rootpassword
           MYSQL_INITDB_MULTIPLE_DATABASES: "test_main_db,test_meta_db"
         options: >-
-          --network-alias db 
           --health-cmd "mysql -h localhost -u root -prootpassword -e 'SELECT 1'"
           --health-interval 5s 
           --health-timeout 20s 
@@ -61,8 +60,36 @@ jobs:
 
       - name: Set Database Connection Environment Variables
         run: |
-          echo "DB_HOST=db" >> $GITHUB_ENV
+          echo "DB_HOST=localhost" >> $GITHUB_ENV
           echo "DB_PASSWORD=rootpassword" >> $GITHUB_ENV
+
+      - name: Wait for MySQL to be ready
+        run: |
+          echo "Waiting for MySQL service on localhost:3306 to be fully ready..."
+          max_retries=60
+          retry_interval=5
+          
+          for i in $(seq 1 $max_retries); do
+            if mysql -h localhost -u root -prootpassword -e 'SELECT 1' &>/dev/null; then
+              echo "MySQL service on localhost:3306 is ready after $(( (i-1) * retry_interval )) seconds."
+              exit 0
+            fi
+            echo "Attempt $i/$max_retries: MySQL not ready yet. Retrying in $retry_interval seconds..."
+            sleep $retry_interval
+          done
+          
+          echo "Error: MySQL service on localhost:3306 did not become ready within $(( max_retries * retry_interval )) seconds."
+          
+          echo "--- Network Diagnostics ---"
+          echo "Pinging localhost:"
+          ping -c 4 localhost
+          echo "Checking netstat for port 3306:"
+          netstat -tuln | grep 3306
+          echo "Checking /etc/hosts:"
+          cat /etc/hosts
+          echo "--- End Network Diagnostics ---"
+          
+          exit 1 
 
       # 테스트 전 애플리케이션 빌드
       - name: Build with Gradle
