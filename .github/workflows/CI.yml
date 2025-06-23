@@ -26,12 +26,12 @@ jobs:
           MYSQL_USER: ${{ secrets.TEST_DB_USERNAME}}
           MYSQL_PASSWORD: ${{ secrets.TEST_DB_PASSWORD}}
           MYSQL_INITDB_MULTIPLE_DATABASES: "test_main_db,test_meta_db"
-          options: >-
-            --health-cmd "mysqladmin ping --silent"
-            --health-interval 10s
-            --health-timeout 5s
-            --health-retries 10
-            --network-alias db # 이 별칭으로 다른 스텝에서 접근합니다.
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost -u root -p${{ env.MYSQL_ROOT_PASSWORD }} --silent" # root 비밀번호 포함
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+          --network-alias db # 이 별칭으로 다른 스텝에서 접근합니다.
 
     steps:
       - uses: actions/checkout@v4
@@ -61,6 +61,7 @@ jobs:
 
       - name: Set Database Connection Environment Variables
         run: |
+          echo "DB_HOST=db" >> $GITHUB_ENV
           echo "DB_USERNAME=${{ secrets.TEST_DB_USERNAME}}" >> $GITHUB_ENV
           echo "DB_PASSWORD=${{ secrets.TEST_DB_PASSWORD}}" >> $GITHUB_ENV
 
