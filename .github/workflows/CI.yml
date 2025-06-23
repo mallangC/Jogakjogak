@@ -24,10 +24,10 @@ jobs:
         options: >-
           -e MYSQL_ROOT_PASSWORD=rootpassword
           -e MYSQL_INITDB_MULTIPLE_DATABASES="test_main_db,test_meta_db"
-          --health-cmd "mysqladmin ping -h localhost -u root -p rootpassword --silent"
+          --health-cmd "mysql -h localhost -u root -p rootpassword -e 'SELECT 1'" # 더 확실한 헬스 체크 명령
           --health-interval 5s
-          --health-timeout 10s
-          --health-retries 15
+          --health-timeout 20s
+          --health-retries 30
           --network-alias db
     steps:
       - uses: actions/checkout@v4
