@@ -65,45 +65,6 @@ jobs:
           echo "DB_HOST=127.0.0.1" >> $GITHUB_ENV
           echo "DB_PASSWORD=rootpassword" >> $GITHUB_ENV
 
-      - name: Wait for MySQL to be ready
-        run: |
-          echo "Waiting for MySQL service on 127.0.0.1:3306 to be fully ready..."
-          max_retries=10
-          retry_interval=5
-          
-          for i in $(seq 1 $max_retries); do
-            if nc -z 127.0.0.1 3306; then
-              echo "MySQL port 3306 on 127.0.0.1 is open."
-              if mysql -h 127.0.0.1 -u root -prootpassword -e 'SELECT 1' &>/dev/null; then
-                echo "MySQL service on 127.0.0.1:3306 is ready after $(( (i-1) * retry_interval )) seconds."
-                exit 0
-              fi
-            fi
-            echo "Attempt $i/$max_retries: MySQL not ready yet. Retrying in $retry_interval seconds..."
-            sleep $retry_interval
-          done
-          
-          echo "Error: MySQL service on 127.0.0.1:3306 did not become ready within $(( max_retries * retry_interval )) seconds."
-          
-          echo "--- Network Diagnostics ---"
-          ping -c 4 127.0.0.1 || true
-          netstat -tuln | grep 3306 || true
-          cat /etc/hosts || true
-          echo "--- End Network Diagnostics ---"
-          
-          exit 1
-
-      - name: Clean Databases with Flyway
-        run: |
-          ./gradlew flywayClean -Pflyway.url=jdbc:mysql://127.0.0.1:3306/test_main_db \
-                                -Pflyway.user=root \
-                                -Pflyway.password=rootpassword \
-                                -Pflyway.cleanDisabled=false
-          ./gradlew flywayClean -Pflyway.url=jdbc:mysql://127.0.0.1:3306/test_meta_db \
-                                -Pflyway.user=root \
-                                -Pflyway.password=rootpassword \
-                                -Pflyway.cleanDisabled=false
-
       # 테스트 전 애플리케이션 빌드
       - name: Build with Gradle
         run: ./gradlew build -x test

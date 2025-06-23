@@ -11,15 +11,6 @@ spring:
     username: ${TEST_DB_USERNAME}
     password: ${TEST_DB_PASSWORD}
 
-  logging:
-    level:
-      root: INFO # 기본 로깅 레벨은 INFO (필요하다면 DEBUG로 올릴 수 있음)
-      org.springframework.jdbc: DEBUG # JDBC 관련 모든 로그 활성화
-      org.springframework.orm.jpa: DEBUG # JPA 관련 로그 활성화
-      org.hibernate: INFO # Hibernate 관련 로그 (필요하면 DEBUG로 올릴 수 있음)
-      org.flywaydb: DEBUG # Flyway 관련 모든 로그 활성화
-      com.mysql.cj.jdbc: DEBUG # MySQL JDBC 드라이버 관련 모든 로그 활성화
-
   flyway:
     enabled: true
     clean-disabled: false
