@@ -17,13 +17,12 @@ jobs:
 
     env:
       SPRING_PROFILES_ACTIVE: test
-      MYSQL_ROOT_PASSWORD: ${{secrets.TEST_DB_PASSWORD}}
 
     services:
       db:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: ${{ env.MYSQL_ROOT_PASSWORD }}
+          MYSQL_ROOT_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
           MYSQL_INITDB_MULTIPLE_DATABASES: "test_main_db,test_meta_db"
         options: >-
           --health-cmd "mysqladmin ping -h localhost -u root -p${{ secrets.TEST_DB_PASSWORD }} --silent"
