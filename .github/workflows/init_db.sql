@@ -1,2 +1,2 @@
-CREATE DATABASE IF NOT EXISTS test_main_db;
-CREATE DATABASE IF NOT EXISTS test_meta_db;
+CREATE DATABASE test_main_db;
+CREATE DATABASE test_meta_db;
