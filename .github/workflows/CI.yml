@@ -31,7 +31,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
-          --network-alias db # 이 별칭으로 다른 스텝에서 접근합니다.
+          --network-alias db
 
     steps:
       - uses: actions/checkout@v4
