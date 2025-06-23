@@ -65,6 +65,41 @@ jobs:
           echo "TEST_DB_USERNAME=root" >> $GITHUB_ENV 
           echo "TEST_DB_PASSWORD=rootpassword" >> $GITHUB_ENV
 
+      - name: Wait for MySQL services to be ready
+        run: |
+          echo "Explicitly waiting for MySQL service (db:3306) to be ready..."
+          for i in $(seq 1 60); do # Max 60 seconds wait for MySQL server
+            if mysqladmin ping -h 127.0.0.1 -P 3306 -u root -prootpassword --silent; then
+              echo "MySQL server (db:3306) is up after $i seconds."
+              break
+            fi
+            echo "Waiting for MySQL server (db:3306)... ($i/60)"
+            sleep 1
+          done
+          mysqladmin ping -h 127.0.0.1 -P 3306 -u root -prootpassword || { echo "MySQL server (db:3306) is not ready after max wait time!"; exit 1; }
+
+          echo "Waiting for test_main_db to be accessible..."
+          for i in $(seq 1 30); do # Max 30 seconds wait for test_main_db
+            if mysql -h 127.0.0.1 -P 3306 -u root -prootpassword -e 'USE test_main_db;' &> /dev/null; then
+              echo "test_main_db is accessible after $i seconds."
+              break
+            fi
+            echo "Waiting for test_main_db... ($i/30)"
+            sleep 1
+          done
+          mysql -h 127.0.0.1 -P 3306 -u root -prootpassword -e 'USE test_main_db;' || { echo "test_main_db is not accessible after max wait time!"; exit 1; }
+
+          echo "Waiting for test_meta_db to be accessible..."
+          for i in $(seq 1 30); do # Max 30 seconds wait for test_meta_db
+            if mysql -h 127.0.0.1 -P 3306 -u root -prootpassword -e 'USE test_meta_db;' &> /dev/null; then
+              echo "test_meta_db is accessible after $i seconds."
+              break
+            fi
+            echo "Waiting for test_meta_db... ($i/30)"
+            sleep 1
+          done
+          mysql -h 127.0.0.1 -P 3306 -u root -prootpassword -e 'USE test_meta_db;' || { echo "test_meta_db is not accessible after max wait time!"; exit 1; }
+
       # 테스트 전 애플리케이션 빌드
       - name: Build with Gradle
         run: ./gradlew build -x test
@@ -76,8 +111,6 @@ jobs:
       - name: Test with Gradle
         env:
           SPRING_PROFILES_ACTIVE: test
-          TEST_DB_USERNAME: root
-          TEST_DB_PASSWORD: rootpassword
         run: ./gradlew test --info
 
       # 테스트를 기반으로 JaCoCo 리포트 작성

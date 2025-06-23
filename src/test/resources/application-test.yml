@@ -13,8 +13,7 @@ spring:
 
   flyway:
     enabled: true
-    clean-disabled: false
-    baseline-on-migrate: true
+
   jpa:
     show-sql: true
     hibernate:
