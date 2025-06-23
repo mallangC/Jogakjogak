@@ -103,10 +103,6 @@ jobs:
                                 -Pflyway.user=root \
                                 -Pflyway.password=rootpassword \
                                 -Pflyway.cleanDisabled=false
-        env:
-          DB_HOST: 127.0.0.1
-          DB_PASSWORD: rootpassword
-
 
       # 테스트 전 애플리케이션 빌드
       - name: Build with Gradle
