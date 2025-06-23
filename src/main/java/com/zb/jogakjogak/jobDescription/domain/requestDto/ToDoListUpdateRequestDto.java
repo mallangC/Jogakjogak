@@ -11,10 +11,7 @@ public class ToDoListUpdateRequestDto {
     @JsonProperty("checklist_id")
     private Long id;
     private String title;
-    private ToDoListType category;
     private String content;
-    private String memo;
-    private Long jdId;
     @JsonProperty("done")
     private boolean isDone;
 }
