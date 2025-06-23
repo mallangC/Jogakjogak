@@ -33,7 +33,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Grant execute permission to init_dbs.sh
-        run: chmod +x ${{ github.workspace }}/.github/workflows/init_dbs.sh
+        run: chmod 755 ${{ github.workspace }}/.github/workflows/init_dbs.sh
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
