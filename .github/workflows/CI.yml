@@ -26,9 +26,9 @@ jobs:
           MYSQL_INITDB_MULTIPLE_DATABASES: "test_main_db,test_meta_db"
         options: >-
           --health-cmd "mysqladmin ping -h localhost -u root -p${{ secrets.TEST_DB_PASSWORD }} --silent"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
+          --health-interval 5s
+          --health-timeout 10s
+          --health-retries 15
           --network-alias db
 
     steps:
@@ -60,7 +60,7 @@ jobs:
       - name: Set Database Connection Environment Variables
         run: |
           echo "DB_HOST=db" >> $GITHUB_ENV
-          echo "DB_PASSWORD=${{ secrets.TEST_DB_PASSWORD}}" >> $GITHUB_ENV
+          echo "DB_PASSWORD=${{ secrets.TEST_DB_PASSWORD }}" >> $GITHUB_ENV
 
       # 테스트 전 애플리케이션 빌드
       - name: Build with Gradle
