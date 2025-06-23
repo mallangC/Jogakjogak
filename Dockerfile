@@ -20,14 +20,6 @@ COPY src ./src
 # Gradle 빌드 (테스트 제외, 데몬 중지)
 RUN ./gradlew build --no-daemon -x test
 
-# 진단 스텝
-RUN echo "Contents of /app/build/libs/ after build:"
-RUN ls -al /app/build/libs/ || echo "/app/build/libs/ not found or empty"
-
-# 빌드된 JAR 파일을 컨테이너 내부에 복사
-COPY build/libs/*.jar app.jar
-
-
 
 # JRE만 포함된 경량 이미지 사용
 FROM eclipse-temurin:17-jre-jammy
@@ -36,7 +28,7 @@ FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 
 # 빌드 스테이지에서 생성된 JAR 파일 복사
-COPY --from=builder /app/app.jar .
+COPY --from=builder /app/build/libs/*.jar app.jar
 
 # 애플리케이션이 사용할 포트 노출 (문서화 목적)
 EXPOSE 8080

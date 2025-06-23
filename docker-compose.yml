@@ -2,10 +2,11 @@ version: '3.8'
 
 services:
   jogak_backend_app:
-    image: mallangc/jogak-backend:1.0.0
+    image: mallangc/jogakjogak-backend:1.0.0
     container_name: jogak-backend
     environment:
       DB_URL: ${DB_URL}
+      DB_META_URL: ${DB_META_URL}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       KAKAO_CLIENT_ID: ${KAKAO_CLIENT_ID}
@@ -13,5 +14,11 @@ services:
       KAKAO_ADMIN_KEY: ${KAKAO_ADMIN_KEY}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_API_URL: ${OPENAI_API_URL}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      EMAIL_ID: ${EMAIL_ID}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
     ports:
-      - "443:8080"
+      - "8080:8080"
