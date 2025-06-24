@@ -69,35 +69,30 @@ jobs:
           echo "TEST_DB_USERNAME=root" >> $GITHUB_ENV 
           echo "TEST_DB_PASSWORD=rootpassword" >> $GITHUB_ENV
 
-      - name: Set Database Connection Environment Variables
-        run: |
-          echo "TEST_DB_USERNAME=root" >> $GITHUB_ENV 
-          echo "TEST_DB_PASSWORD=rootpassword" >> $GITHUB_ENV
-
       - name: Wait for MySQL services to be ready
         run: |
           echo "Explicitly waiting for MySQL service (db_main:3306) to be ready..."
-          for i in $(seq 1 20); do # Max 20 seconds wait
-            if mysqladmin ping -h 127.0.0.1 -P 3306 -u root -prootpassword --silent; then
+          for i in $(seq 1 20); do 
+            if mysqladmin ping -h db_main -P 3306 -u root -prootpassword --silent; then
               echo "MySQL server (db_main:3306) is up after $i seconds."
               break
             fi
             echo "Waiting for MySQL server (db_main:3306)... ($i/20)"
             sleep 1
           done
-          mysqladmin ping -h 127.0.0.1 -P 3306 -u root -prootpassword || { echo "MySQL server (db_main:3306) is not ready after max wait time!"; exit 1; }
+          mysqladmin ping -h db_main -P 3306 -u root -prootpassword || { echo "MySQL server (db_main:3306) is not ready after max wait time!"; exit 1; }
           echo "test_main_db is accessible and ready." 
 
-          echo "Explicitly waiting for MySQL service (db_meta:3307) to be ready..."
-          for i in $(seq 1 20); do # Max 20 seconds wait
-            if mysqladmin ping -h 127.0.0.1 -P 3307 -u root -prootpassword --silent; then
+          echo "Explicitly waiting for MySQL service (db_meta:3307) to be ready..." 
+          for i in $(seq 1 20); do 
+            if mysqladmin ping -h db_meta -P 3306 -u root -prootpassword --silent; then
               echo "MySQL server (db_meta:3307) is up after $i seconds."
               break
             fi
             echo "Waiting for MySQL server (db_meta:3307)... ($i/20)"
             sleep 1
           done
-          mysqladmin ping -h 127.0.0.1 -P 3307 -u root -prootpassword || { echo "MySQL server (db_meta:3307) is not ready after max wait time!"; exit 1; }
+          mysqladmin ping -h db_meta -P 3306 -u root -prootpassword || { echo "MySQL server (db_meta:3307) is not ready after max wait time!"; exit 1; }
           echo "test_meta_db is accessible and ready." 
 
       # 테스트 전 애플리케이션 빌드
