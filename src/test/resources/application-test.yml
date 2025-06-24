@@ -2,14 +2,14 @@ spring:
   datasource-main:
     jdbc-url: jdbc:mysql://db_main:3306/test_main_db?useSSL=false&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${TEST_DB_USERNAME}
-    password: ${TEST_DB_PASSWORD}
+    username: root
+    password: rootpassword
 
   datasource-meta:
     jdbc-url: jdbc:mysql://db_meta:3307/test_meta_db?useSSL=false&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${TEST_DB_USERNAME}
-    password: ${TEST_DB_PASSWORD}
+    username: root
+    password: rootpassword
 
   flyway:
     enabled: true
