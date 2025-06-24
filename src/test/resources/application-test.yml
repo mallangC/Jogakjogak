@@ -1,12 +1,12 @@
 spring:
   datasource-main:
-    jdbc-url: jdbc:mysql://db_main:3306/test_main_db?useSSL=false&allowPublicKeyRetrieval=true
+    jdbc-url: jdbc:mysql://127.0.0.1:3306/test_main_db?useSSL=false&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: rootpassword
 
   datasource-meta:
-    jdbc-url: jdbc:mysql://db_meta:3307/test_meta_db?useSSL=false&allowPublicKeyRetrieval=true
+    jdbc-url: jdbc:mysql://127.0.0.1:3307/test_meta_db?useSSL=false&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: rootpassword
@@ -103,9 +103,9 @@ kakao: # KAKAO_ADMIN_KEY
 
 logging:
   level:
-    root: DEBUG # 모든 로거의 기본 레벨을 DEBUG로 설정
+    root: INFO # 모든 로거의 기본 레벨
     org.springframework: DEBUG # 스프링 프레임워크 로깅 레벨
-    com.example.yourproject: DEBUG # 너의 프로젝트 패키지 로깅 레벨
-    org.hibernate: INFO # JPA/Hibernate 관련 로깅 (필요 시 DEBUG로 변경)
+    com.example.jogakjogak: DEBUG # 프로젝트 패키지 로깅 레벨
+    org.hibernate: INFO # JPA/Hibernate 관련 로깅
     org.springframework.jdbc: DEBUG # JDBC 관련 로깅 (SQL 쿼리 확인)
-    com.zaxxer.hikari: DEBUG # HikariCP 커넥션 풀 로깅
+    com.zaxxer.hikari: INFO # HikariCP 커넥션 풀 로깅
