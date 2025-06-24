@@ -37,7 +37,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         addRefreshToken(username, refreshToken);
 
         response.addCookie(createCookie("refresh", refreshToken));
-        response.sendRedirect("http://localhost:3000");
+        response.sendRedirect("https://localhost:3000");
     }
 
     private String getRole(Authentication authentication){
@@ -51,7 +51,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(60 * 60 * 24 * 7);
-        //cookie.setSecure(true);
+        cookie.setSecure(true);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
 
