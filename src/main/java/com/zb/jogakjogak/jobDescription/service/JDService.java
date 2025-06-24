@@ -97,6 +97,10 @@ public class JDService {
             throw new ResumeException(ResumeErrorCode.RESUME_NOT_FOUND_PLEASE_REGISTER);
         }
 
+        if(memberRepository.countJdByMemberId(member.getId()) >= 20) {
+            throw new JDException(JDErrorCode.JD_LIMIT_EXCEEDED);
+        }
+
         String analysisJsonString = llmService.generateTodoListJson(member.getResume().getContent(), jdRequestDto.getContent(), jdRequestDto.getJob());
         List<ToDoListDto> parsedAnalysisResult;
         try {
