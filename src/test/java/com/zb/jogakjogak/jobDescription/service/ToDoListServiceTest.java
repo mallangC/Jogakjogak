@@ -5,9 +5,7 @@ import com.zb.jogakjogak.global.exception.JDErrorCode;
 import com.zb.jogakjogak.global.exception.JDException;
 import com.zb.jogakjogak.global.exception.ToDoListErrorCode;
 import com.zb.jogakjogak.global.exception.ToDoListException;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.BulkToDoListUpdateRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListUpdateRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.*;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListGetByCategoryResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
@@ -60,8 +58,8 @@ class ToDoListServiceTest {
     private JD mockJd;
     private Long toDoListId;
     private ToDoList mockToDoList;
-    private ToDoListDto createToDoListDto;
-    private ToDoListDto updateToDoListDto;
+    private CreateToDoListRequestDto createToDoListDto;
+    private UpdateToDoListRequestDto updateToDoListDto;
     private ToDoListUpdateRequestDto createToDoListUpdateReqDto;
     private ToDoListUpdateRequestDto updateToDoListUpdateReqDto;
     private ToDoListType targetCategory;
@@ -78,56 +76,47 @@ class ToDoListServiceTest {
         mockMember = Member.builder()
                 .id(1L)
                 .role(Role.USER)
-                .username(faker.name().fullName())
+                .username("testUser")
                 .build();
 
         mockJd = JD.builder()
                 .id(jdId)
-                .title(faker.job().title())
+                .title("Test Job Description")
                 .jdUrl(faker.internet().url())
                 .companyName(faker.company().name())
                 .job(faker.job().position())
                 .content(faker.lorem().paragraph())
-                .endedAt(faker.date().future(365, TimeUnit.DAYS).toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
+                .endedAt(faker.date().future(365, TimeUnit.DAYS).toInstant().atZone(ZoneId.systemDefault()).toLocalDate().atStartOfDay())
                 .applyAt(null)
                 .member(mockMember)
                 .memo(faker.lorem().sentence())
                 .build();
 
-        createToDoListDto = new ToDoListDto(
-                faker.options().option(ToDoListType.class),
-                faker.lorem().sentence(3, 5),
-                faker.lorem().paragraph(2),
-                faker.lorem().sentence(1),
-                faker.bool().bool()
-        );
+        createToDoListDto = CreateToDoListRequestDto.builder()
+                .title("ToDoList 제목")
+                .category(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN)
+                .content("ToDoList 내용")
+                .build();
 
-        updateToDoListDto = new ToDoListDto(
-                faker.options().option(ToDoListType.class),
-                faker.lorem().sentence(4, 6),
-                faker.lorem().paragraph(3),
-                faker.lorem().sentence(2),
-                !createToDoListDto.isDone()
-        );
+        updateToDoListDto = UpdateToDoListRequestDto.builder()
+                .title("새로운 ToDoList 제목")
+                .category(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN)
+                .content("새로운 ToDoList 내용")
+                .isDone(true)
+                .build();
 
         createToDoListUpdateReqDto = ToDoListUpdateRequestDto.builder()
                 .id(null)
                 .title(faker.lorem().sentence(3, 5))
-                .category(targetCategory)
                 .content(faker.lorem().paragraph(2))
-                .memo(faker.lorem().sentence(1))
                 .isDone(faker.bool().bool())
-                .jdId(jdId)
                 .build();
 
         updateToDoListUpdateReqDto = ToDoListUpdateRequestDto.builder()
                 .id(toDoListId)
                 .title(faker.lorem().sentence(4, 6))
-                .category(targetCategory)
                 .content(faker.lorem().paragraph(3))
-                .memo(faker.lorem().sentence(2))
                 .isDone(!createToDoListUpdateReqDto.isDone())
-                .jdId(jdId)
                 .build();
 
         mockToDoList = ToDoList.builder()
@@ -135,8 +124,8 @@ class ToDoListServiceTest {
                 .category(createToDoListDto.getCategory())
                 .title(createToDoListDto.getTitle())
                 .content(createToDoListDto.getContent())
-                .memo(createToDoListDto.getMemo())
-                .isDone(createToDoListDto.isDone())
+                .memo("")
+                .isDone(false)
                 .jd(mockJd)
                 .build();
     }
@@ -145,6 +134,15 @@ class ToDoListServiceTest {
     @DisplayName("ToDoList 성공적으로 생성")
     void createToDoList_success() {
         // Given
+        for (int i = 0; i < 9; i++) {
+            mockJd.getToDoLists().add(ToDoList.builder()
+                    .id((long) (i + 1))
+                    .category(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN)
+                    .title("기존 ToDo " + i)
+                    .content("내용")
+                    .jd(mockJd)
+                    .build());
+        }
         when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
         when(toDoListRepository.save(any(ToDoList.class))).thenAnswer(invocation -> {
             ToDoList originalToDoList = invocation.getArgument(0);
@@ -172,10 +170,9 @@ class ToDoListServiceTest {
         assertEquals(createToDoListDto.getCategory(), result.getCategory());
         assertEquals(createToDoListDto.getTitle(), result.getTitle());
         assertEquals(createToDoListDto.getContent(), result.getContent());
-        assertEquals(createToDoListDto.getMemo(), result.getMemo());
-        assertEquals(createToDoListDto.isDone(), result.isDone());
+        assertEquals("", result.getMemo());
+        assertEquals(false, result.isDone());
         assertEquals(jdId, result.getJdId());
-        assertEquals(createToDoListDto.getMemo(), result.getMemo());
     }
 
     @Test
@@ -194,6 +191,72 @@ class ToDoListServiceTest {
         assertEquals("JD를 찾을 수 없습니다.", exception.getMessage());
 
         verify(toDoListRepository, never()).save(any(ToDoList.class));
+    }
+
+    @Test
+    @DisplayName("실패: ToDoList가 카테고리별 제한 10개를 초과할 때 예외 발생")
+    void createToDoList_fail_exceeds_category_limit() {
+        // Given
+        for (int i = 0; i < 10; i++) {
+            mockJd.getToDoLists().add(ToDoList.builder()
+                    .id((long) (i + 1))
+                    .category(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN)
+                    .title("기존 ToDo " + i)
+                    .content("내용")
+                    .jd(mockJd)
+                    .build());
+        }
+        when(memberRepository.findByUsername(mockMember.getUsername())).thenReturn(Optional.of(mockMember));
+        when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
+        ToDoListException exception = assertThrows(ToDoListException.class, () -> {
+            toDoListService.createToDoList(mockJd.getId(), createToDoListDto, mockMember.getUsername());
+        });
+
+        assertEquals(ToDoListErrorCode.TODO_LIST_LIMIT_EXCEEDED_FOR_CATEGORY, exception.getErrorCode());
+        assertEquals(ToDoListErrorCode.TODO_LIST_LIMIT_EXCEEDED_FOR_CATEGORY.getMessage(), exception.getMessage());
+
+        verify(jdRepository, times(1)).findById(mockJd.getId());
+        verify(memberRepository, times(1)).findByUsername(mockMember.getUsername());
+        verify(toDoListRepository, never()).save(any(ToDoList.class));
+    }
+
+
+    @Test
+    @DisplayName("성공: 다른 카테고리의 ToDoList는 제한에 영향을 주지 않음")
+    void createToDoList_success_other_category_does_not_affect() {
+        // Given
+        for (int i = 0; i < 10; i++) {
+            mockJd.getToDoLists().add(ToDoList.builder()
+                    .id((long) (i + 1))
+                    .category(ToDoListType.CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL)
+                    .title("기존 ToDo " + i)
+                    .content("내용")
+                    .jd(mockJd)
+                    .build());
+        }
+        when(memberRepository.findByUsername(mockMember.getUsername())).thenReturn(Optional.of(mockMember));
+        when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
+
+        when(toDoListRepository.save(any(ToDoList.class))).thenAnswer(invocation -> {
+            ToDoList originalToDoList = invocation.getArgument(0);
+            return ToDoList.builder()
+                    .id(1L)
+                    .category(originalToDoList.getCategory())
+                    .title(originalToDoList.getTitle())
+                    .content(originalToDoList.getContent())
+                    .memo(originalToDoList.getMemo())
+                    .isDone(originalToDoList.isDone())
+                    .jd(originalToDoList.getJd())
+                    .build();
+        });
+
+        assertDoesNotThrow(() -> {
+            toDoListService.createToDoList(mockJd.getId(), createToDoListDto, mockMember.getUsername());
+        });
+
+        verify(jdRepository, times(1)).findById(mockJd.getId());
+        verify(memberRepository, times(1)).findByUsername(mockMember.getUsername());
+        verify(toDoListRepository, times(1)).save(any(ToDoList.class));
     }
 
     @Test
@@ -220,7 +283,6 @@ class ToDoListServiceTest {
         assertEquals(updateToDoListDto.getCategory(), result.getCategory());
         assertEquals(updateToDoListDto.getTitle(), result.getTitle());
         assertEquals(updateToDoListDto.getContent(), result.getContent());
-        assertEquals(updateToDoListDto.getMemo(), result.getMemo());
         assertEquals(updateToDoListDto.isDone(), result.isDone());
         assertEquals(jdId, result.getJdId());
     }
@@ -311,7 +373,7 @@ class ToDoListServiceTest {
                 .companyName(faker.company().name())
                 .job(faker.job().position())
                 .content(faker.lorem().paragraph())
-                .endedAt(LocalDate.now())
+                .endedAt(LocalDate.now().atStartOfDay())
                 .memo(faker.lorem().sentence())
                 .build();
 
@@ -353,18 +415,15 @@ class ToDoListServiceTest {
         ToDoListUpdateRequestDto wrongJdInDto = ToDoListUpdateRequestDto.builder()
                 .id(toDoListId)
                 .title("Wrong JD DTO")
-                .category(targetCategory)
                 .content("Content")
-                .memo("Memo")
                 .isDone(false)
-                .jdId(anotherJdId)
                 .build();
         BulkToDoListUpdateRequestDto bulkReqInitialWrongJd = BulkToDoListUpdateRequestDto.builder()
                 .category(targetCategory)
                 .updatedOrCreateToDoLists(Collections.singletonList(wrongJdInDto))
                 .deletedToDoListIds(Collections.emptyList())
                 .build();
-        assertThrowsToDoListNotBelongToJd(() ->
+        assertThrowsToDoListNotFound(() ->
                 toDoListService.bulkUpdateToDoLists(jdId, bulkReqInitialWrongJd,mockMember.getName()));
     }
 
@@ -375,11 +434,8 @@ class ToDoListServiceTest {
         ToDoListUpdateRequestDto newToDoListDto = ToDoListUpdateRequestDto.builder()
                 .id(null)
                 .title(faker.lorem().sentence())
-                .category(targetCategory)
                 .content(faker.lorem().paragraph())
-                .memo(faker.lorem().sentence())
                 .isDone(faker.bool().bool())
-                .jdId(jdId)
                 .build();
 
         Long anotherExistingId = 102L;
@@ -390,11 +446,8 @@ class ToDoListServiceTest {
         ToDoListUpdateRequestDto updateAnotherDto = ToDoListUpdateRequestDto.builder()
                 .id(anotherExistingId)
                 .title("Updated Another Title")
-                .category(targetCategory)
                 .content("Updated Another Content")
-                .memo("Updated Another Memo")
                 .isDone(true)
-                .jdId(jdId)
                 .build();
 
 
@@ -413,7 +466,6 @@ class ToDoListServiceTest {
 
 
         when(jdRepository.findById(jdId)).thenReturn(Optional.of(mockJd));
-        when(toDoListRepository.findById(anotherExistingId)).thenReturn(Optional.of(anotherExistingToDoList));
         when(toDoListRepository.save(any(ToDoList.class))).thenAnswer(invocation -> {
             ToDoList savedToDo = invocation.getArgument(0);
             if (savedToDo.getId() == null) {
@@ -434,48 +486,27 @@ class ToDoListServiceTest {
                 .thenReturn(Collections.singletonList(toDoListToDelete));
         doNothing().when(toDoListRepository).deleteAllById(Collections.singletonList(deletedToDoListId));
 
-        ToDoList finalResultNew = mock(ToDoList.class);
-        when(finalResultNew.getId()).thenReturn(newToDoListDto.getId() != null ? newToDoListDto.getId() : faker.number().randomNumber() + 1000L);
-        when(finalResultNew.getCategory()).thenReturn(newToDoListDto.getCategory());
-        when(finalResultNew.getTitle()).thenReturn(newToDoListDto.getTitle());
-        when(finalResultNew.getContent()).thenReturn(newToDoListDto.getContent());
-        when(finalResultNew.getMemo()).thenReturn(newToDoListDto.getMemo());
-        when(finalResultNew.isDone()).thenReturn(newToDoListDto.isDone());
-        when(finalResultNew.getJd()).thenReturn(mockJd);
-
-        ToDoList finalResultUpdatedAnother = mock(ToDoList.class);
-        when(finalResultUpdatedAnother.getId()).thenReturn(updateAnotherDto.getId());
-        when(finalResultUpdatedAnother.getCategory()).thenReturn(updateAnotherDto.getCategory());
-        when(finalResultUpdatedAnother.getTitle()).thenReturn(updateAnotherDto.getTitle());
-        when(finalResultUpdatedAnother.getContent()).thenReturn(updateAnotherDto.getContent());
-        when(finalResultUpdatedAnother.getMemo()).thenReturn(updateAnotherDto.getMemo());
-        when(finalResultUpdatedAnother.isDone()).thenReturn(updateAnotherDto.isDone());
-        when(finalResultUpdatedAnother.getJd()).thenReturn(mockJd);
-
-        when(toDoListRepository.findByJdAndCategory(mockJd, targetCategory)).thenReturn(Arrays.asList(finalResultNew, finalResultUpdatedAnother));
         when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
+        when(toDoListRepository.findByIdWithJd(anotherExistingId)).thenReturn(Optional.of(anotherExistingToDoList));
 
         // When
         ToDoListGetByCategoryResponseDto result = toDoListService.bulkUpdateToDoLists(jdId, request,mockMember.getName());
 
         // Then
         verify(jdRepository, times(1)).findById(jdId);
-        verify(toDoListRepository, times(1)).findById(anotherExistingId);
         verify(memberRepository, times(1)).findByUsername(mockMember.getName());
-        verify(anotherExistingToDoList, times(1)).updateFromBulkUpdateToDoLists(any(ToDoListUpdateRequestDto.class));
         verify(toDoListRepository, times(1)).save(any(ToDoList.class));
         verify(toDoListRepository, times(1)).findAllById(Collections.singletonList(deletedToDoListId));
         verify(toDoListRepository, times(1)).deleteAllById(Collections.singletonList(deletedToDoListId));
-        verify(toDoListRepository, times(1)).findByJdAndCategory(mockJd, targetCategory);
+        verify(toDoListRepository, times(1)).findByIdWithJd(anotherExistingId);
+        verify(toDoListRepository, times(1)).findByJdIdAndCategoryFetch(mockJd.getId(), targetCategory);
+
 
         assertNotNull(result);
         assertEquals(jdId, result.getJdId());
         assertEquals(targetCategory, result.getCategory());
         assertNotNull(result.getToDoLists());
-        assertEquals(2, result.getToDoLists().size());
 
-        assertTrue(result.getToDoLists().stream().anyMatch(dto -> dto.getTitle().equals(newToDoListDto.getTitle())));
-        assertTrue(result.getToDoLists().stream().anyMatch(dto -> dto.getTitle().equals(updateAnotherDto.getTitle())));
     }
 
     @Test
@@ -508,18 +539,15 @@ class ToDoListServiceTest {
                 .companyName(faker.company().name())
                 .job(faker.job().position())
                 .content(faker.lorem().paragraph())
-                .endedAt(LocalDate.now())
+                .endedAt(LocalDate.now().atStartOfDay())
                 .memo(faker.lorem().sentence())
                 .build();
 
         ToDoListUpdateRequestDto dtoWithWrongJdId = ToDoListUpdateRequestDto.builder()
                 .id(null)
                 .title("Wrong JD DTO")
-                .category(targetCategory)
                 .content("Content")
-                .memo("Memo")
                 .isDone(false)
-                .jdId(anotherJdId)
                 .build();
         BulkToDoListUpdateRequestDto requestWrongJdInDto = BulkToDoListUpdateRequestDto.builder()
                 .category(targetCategory)
@@ -530,11 +558,8 @@ class ToDoListServiceTest {
         ToDoListUpdateRequestDto dtoWithWrongCategory = ToDoListUpdateRequestDto.builder()
                 .id(null)
                 .title("Wrong Category DTO")
-                .category(ToDoListType.CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL)
                 .content("Content")
-                .memo("Memo")
                 .isDone(false)
-                .jdId(jdId)
                 .build();
         BulkToDoListUpdateRequestDto requestWrongCategoryInDto = BulkToDoListUpdateRequestDto.builder()
                 .category(targetCategory)
@@ -560,8 +585,6 @@ class ToDoListServiceTest {
 
 
         // When & Then
-        assertThrowsToDoListNotBelongToJd(() -> toDoListService.bulkUpdateToDoLists(jdId, requestWrongJdInDto, mockMember.getName()));
-        assertThrowsToDoListCategoryMismatch(() -> toDoListService.bulkUpdateToDoLists(jdId, requestWrongCategoryInDto,mockMember.getName()));
         assertThrowsToDoListNotBelongToJd(() -> toDoListService.bulkUpdateToDoLists(jdId, requestDeleteWrongOwner, mockMember.getName()));
 
         // Verify

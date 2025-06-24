@@ -15,8 +15,27 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    services:
+      db_main:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: test_main_db
+        ports:
+          - 3306:3306
+
+      db_meta:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: test_meta_db
+        ports:
+          - 3307:3306
+
     steps:
       - uses: actions/checkout@v4
+        with:
+          clean: false
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -41,14 +60,58 @@ jobs:
         with:
           gradle-version: '7.6.4'
 
+      - name: Wait for MySQL services to be ready
+        run: |
+          echo "Explicitly waiting for MySQL service (db_main:3306) to be ready..."
+          for i in $(seq 1 30); do 
+            SLEEP_DURATION=1 
+            if [ "$i" -le 5 ]; then
+              SLEEP_DURATION=2
+            fi
+
+            if mysqladmin ping -h 127.0.0.1 -P 3306 -u root -prootpassword --silent; then
+              echo "MySQL server (db_main:3306) is up after $i seconds."
+              break
+            fi
+            echo "Waiting for MySQL server (db_main:3306)... ($i/30)"
+            sleep $SLEEP_DURATION
+          done
+          mysqladmin ping -h 127.0.0.1 -P 3306 -u root -prootpassword || { echo "MySQL server (db_main:3306) is not ready after max wait time!"; exit 1; }
+          echo "test_main_db is accessible and ready." 
+
+          echo "Explicitly waiting for MySQL service (db_meta:3307) to be ready..."
+          for i in $(seq 1 30); do 
+            SLEEP_DURATION=1 
+            if [ "$i" -le 5 ]; then 
+              SLEEP_DURATION=2
+            fi
+
+            if mysqladmin ping -h 127.0.0.1 -P 3307 -u root -prootpassword --silent; then
+              echo "MySQL server (db_meta:3307) is up after $i seconds."
+              break
+            fi
+            echo "Waiting for MySQL server (db_meta:3307)... ($i/30)"
+            sleep $SLEEP_DURATION
+          done
+          mysqladmin ping -h 127.0.0.1 -P 3307 -u root -prootpassword || { echo "MySQL server (db_meta:3307) is not ready after max wait time!"; exit 1; }
+          echo "test_meta_db is accessible and ready." 
+
       # 테스트 전 애플리케이션 빌드
       - name: Build with Gradle
-        if: ${{github.event_name == 'push'}}
         run: ./gradlew build -x test
+
+      - name: Check application-test.yml exists
+        run: cat src/test/resources/application-test.yml || echo "application-test.yml not found"
 
       # 테스트 진행
       - name: Test with Gradle
-        run: ./gradlew test
+        env:
+          SPRING_PROFILES_ACTIVE: test
+          TEST_DB_MAIN_PORT: 3306
+          TEST_DB_META_PORT: 3307
+          TEST_DB_USERNAME: root
+          TEST_DB_PASSWORD: rootpassword
+        run: ./gradlew test --info
 
       # 테스트를 기반으로 JaCoCo 리포트 작성
       - name: Generate JaCoCo Report
@@ -62,3 +125,22 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           title: 'Code Coverage'
           update-comment: true
+
+      # 모든 스텝 종료 후 컨테이너 로그 출력 (에러 발생 시 유용)
+      - name: Print Docker container logs (for debugging)
+        if: always()
+        run: |
+          echo "Listing all Docker containers:"
+          time docker ps -a
+          echo "--- Attempting to get logs for all 'mysql:8.0' containers ---"
+          ALL_MYSQL_CONTAINER_IDS=$(docker ps -a -q -f "ancestor=mysql:8.0")
+          if [ -n "$ALL_MYSQL_CONTAINER_IDS" ]; then
+            for CONTAINER_ID in $ALL_MYSQL_CONTAINER_IDS; do
+              echo "--- Logs for container ID: $CONTAINER_ID ---"
+              docker logs --details "$CONTAINER_ID" || true
+              echo "--- End of logs for container ID: $CONTAINER_ID ---"
+            done
+          else
+            echo "No 'mysql:8.0' containers found."
+          fi
+          echo "--- End of Docker container logs ---"

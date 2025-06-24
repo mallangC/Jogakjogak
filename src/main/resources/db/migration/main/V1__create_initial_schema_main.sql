@@ -1,12 +1,12 @@
 CREATE TABLE member
 (
     id            BIGINT PRIMARY KEY AUTO_INCREMENT,
-    username      VARCHAR(50) NOT NULL UNIQUE,
+    username      VARCHAR(50),
     email         VARCHAR(50) NOT NULL UNIQUE,
-    password      VARCHAR(50) NOT NULL,
-    name          VARCHAR(50) NOT NULL,
-    nickname      VARCHAR(50) NOT NULL,
-    phone_number  VARCHAR(11) NOT NULL,
+    password      VARCHAR(50),
+    name          VARCHAR(50),
+    nickname      VARCHAR(50),
+    phone_number  VARCHAR(20) NOT NULL,
     role          VARCHAR(50) NOT NULL,
     registered_at DATETIME    NOT NULL,
     last_login_at DATETIME    NOT NULL
@@ -76,7 +76,7 @@ CREATE TABLE to_do_list
 CREATE TABLE notification
 (
     id         BIGINT PRIMARY KEY AUTO_INCREMENT,
-    member_id BIGINT NOT NULL ,
+    member_id  BIGINT NOT NULL,
     created_at DATETIME,
-    FOREIGN KEY (member_id) REFERENCES member(id)
+    FOREIGN KEY (member_id) REFERENCES member (id)
 );

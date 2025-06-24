@@ -3,6 +3,7 @@ plugins {
     id 'org.springframework.boot' version '3.5.0'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'jacoco'
+    id 'org.flywaydb.flyway' version '9.16.3'
 }
 
 group = 'com.zb'
@@ -47,6 +48,9 @@ dependencies {
     testImplementation 'org.springframework.batch:spring-batch-test'
     testImplementation 'org.mockito:mockito-core'
     testImplementation 'net.datafaker:datafaker:2.0.2'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testRuntimeOnly 'com.h2database:h2'
 
     //.env
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'
@@ -63,18 +67,11 @@ dependencies {
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-    runtimeOnly 'com.mysql:mysql-connector-j'
+    implementation 'mysql:mysql-connector-java:8.0.33'
 
     //flyway
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-mysql'
-
-    //Test
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    testImplementation 'com.h2database:h2'
-
 
     // java-faker
     implementation('com.github.javafaker:javafaker:1.0.2') { exclude module: 'snakeyaml' }
@@ -90,18 +87,6 @@ dependencies {
     implementation 'com.google.guava:guava:33.2.1-jre'
 
     implementation 'io.github.cdimascio:dotenv-java:2.3.2'
-}
-
-jacocoTestReport {
-    dependsOn compileJava
-    dependsOn processResources
-
-    reports {
-        html.required.set(true)
-        xml.required.set(true)
-    }
-
-    finalizedBy 'jacocoTestCoverageVerification'
 }
 
 jacocoTestReport {

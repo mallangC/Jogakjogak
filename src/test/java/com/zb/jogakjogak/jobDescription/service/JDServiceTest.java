@@ -7,10 +7,7 @@ import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.JDErrorCode;
 import com.zb.jogakjogak.global.exception.JDException;
 import com.zb.jogakjogak.global.exception.MemberErrorCode;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.BookmarkRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.*;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.*;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
@@ -95,7 +92,7 @@ class JDServiceTest {
                 .companyName(faker.company().name())
                 .job(faker.job().title())
                 .content(faker.lorem().paragraph())
-                .endedAt(faker.date().future(365, TimeUnit.DAYS).toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
+                .endedAt(faker.date().future(365, TimeUnit.DAYS).toInstant().atZone(ZoneId.systemDefault()).toLocalDate().atStartOfDay())
                 .build();
 
         mockLLMAnalysisJsonString = "[" +
@@ -189,6 +186,25 @@ class JDServiceTest {
     }
 
     @Test
+    @DisplayName("LLM 분석 서비스 실패 테스트 - JD 제한 20개 초과 시 JDException 발생")
+    void llmAnalyze_failure_jdLimitExceeded() {
+        // given
+        when(memberRepository.findByUsername(mockMember.getUsername())).thenReturn(Optional.of(mockMember));
+        when(memberRepository.countJdByMemberId(mockMember.getId())).thenReturn(20L);
+
+        // when & then
+        JDException thrown = assertThrows(JDException.class, () ->
+                jdService.llmAnalyze(jdRequestDto, mockMember.getUsername()));
+        assertEquals(JDErrorCode.JD_LIMIT_EXCEEDED, thrown.getErrorCode());
+
+        // verify
+        verify(memberRepository, times(1)).findByUsername(mockMember.getUsername());
+        verify(memberRepository, times(1)).countJdByMemberId(mockMember.getId());
+        verify(llmService, never()).generateTodoListJson(anyString(), anyString(), anyString());
+        verify(jdRepository, never()).save(any(JD.class));
+    }
+
+    @Test
     @DisplayName("LLM 분석 서비스 JsonProcessingException 발생 시 JDException 던지는지 테스트 (Gemini)")
     void llmAnalyze_failure_jsonProcessingException() throws JsonProcessingException {
         // given
@@ -224,7 +240,7 @@ class JDServiceTest {
                 .memo("테스트 메모")
                 .member(mockMember)
                 .isAlarmOn(true)
-                .endedAt(LocalDate.now().plusDays(10))
+                .endedAt(LocalDate.now().plusDays(10).atStartOfDay())
                 .build();
 
         ToDoList toDoList1 = ToDoList.builder()
@@ -411,14 +427,14 @@ class JDServiceTest {
                 .id(3L).category(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN).title("투두3").content("내용3").isDone(true).build();
 
         JD jd1 = JD.builder()
-                .id(101L).title("백엔드 개발자").companyName("SKC").endedAt(LocalDate.of(2025, 5, 24))
+                .id(101L).title("백엔드 개발자").companyName("SKC").endedAt(LocalDate.of(2025, 5, 24).atStartOfDay())
                 .member(mockMember)
                 .build();
         jd1.addToDoList(todo1);
         jd1.addToDoList(todo2);
 
         JD jd2 = JD.builder()
-                .id(102L).title("UX 디렉터").companyName("메리츠화재").endedAt(LocalDate.of(2025, 1, 20))
+                .id(102L).title("UX 디렉터").companyName("메리츠화재").endedAt(LocalDate.of(2025, 1, 20).atStartOfDay())
                 .member(mockMember)
                 .build();
         jd2.addToDoList(todo3);
@@ -699,6 +715,107 @@ class JDServiceTest {
 
         verify(memberRepository, times(1)).findByUsername(otherMember.getUsername());
         verify(jdRepository, times(1)).findById(anyLong());
+        verify(jdRepository, never()).save(any(JD.class));
+    }
+
+    @Test
+    @DisplayName("메모 업데이트 성공 테스트")
+    void updateMemo_Success() {
+        // Given
+        MemoRequestDto memoRequestDto = MemoRequestDto.builder()
+                .memo("새로운 메모")
+                .build();
+
+        // Mock repository calls
+        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
+        when(jdRepository.findById(anyLong())).thenReturn(Optional.of(testJd));
+        when(jdRepository.save(any(JD.class))).thenReturn(testJd);
+
+        // When
+        MemoResponseDto result = jdService.updateMemo(testJd.getId(), memoRequestDto, mockMember.getName());
+
+        // Then
+        assertNotNull(result);
+        assertEquals(testJd.getId(), result.getJd_id());
+        assertEquals(memoRequestDto.getMemo(), result.getMemo());
+        assertEquals(memoRequestDto.getMemo(), testJd.getMemo());
+
+        verify(memberRepository, times(1)).findByUsername(mockMember.getName());
+        verify(jdRepository, times(1)).findById(mockMember.getId());
+        verify(jdRepository, times(1)).save(testJd);
+
+    }
+
+    @Test
+    @DisplayName("메모 업데이트 실패: 사용자 없음")
+    void updateMemo_MemberNotFound() {
+        // Given
+        MemoRequestDto memoRequestDto = MemoRequestDto.builder()
+                .memo("새로운 메모")
+                .build();
+
+        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.empty());
+
+        // When & Then
+        AuthException exception = assertThrows(AuthException.class,
+                () -> jdService.updateMemo(testJd.getId(), memoRequestDto, mockMember.getName()));
+
+        assertEquals(MemberErrorCode.NOT_FOUND_MEMBER, exception.getMemberErrorCode());
+
+        // Verify no further interactions after member not found
+        verify(memberRepository, times(1)).findByUsername(mockMember.getName());
+        verify(jdRepository, never()).findById(anyLong());
+        verify(jdRepository, never()).save(any(JD.class));
+    }
+
+    @Test
+    @DisplayName("메모 업데이트 실패: JD 없음")
+    void updateMemo_JDNotFound() {
+        // Given
+        MemoRequestDto memoRequestDto = MemoRequestDto.builder()
+                .memo("새로운 메모")
+                .build();
+
+        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
+        when(jdRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        // When & Then
+        JDException exception = assertThrows(JDException.class,
+                () -> jdService.updateMemo(testJd.getId(), memoRequestDto, mockMember.getName()));
+
+        assertEquals(JDErrorCode.NOT_FOUND_JD, exception.getErrorCode());
+
+        // Verify interactions
+        verify(memberRepository, times(1)).findByUsername(mockMember.getName());
+        verify(jdRepository, times(1)).findById(testJd.getId());
+        verify(jdRepository, never()).save(any(JD.class));
+    }
+
+    @Test
+    @DisplayName("메모 업데이트 실패: 권한 없음")
+    void updateMemo_UnauthorizedAccess() {
+        // Given
+        MemoRequestDto memoRequestDto = MemoRequestDto.builder()
+                .memo("새로운 메모")
+                .build();
+
+        Member unauthorizedMember = Member.builder()
+                .id(999L) // Different ID
+                .username("unauthorizedUser")
+                .build();
+
+        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(unauthorizedMember));
+        when(jdRepository.findById(anyLong())).thenReturn(Optional.of(testJd));
+
+        // When & Then
+        JDException exception = assertThrows(JDException.class,
+                () -> jdService.updateMemo(testJd.getId(), memoRequestDto, mockMember.getName()));
+
+        assertEquals(JDErrorCode.UNAUTHORIZED_ACCESS, exception.getErrorCode());
+
+        // Verify interactions
+        verify(memberRepository, times(1)).findByUsername(mockMember.getName());
+        verify(jdRepository, times(1)).findById(testJd.getId());
         verify(jdRepository, never()).save(any(JD.class));
     }
 }
