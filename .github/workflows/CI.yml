@@ -34,7 +34,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: rootpassword
           MYSQL_DATABASE: test_meta_db
         ports:
-          - 3307:3307
+          - 3307:3306
 
     steps:
       - uses: actions/checkout@v4
@@ -73,10 +73,9 @@ jobs:
         run: |
           echo "Explicitly waiting for MySQL service (db_main:3306) to be ready..."
           for i in $(seq 1 30); do 
+            SLEEP_DURATION=1 
             if [ "$i" -le 5 ]; then
               SLEEP_DURATION=2
-            else
-              SLEEP_DURATION=1
             fi
 
             if mysqladmin ping -h 127.0.0.1 -P 3306 -u root -prootpassword --silent; then
@@ -91,10 +90,9 @@ jobs:
 
           echo "Explicitly waiting for MySQL service (db_meta:3307) to be ready..."
           for i in $(seq 1 30); do 
-            if [ "$i" -le 5 ]; then
+            SLEEP_DURATION=1 
+            if [ "$i" -le 5 ]; then 
               SLEEP_DURATION=2
-            else
-              SLEEP_DURATION=1
             fi
 
             if mysqladmin ping -h 127.0.0.1 -P 3307 -u root -prootpassword --silent; then
