@@ -1,11 +1,11 @@
 CREATE TABLE member
 (
     id            BIGINT PRIMARY KEY AUTO_INCREMENT,
-    username      VARCHAR(50) NOT NULL UNIQUE,
+    username      VARCHAR(50),
     email         VARCHAR(50) NOT NULL UNIQUE,
-    password      VARCHAR(50) NOT NULL,
-    name          VARCHAR(50) NOT NULL,
-    nickname      VARCHAR(50) NOT NULL,
+    password      VARCHAR(50),
+    name          VARCHAR(50),
+    nickname      VARCHAR(50),
     phone_number  VARCHAR(11) NOT NULL,
     role          VARCHAR(50) NOT NULL,
     registered_at DATETIME    NOT NULL,
@@ -40,7 +40,7 @@ CREATE TABLE resume
     FOREIGN KEY (member_id) REFERENCES member (id)
 );
 
-CREATE TABLE job_descriptions
+CREATE TABLE job_description
 (
     id           BIGINT PRIMARY KEY AUTO_INCREMENT,
     member_id    BIGINT        NOT NULL,
@@ -70,13 +70,13 @@ CREATE TABLE to_do_list
     is_done    BIT           NOT NULL,
     created_at DATETIME,
     updated_at DATETIME,
-    FOREIGN KEY (jd_id) REFERENCES job_descriptions (id)
+    FOREIGN KEY (jd_id) REFERENCES job_description (id)
 );
 
 CREATE TABLE notification
 (
     id         BIGINT PRIMARY KEY AUTO_INCREMENT,
-    member_id BIGINT NOT NULL ,
+    member_id  BIGINT NOT NULL,
     created_at DATETIME,
-    FOREIGN KEY (member_id) REFERENCES member(id)
+    FOREIGN KEY (member_id) REFERENCES member (id)
 );
