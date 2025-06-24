@@ -5,9 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.Hibernate;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,7 +34,7 @@ public class JDResponseDto {
 
     public static JDResponseDto fromEntity(JD jd) {
         List<ToDoListResponseDto> mappedToDoLists = null;
-        if (jd.getToDoLists() != null && Hibernate.isInitialized(jd.getToDoLists())) {
+        if (jd.getToDoLists() != null) {
             mappedToDoLists = jd.getToDoLists().stream()
                     .map(ToDoListResponseDto::fromEntity)
                     .collect(Collectors.toList());
