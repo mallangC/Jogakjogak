@@ -43,7 +43,7 @@ spring:
               - name
               - phone_number
             authorization-grant-type: authorization_code
-            redirect-uri: "https://jogakjogak.com/login/oauth2/code/kakao"
+            redirect-uri: ${KAKAO_REDIRECT_URI}
             client-name: Kakao
             client-authentication-method: client_secret_post
 
