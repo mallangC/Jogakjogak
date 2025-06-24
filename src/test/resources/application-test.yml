@@ -29,6 +29,7 @@ spring:
     jdbc:
       initialize-schema: never
 
+
   # mail 설정 추가
   mail:
     protocol: smtp

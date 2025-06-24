@@ -2,6 +2,8 @@ package com.zb.jogakjogak.security.repository;
 
 import com.zb.jogakjogak.security.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -9,4 +11,7 @@ import java.util.Optional;
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByUsername(String userName);
+
+    @Query("SELECT COUNT(j) FROM JD j WHERE j.member.id = :memberId")
+    long countJdByMemberId(@Param("memberId") Long memberId);
 }

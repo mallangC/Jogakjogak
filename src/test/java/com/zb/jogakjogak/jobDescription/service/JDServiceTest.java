@@ -186,6 +186,25 @@ class JDServiceTest {
     }
 
     @Test
+    @DisplayName("LLM 분석 서비스 실패 테스트 - JD 제한 20개 초과 시 JDException 발생")
+    void llmAnalyze_failure_jdLimitExceeded() {
+        // given
+        when(memberRepository.findByUsername(mockMember.getUsername())).thenReturn(Optional.of(mockMember));
+        when(memberRepository.countJdByMemberId(mockMember.getId())).thenReturn(20L);
+
+        // when & then
+        JDException thrown = assertThrows(JDException.class, () ->
+                jdService.llmAnalyze(jdRequestDto, mockMember.getUsername()));
+        assertEquals(JDErrorCode.JD_LIMIT_EXCEEDED, thrown.getErrorCode());
+
+        // verify
+        verify(memberRepository, times(1)).findByUsername(mockMember.getUsername());
+        verify(memberRepository, times(1)).countJdByMemberId(mockMember.getId());
+        verify(llmService, never()).generateTodoListJson(anyString(), anyString(), anyString());
+        verify(jdRepository, never()).save(any(JD.class));
+    }
+
+    @Test
     @DisplayName("LLM 분석 서비스 JsonProcessingException 발생 시 JDException 던지는지 테스트 (Gemini)")
     void llmAnalyze_failure_jsonProcessingException() throws JsonProcessingException {
         // given
