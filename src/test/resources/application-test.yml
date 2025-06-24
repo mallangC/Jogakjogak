@@ -101,12 +101,19 @@ gemini: # Gemini API 설정 추가
 
 kakao: # KAKAO_ADMIN_KEY
   admin-key: test-kakao-admin-key # 더미 값
+  redirect-uri: ${KAKAO_REDIRECT_URI}
 
 logging:
   level:
     root: INFO # 모든 로거의 기본 레벨
+    org:
+      springframework:
+        security:
+          oauth2: INFO
+        boot:
+          autoconfigure: INFO
+        jdbc: DEBUG
     org.springframework: DEBUG # 스프링 프레임워크 로깅 레벨
     com.example.jogakjogak: DEBUG # 프로젝트 패키지 로깅 레벨
     org.hibernate: INFO # JPA/Hibernate 관련 로깅
-    org.springframework.jdbc: DEBUG # JDBC 관련 로깅 (SQL 쿼리 확인)
     com.zaxxer.hikari: INFO # HikariCP 커넥션 풀 로깅
