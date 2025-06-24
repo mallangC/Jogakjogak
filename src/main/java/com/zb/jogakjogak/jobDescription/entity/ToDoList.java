@@ -2,8 +2,10 @@ package com.zb.jogakjogak.jobDescription.entity;
 
 
 import com.zb.jogakjogak.global.BaseEntity;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.CreateToDoListRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListUpdateRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.UpdateToDoListRequestDto;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -76,34 +78,45 @@ public class ToDoList extends BaseEntity {
                 .build();
     }
 
-    public static ToDoList fromDto(ToDoListUpdateRequestDto dto, JD jd) {
+    public static ToDoList fromDto(ToDoListUpdateRequestDto dto, JD jd, ToDoListType category) {
 
         return ToDoList.builder()
-                .category(dto.getCategory())
+                .category(category)
                 .title(dto.getTitle())
                 .content(dto.getContent())
-                .memo(dto.getMemo())
                 .isDone(dto.isDone())
+                .memo("")
                 .jd(jd)
                 .build();
     }
+
+    public static ToDoList createToDoList(CreateToDoListRequestDto toDoListDto, JD jd) {
+        return ToDoList.builder()
+                .category(toDoListDto.getCategory())
+                .title(toDoListDto.getTitle())
+                .content(toDoListDto.getContent())
+                .memo("")
+                .isDone(false)
+                .jd(jd)
+                .build();
+    }
+
     public void setJd(JD jd) {
         this.jd = jd;
     }
 
-    public void updateFromDto(ToDoListDto dto) {
+    public void updateFromDto(UpdateToDoListRequestDto dto) {
         this.category = dto.getCategory();
         this.title = dto.getTitle();
         this.content = dto.getContent();
-        this.memo = dto.getMemo() != null ? dto.getMemo() : "";
         this.isDone = dto.isDone();
     }
 
-    public void updateFromBulkUpdateToDoLists(ToDoListUpdateRequestDto dto) {
-        this.category = dto.getCategory();
+    public void updateFromBulkUpdateToDoLists(ToDoListUpdateRequestDto dto, ToDoListType category) {
+        this.category = category;
         this.title = dto.getTitle();
         this.content = dto.getContent();
-        this.memo = dto.getMemo() != null ? dto.getMemo() : "";
+        this.memo = "";
         this.isDone = dto.isDone();
     }
 }
