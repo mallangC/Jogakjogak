@@ -20,7 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Member{
+public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -62,19 +62,30 @@ public class Member{
     private List<Notification> notification;
 
     @PrePersist
-    public void prePersist(){
+    public void prePersist() {
         this.registeredAt = LocalDateTime.now();
     }
 
     @PreUpdate
-    public void preUpdate(){
+    public void preUpdate() {
         this.lastLoginAt = LocalDateTime.now();
     }
 
-    public void updateExistingMember(OAuth2ResponseDto oAuth2ResponseDto){
+    public void updateExistingMember(OAuth2ResponseDto oAuth2ResponseDto) {
         this.email = oAuth2ResponseDto.getEmail();
         this.nickname = oAuth2ResponseDto.getNickname();
         this.phoneNumber = oAuth2ResponseDto.getPhoneNumber();
         this.name = oAuth2ResponseDto.getName();
+    }
+
+    public void setResume(Resume resume) {
+        if (this.resume != null && !this.resume.equals(resume)) {
+
+        }
+        this.resume = resume;
+
+        if (resume != null && (resume.getMember() == null || !resume.getMember().equals(this))) {
+            resume.setMember(this);
+        }
     }
 }
