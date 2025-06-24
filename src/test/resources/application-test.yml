@@ -1,15 +1,15 @@
 spring:
   datasource-main:
-    jdbc-url: jdbc:mysql://127.0.0.1:3306/test_main_db?useSSL=false&allowPublicKeyRetrieval=true
+    jdbc-url: jdbc:mysql://127.0.0.1:${TEST_DB_MAIN_PORT}/test_main_db?useSSL=false&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: rootpassword
+    username: ${TEST_DB_USERNAME}
+    password: ${TEST_DB_PASSWORD}
 
   datasource-meta:
-    jdbc-url: jdbc:mysql://127.0.0.1:3307/test_meta_db?useSSL=false&allowPublicKeyRetrieval=true
+    jdbc-url: jdbc:mysql://127.0.0.1:${TEST_DB_META_PORT}/test_meta_db?useSSL=false&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: rootpassword
+    username: ${TEST_DB_USERNAME}
+    password: ${TEST_DB_PASSWORD}
 
   flyway:
     enabled: true
