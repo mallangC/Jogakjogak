@@ -65,6 +65,25 @@ class ResumeRequestDtoTest {
         assertThat(violations).isEmpty();
     }
 
+    @DisplayName("이력서 내용 공백시 율효성 검사 실패")
+    @Test
+    void testContentIsBlank() {
+        // Given
+        ResumeRequestDto requestDto = ResumeRequestDto.builder()
+                .title("유효한 이름")
+                .content("")
+                .build();
+
+        // When
+        Set<ConstraintViolation<ResumeRequestDto>> violations = validator.validate(requestDto);
+
+        // Then
+        assertThat(violations).hasSize(1);
+        ConstraintViolation<ResumeRequestDto> violation = violations.iterator().next();
+        assertThat(violation.getPropertyPath().toString()).isEqualTo("content");
+        assertThat(violation.getMessage()).isEqualTo("이력서 내용은 필수 입력 사항입니다.");
+    }
+
     @DisplayName("이력서 이름 공백 문자열 시 유효성 검사 실패 (@NotBlank)")
     @Test
     void testNameIsBlank() {
@@ -81,7 +100,7 @@ class ResumeRequestDtoTest {
         assertThat(violations).hasSize(1);
         ConstraintViolation<ResumeRequestDto> violation = violations.iterator().next();
         assertThat(violation.getPropertyPath().toString()).isEqualTo("title");
-        assertThat(violation.getMessage()).isEqualTo("이력서 이름은 필수 입력 사항입니다.");
+        assertThat(violation.getMessage()).isEqualTo("이력서 제목은 필수 입력 사항입니다.");
     }
 
     @DisplayName("이력서 이름 null 시 유효성 검사 실패 (@NotBlank)")
@@ -100,7 +119,28 @@ class ResumeRequestDtoTest {
         assertThat(violations).hasSize(1);
         ConstraintViolation<ResumeRequestDto> violation = violations.iterator().next();
         assertThat(violation.getPropertyPath().toString()).isEqualTo("title");
-        assertThat(violation.getMessage()).isEqualTo("이력서 이름은 필수 입력 사항입니다.");
+        assertThat(violation.getMessage()).isEqualTo("이력서 제목은 필수 입력 사항입니다.");
+    }
+
+    @DisplayName("이력서 제목이 30자 초과시 유효성 검사 실패")
+    @Test
+    void testNameSizeExceedsLimit() {
+        // Given
+        String longTitle = "A".repeat(31);
+
+        ResumeRequestDto requestDto = ResumeRequestDto.builder()
+                .title(longTitle)
+                .content("이것은 유효한 길이의 이력서 내용입니다.")
+                .build();
+
+        // When
+        Set<ConstraintViolation<ResumeRequestDto>> violations = validator.validate(requestDto);
+
+        // Then
+        assertThat(violations).hasSize(1);
+        ConstraintViolation<ResumeRequestDto> violation = violations.iterator().next();
+        assertThat(violation.getPropertyPath().toString()).isEqualTo("title");
+        assertThat(violation.getMessage()).isEqualTo("이력서 제목은 30자 이내여야 합니다.");
     }
 
     @DisplayName("모든 필드가 유효할 때 유효성 검사 성공")

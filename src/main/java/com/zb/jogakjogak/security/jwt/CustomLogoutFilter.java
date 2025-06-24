@@ -44,7 +44,6 @@ public class CustomLogoutFilter extends GenericFilter {
         refreshEntityRepository.deleteByToken(refreshToken);
         //Cookie 값 0
         Cookie cookie = resetRefreshTokenInCookie();
-
         response.addCookie(cookie);
         response.setStatus(HttpServletResponse.SC_OK);
     }
