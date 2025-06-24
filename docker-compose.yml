@@ -20,5 +20,8 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       EMAIL_ID: ${EMAIL_ID}
       EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+      KAKAO_REDIRECT_URI: ${KAKAO_REDIRECT_URL}
     ports:
       - "8080:8080"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
