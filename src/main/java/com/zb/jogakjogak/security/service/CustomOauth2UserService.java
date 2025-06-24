@@ -55,7 +55,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
                     .lastLoginAt(LocalDateTime.now())
                     .oauth2Info(new ArrayList<>())
                     .jdList(new ArrayList<>())
-                    .password(null)
+                    .password("temp_password")
                     .role(Role.USER)
                     .build();
             OAuth2Info oAuth2Info = OAuth2Info.builder()
