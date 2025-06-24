@@ -20,20 +20,26 @@ jobs:
       _JAVA_OPTIONS: "-Djava.net.preferIPv4Stack=true -Djava.net.preferIPv4Addresses"
 
     services:
-      db:
+      db_main:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: test_main_db
         ports:
           - 3306:3306
-        volumes:
-          - ${{ github.workspace }}/.github/workflows/init_dbs.sh:/docker-entrypoint-initdb.d/init_dbs.sh
+
+      db_meta:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: test_meta_db
+        ports:
+          - 3307:3307
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Grant execute permission to init_dbs.sh
-        run: chmod 755 ${{ github.workspace }}/.github/workflows/init_dbs.sh
+        with:
+          clean: false
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -63,40 +69,36 @@ jobs:
           echo "TEST_DB_USERNAME=root" >> $GITHUB_ENV 
           echo "TEST_DB_PASSWORD=rootpassword" >> $GITHUB_ENV
 
+      - name: Set Database Connection Environment Variables
+        run: |
+          echo "TEST_DB_USERNAME=root" >> $GITHUB_ENV 
+          echo "TEST_DB_PASSWORD=rootpassword" >> $GITHUB_ENV
+
       - name: Wait for MySQL services to be ready
         run: |
-          echo "Explicitly waiting for MySQL service (db:3306) to be ready..."
-          for i in $(seq 1 20); do
+          echo "Explicitly waiting for MySQL service (db_main:3306) to be ready..."
+          for i in $(seq 1 20); do # Max 20 seconds wait
             if mysqladmin ping -h 127.0.0.1 -P 3306 -u root -prootpassword --silent; then
-              echo "MySQL server (db:3306) is up after $i seconds."
+              echo "MySQL server (db_main:3306) is up after $i seconds."
               break
             fi
-            echo "Waiting for MySQL server (db:3306)... ($i/20)"
+            echo "Waiting for MySQL server (db_main:3306)... ($i/20)"
             sleep 1
           done
-          mysqladmin ping -h 127.0.0.1 -P 3306 -u root -prootpassword || { echo "MySQL server (db:3306) is not ready after max wait time!"; exit 1; }
+          mysqladmin ping -h 127.0.0.1 -P 3306 -u root -prootpassword || { echo "MySQL server (db_main:3306) is not ready after max wait time!"; exit 1; }
+          echo "test_main_db is accessible and ready." 
 
-          echo "Waiting for test_main_db to be accessible..."
-          for i in $(seq 1 10); do
-            if mysql -h 127.0.0.1 -P 3306 -u root -prootpassword -e 'USE test_main_db;' &> /dev/null; then
-              echo "test_main_db is accessible after $i seconds."
+          echo "Explicitly waiting for MySQL service (db_meta:3307) to be ready..."
+          for i in $(seq 1 20); do # Max 20 seconds wait
+            if mysqladmin ping -h 127.0.0.1 -P 3307 -u root -prootpassword --silent; then
+              echo "MySQL server (db_meta:3307) is up after $i seconds."
               break
             fi
-            echo "Waiting for test_main_db... ($i/10)"
+            echo "Waiting for MySQL server (db_meta:3307)... ($i/20)"
             sleep 1
           done
-          mysql -h 127.0.0.1 -P 3306 -u root -p rootpassword -e 'USE test_main_db;' || { echo "test_main_db is not accessible after max wait time!"; exit 1; }
-
-          echo "Waiting for test_meta_db to be accessible..."
-          for i in $(seq 1 10); do
-            if mysql -h 127.0.0.1 -P 3306 -u root -prootpassword -e 'USE test_meta_db;' &> /dev/null; then
-              echo "test_meta_db is accessible after $i seconds."
-              break
-            fi
-            echo "Waiting for test_meta_db... ($i/10)"
-            sleep 1
-          done
-          mysql -h 127.0.0.1 -P 3306 -u root -p rootpassword -e 'USE test_meta_db;' || { echo "test_meta_db is not accessible after max wait time!"; exit 1; }
+          mysqladmin ping -h 127.0.0.1 -P 3307 -u root -prootpassword || { echo "MySQL server (db_meta:3307) is not ready after max wait time!"; exit 1; }
+          echo "test_meta_db is accessible and ready." 
 
       # 테스트 전 애플리케이션 빌드
       - name: Build with Gradle
@@ -126,11 +128,12 @@ jobs:
 
       # 모든 스텝 종료 후 컨테이너 로그 출력 (에러 발생 시 유용)
       - name: Print Docker container logs (for debugging)
-        if: always() # 실패해도 항상 로그 출력
+        if: always()
         run: |
           echo "Listing all Docker containers:"
           docker ps -a
           echo "--- Attempting to get logs for all 'mysql:8.0' containers ---"
+          # 이제 두 개의 컨테이너 ID를 모두 가져오도록 변경
           ALL_MYSQL_CONTAINER_IDS=$(docker ps -a -q -f "ancestor=mysql:8.0")
           if [ -n "$ALL_MYSQL_CONTAINER_IDS" ]; then
             for CONTAINER_ID in $ALL_MYSQL_CONTAINER_IDS; do
