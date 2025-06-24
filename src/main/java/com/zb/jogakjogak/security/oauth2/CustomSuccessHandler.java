@@ -25,7 +25,7 @@ import java.util.Iterator;
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     private final JWTUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
-    private static final long REFRESH_TOKEN_DAYS = 7;
+    private static final long REFRESH_TOKEN_EXPIRATION = 7 * 24 * 60 * 60 * 1000L;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -33,7 +33,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         CustomOAuth2User customOAuth2User = (CustomOAuth2User) authentication.getPrincipal();
         String username = customOAuth2User.getName();
         String role = getRole(authentication);
-        String refreshToken = jwtUtil.createJwt(username, role, REFRESH_TOKEN_DAYS * 24 * 60 * 60 * 1000L, Token.REFRESH_TOKEN);
+        String refreshToken = jwtUtil.createJwt(username, role, REFRESH_TOKEN_EXPIRATION, Token.REFRESH_TOKEN);
         addRefreshToken(username, refreshToken);
 
         response.addCookie(createCookie("refresh", refreshToken));
@@ -63,7 +63,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         RefreshToken refreshToken = RefreshToken.builder()
                 .username(userName)
                 .token(refresh)
-                .expiration(LocalDateTime.now().plusDays(REFRESH_TOKEN_DAYS))
+                .expiration(LocalDateTime.now().plusSeconds(REFRESH_TOKEN_EXPIRATION / 1000))
                 .build();
         refreshTokenRepository.save(refreshToken);
     }
