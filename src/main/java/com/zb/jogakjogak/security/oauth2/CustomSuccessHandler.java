@@ -30,6 +30,11 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     @Value("${kakao.redirect-uri}")
     private String kakaoRedirectUri;
 
+    @Value("${kakao.redirect-uri}")
+    private String kakaoRedirectUri;
+
+
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
 
