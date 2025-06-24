@@ -110,7 +110,7 @@ logging:
         security:
           oauth2: INFO
         boot:
-          autoconfigure: INFO
+          autoconfigure: DEBUG
         jdbc: DEBUG
     org.springframework: DEBUG # 스프링 프레임워크 로깅 레벨
     com.example.jogakjogak: DEBUG # 프로젝트 패키지 로깅 레벨
