@@ -18,8 +18,8 @@ public class ReissueService {
 
     private final JWTUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
-    private static final long ACCESS_TOKEN_HOURS = 24;
-    private static final long REFRESH_TOKEN_DAYS = 7;
+    private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 60 * 24L;
+    private static final long REFRESH_TOKEN_EXPIRATION = 7 * 24 * 60 * 60 * 1000L;
 
     public ReissueResultDto reissue(String refreshToken) {
 
@@ -28,8 +28,8 @@ public class ReissueService {
         String userName = jwtUtil.getUserName(refreshToken);
         String role = jwtUtil.getRole(refreshToken);
 
-        String newAccess = jwtUtil.createJwt(userName, role, ACCESS_TOKEN_HOURS * 60 * 60 * 1000L, Token.ACCESS_TOKEN);
-        String newRefresh = jwtUtil.createJwt(userName, role, REFRESH_TOKEN_DAYS * 24 * 60 * 60 * 1000L, Token.REFRESH_TOKEN);
+        String newAccess = jwtUtil.createJwt(userName, role, ACCESS_TOKEN_EXPIRATION, Token.ACCESS_TOKEN);
+        String newRefresh = jwtUtil.createJwt(userName, role, REFRESH_TOKEN_EXPIRATION, Token.REFRESH_TOKEN);
 
         // refresh 토큰 저장 DB에 존재하면 업데이트, 없으면 생성
         Optional<RefreshToken> existingToken = refreshTokenRepository.findByToken(refreshToken);
@@ -47,7 +47,7 @@ public class ReissueService {
 
     private void updateExistingRefreshTokenEntity(RefreshToken existingToken, String newRefresh) {
         existingToken.setToken(newRefresh);
-        existingToken.setExpiration(LocalDateTime.now().plusDays(REFRESH_TOKEN_DAYS));
+        existingToken.setExpiration(LocalDateTime.now().plusSeconds(REFRESH_TOKEN_EXPIRATION / 1000));
         refreshTokenRepository.save(existingToken);
     }
 
@@ -55,7 +55,7 @@ public class ReissueService {
         RefreshToken refreshToken = RefreshToken.builder()
                 .username(userName)
                 .token(newRefresh)
-                .expiration(LocalDateTime.now().plusDays(REFRESH_TOKEN_DAYS))
+                .expiration(LocalDateTime.now().plusSeconds(REFRESH_TOKEN_EXPIRATION / 1000))
                 .build();
         refreshTokenRepository.save(refreshToken);
     }
