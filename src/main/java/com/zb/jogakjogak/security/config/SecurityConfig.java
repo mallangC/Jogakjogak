@@ -39,7 +39,6 @@ public class SecurityConfig {
                 cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-
                         CorsConfiguration corsConfiguration = new CorsConfiguration();
                         corsConfiguration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
                         corsConfiguration.setAllowedMethods(Collections.singletonList("*"));
@@ -47,7 +46,6 @@ public class SecurityConfig {
                         corsConfiguration.setAllowedHeaders(Collections.singletonList("*"));
                         corsConfiguration.setMaxAge(3600L);
                         corsConfiguration.setExposedHeaders(Arrays.asList("Set-Cookie", "Authorization"));
-
                         return corsConfiguration;
                     }}));
         http.

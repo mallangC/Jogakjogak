@@ -67,12 +67,13 @@ public class NotificationBatchConfig {
     @StepScope
     public RepositoryItemReader<JD> JDReader(){
         LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(1);
+        LocalDateTime now = LocalDateTime.now();
         return new RepositoryItemReaderBuilder<JD>()
                 .name("JDReader")
                 .pageSize(PAGE_SIZE)
                 .methodName("findAll")
                 .methodName("findOutdatedJD")
-                .arguments(List.of(threeDaysAgo))
+                .arguments(List.of(threeDaysAgo, now))
                 .repository(jdRepository)
                 .sorts(Map.of("id", Sort.Direction.ASC))
                 .build();
