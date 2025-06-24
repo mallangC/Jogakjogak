@@ -34,8 +34,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          clean: false
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -59,42 +57,6 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           gradle-version: '7.6.4'
-
-      - name: Wait for MySQL services to be ready
-        run: |
-          echo "Explicitly waiting for MySQL service (db_main:3306) to be ready..."
-          for i in $(seq 1 30); do 
-            SLEEP_DURATION=1 
-            if [ "$i" -le 5 ]; then
-              SLEEP_DURATION=2
-            fi
-
-            if mysqladmin ping -h 127.0.0.1 -P 3306 -u root -prootpassword --silent; then
-              echo "MySQL server (db_main:3306) is up after $i seconds."
-              break
-            fi
-            echo "Waiting for MySQL server (db_main:3306)... ($i/30)"
-            sleep $SLEEP_DURATION
-          done
-          mysqladmin ping -h 127.0.0.1 -P 3306 -u root -prootpassword || { echo "MySQL server (db_main:3306) is not ready after max wait time!"; exit 1; }
-          echo "test_main_db is accessible and ready." 
-
-          echo "Explicitly waiting for MySQL service (db_meta:3307) to be ready..."
-          for i in $(seq 1 30); do 
-            SLEEP_DURATION=1 
-            if [ "$i" -le 5 ]; then 
-              SLEEP_DURATION=2
-            fi
-
-            if mysqladmin ping -h 127.0.0.1 -P 3307 -u root -prootpassword --silent; then
-              echo "MySQL server (db_meta:3307) is up after $i seconds."
-              break
-            fi
-            echo "Waiting for MySQL server (db_meta:3307)... ($i/30)"
-            sleep $SLEEP_DURATION
-          done
-          mysqladmin ping -h 127.0.0.1 -P 3307 -u root -prootpassword || { echo "MySQL server (db_meta:3307) is not ready after max wait time!"; exit 1; }
-          echo "test_meta_db is accessible and ready." 
 
       # 테스트 전 애플리케이션 빌드
       - name: Build with Gradle
