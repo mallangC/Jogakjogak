@@ -24,8 +24,8 @@ public class Resume extends BaseEntity {
     @Column(nullable = false, length = 5000)
     private String content;
 
-    @OneToOne
-    @JoinColumn(name = "member_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     /**
@@ -35,5 +35,9 @@ public class Resume extends BaseEntity {
     public void modify(ResumeRequestDto requestDto) {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
+    }
+
+    public void setMember(Member member) {
+        this.member = member;
     }
 }
