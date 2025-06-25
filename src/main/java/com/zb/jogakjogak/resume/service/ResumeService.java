@@ -109,13 +109,16 @@ public class ResumeService {
      * @param resumeId 삭제하려는 이력서의 id
      * @return 삭제한 이력서의 응답 dto
      */
+    @Transactional
     public void delete(Long resumeId, String username) {
-
         Member member = getMemberByUsername(username);
+        Resume resumeToDelete = resumeRepository.findById(resumeId)
+                        .orElseThrow(()-> new ResumeException(ResumeErrorCode.NOT_FOUND_RESUME));
+        if(resumeToDelete.getMember() == null || !resumeToDelete.getMember().getId().equals(member.getId())) {
+            throw new ResumeException(ResumeErrorCode.UNAUTHORIZED_ACCESS);
 
-        Resume resume = findResumeAndVerifyOwner(resumeId, member);
-
-        resumeRepository.delete(resume);
+        }
+        resumeRepository.delete(resumeToDelete);
     }
 
     /**
@@ -145,6 +148,4 @@ public class ResumeService {
         return memberRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
     }
-
-
 }

@@ -31,6 +31,7 @@ public class JDController {
      * @param customOAuth2User 현재 인증된 사용자의 OAuth2 정보를 포함하는 Principal 객체.
      * @return 제목, JD의 URL, To Do List, 사용자 메모, 마감일
      */
+    //TODO: 삭제?
     @PostMapping("/jd")
     public ResponseEntity<HttpApiResponse<JDResponseDto>> requestSend(
             @RequestBody JDRequestDto jdRequestDto,
