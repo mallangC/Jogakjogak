@@ -5,11 +5,11 @@ spring:
     username: ${TEST_DB_USERNAME}
     password: ${TEST_DB_PASSWORD}
 
-  datasource-meta:
-    jdbc-url: jdbc:mysql://127.0.0.1:${TEST_DB_META_PORT}/test_meta_db?useSSL=false&allowPublicKeyRetrieval=true
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${TEST_DB_USERNAME}
-    password: ${TEST_DB_PASSWORD}
+    datasource-meta:
+      jdbc-url: jdbc:mysql://127.0.0.1:${TEST_DB_META_PORT}/test_meta_db?useSSL=false&allowPublicKeyRetrieval=true
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      username: ${TEST_DB_USERNAME}
+      password: ${TEST_DB_PASSWORD}
 
   flyway:
     enabled: true

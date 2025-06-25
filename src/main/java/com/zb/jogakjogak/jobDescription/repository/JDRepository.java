@@ -1,6 +1,7 @@
 package com.zb.jogakjogak.jobDescription.repository;
 
 import com.zb.jogakjogak.jobDescription.entity.JD;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -35,6 +36,8 @@ public interface JDRepository extends JpaRepository<JD, Long> {
     @EntityGraph(attributePaths = "toDoLists")
     Page<JD> findByMemberId(Long memberId, Pageable pageable);
 
-    @Query("SELECT jd FROM JD jd WHERE jd.updatedAt <= :oldDate AND jd.endedAt >= now")
-    Page<JD> findOutdatedJD(@Param("oldDate") LocalDateTime oldDate, @Param("now") LocalDateTime now, Pageable pageable);
+
+    @Query("SELECT jd FROM JD jd WHERE jd.updatedAt <= :oldDate AND jd.endedAt >= now AND jd.isAlarmOn = true")
+    Page<JD> findNotUpdatedJd(@Param("oldDate")LocalDateTime oldDate, @Param("now") LocalDateTime now, Pageable pageable);
+
 }

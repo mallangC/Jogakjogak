@@ -29,6 +29,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Configuration
 @RequiredArgsConstructor
@@ -71,8 +72,8 @@ public class NotificationBatchConfig {
         return new RepositoryItemReaderBuilder<JD>()
                 .name("JDReader")
                 .pageSize(PAGE_SIZE)
-                .methodName("findAll")
-                .methodName("findOutdatedJD")
+                //.methodName("findAll")
+                .methodName("findNotUpdatedJd")
                 .arguments(List.of(threeDaysAgo, now))
                 .repository(jdRepository)
                 .sorts(Map.of("id", Sort.Direction.ASC))
@@ -82,8 +83,8 @@ public class NotificationBatchConfig {
     @Bean
     public ItemProcessor<JD, JD> processor(){
         return jd -> {
-            createNotification(jd);
-            sendNotification(jd);
+            Notification notification = createNotification(jd);
+            sendNotification(notification);
 
             return jd;
         };
@@ -97,24 +98,21 @@ public class NotificationBatchConfig {
                 .build();
     }
 
-    private void createNotification(JD jd){
+    private Notification createNotification(JD jd){
+        Optional<Notification> existsNotification = notificationRepository.findByMemberId(jd.getMember().getId());
+        if (existsNotification.isPresent()){
+            existsNotification.get().getJdList().add(jd);
+        }
         Notification notification = Notification.builder()
                 .member(jd.getMember())
                 .createdAt(LocalDateTime.now())
                 .build();
+        notification.getJdList().add(jd);
         notificationRepository.save(notification);
+        return notification;
     }
-    private void sendNotification(JD jd) throws MessagingException {
-        List<ToDoList> toDoList = toDoListRepository.findByJdId(jd.getId());
-        int completedJogak = 0;
-        int notCompletedJogak = 0;
-        for(ToDoList todo : toDoList){
-            if(todo.isDone()){
-                completedJogak ++;
-            }else {
-                notCompletedJogak ++;
-            }
-        }
-        notificationService.sendNotificationEmail(jd.getTitle(), jd.getMember().getEmail(), completedJogak, notCompletedJogak);
+    private void sendNotification(Notification notification) throws MessagingException {
+
+        notificationService.sendNotificationEmail(notification);
     }
 }

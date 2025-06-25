@@ -2,6 +2,7 @@ package com.zb.jogakjogak.jobDescription.entity;
 
 import com.zb.jogakjogak.global.BaseEntity;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.MemoRequestDto;
+import com.zb.jogakjogak.notification.entity.Notification;
 import com.zb.jogakjogak.security.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
@@ -61,6 +62,10 @@ public class JD extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "notification_id")
+    private Notification notification;
+
     public void addToDoList(ToDoList toDoList) {
         if (this.toDoLists == null) {
             this.toDoLists = new ArrayList<>();
@@ -80,6 +85,7 @@ public class JD extends BaseEntity {
     public void markJdAsApplied() {
         this.applyAt = LocalDateTime.now();
     }
+
     public void unMarkJdAsApplied() {
         this.applyAt = null;
     }
