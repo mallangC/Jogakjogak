@@ -80,9 +80,6 @@ public class Member {
     }
 
     public void setResume(Resume resume) {
-        if (this.resume != null && !this.resume.equals(resume)) {
-
-        }
         this.resume = resume;
 
         if (resume != null && (resume.getMember() == null || !resume.getMember().equals(this))) {
