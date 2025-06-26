@@ -4,6 +4,8 @@ package com.zb.jogakjogak.security.controller;
 import com.zb.jogakjogak.global.HttpApiResponse;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.service.WithdrawalService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "회원 탈퇴 API", description = "사용자 회원 탈퇴 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/member/withdrawal")
@@ -23,6 +26,7 @@ public class WithdrawalController {
 
     private final WithdrawalService withdrawalService;
 
+    @Operation(summary = "회원 탈퇴", description = "로그인된 사용자가 회원을 탈퇴합니다")
     @PostMapping
     public ResponseEntity oauth2Withdrawal(HttpServletResponse response, @AuthenticationPrincipal CustomOAuth2User customOAuth2User){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
