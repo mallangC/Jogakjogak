@@ -23,7 +23,6 @@ public class NotificationService {
     private static final String EMAIL_TITLE = "[조각조각]에서 알림이 도착했습니다.";
 
     private final JavaMailSender javaMailSender;
-    private final SpringTemplateEngine templateEngine;
 
     private final ToDoListRepository toDoListRepository;
 
