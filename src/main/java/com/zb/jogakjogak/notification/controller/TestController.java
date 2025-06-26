@@ -2,6 +2,7 @@ package com.zb.jogakjogak.notification.controller;
 
 
 import com.zb.jogakjogak.notification.dto.ResponseDto;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -23,6 +24,8 @@ public class TestController {
      */
     private final JobLauncher jobLauncher;
     private final JobRegistry jobRegistry;
+
+    @Hidden
     @PostMapping
     public ResponseDto bizMessageSend() throws Exception{
         JobParameters jobParameters = new JobParametersBuilder()

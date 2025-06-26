@@ -45,5 +45,4 @@ public interface JDRepository extends JpaRepository<JD, Long> {
     //테스트용
     @EntityGraph(attributePaths = "member")
     Page<JD> findAll(Pageable pageable);
-
 }
