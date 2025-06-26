@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/jds/{jdId}/to-do-lists")
+@RequestMapping("/api/jds/{jd_id}/to-do-lists")
 public class ToDoListController {
 
     private final ToDoListService toDoListService;
@@ -33,7 +33,7 @@ public class ToDoListController {
      */
     @PostMapping
     public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> createToDoList(
-            @PathVariable Long jdId,
+            @PathVariable("jd_id") Long jdId,
             @RequestBody @Valid CreateToDoListRequestDto dto,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
 
@@ -60,7 +60,7 @@ public class ToDoListController {
      */
     @PatchMapping("/{toDoListId}")
     public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> updateToDoList(
-            @PathVariable Long jdId,
+            @PathVariable("jd_id") Long jdId,
             @PathVariable Long toDoListId,
             @RequestBody @Valid UpdateToDoListRequestDto toDoListDto,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
@@ -85,7 +85,7 @@ public class ToDoListController {
      */
     @GetMapping("/{toDoListId}")
     public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> getToDoList(
-            @PathVariable Long jdId,
+            @PathVariable("jd_id") Long jdId,
             @PathVariable Long toDoListId,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
         String memberName = customUser.getName();
@@ -108,7 +108,7 @@ public class ToDoListController {
      */
     @DeleteMapping("/{toDoListId}")
     public ResponseEntity<HttpApiResponse<String>> deleteToDoList(
-            @PathVariable Long jdId,
+            @PathVariable("jd_id") Long jdId,
             @PathVariable Long toDoListId,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
         String memberName = customUser.getName();
@@ -132,7 +132,7 @@ public class ToDoListController {
      */
     @GetMapping
     public ResponseEntity<HttpApiResponse<ToDoListGetByCategoryResponseDto>> getToDoListsByCategory(
-            @PathVariable Long jdId,
+            @PathVariable("jd_id")  Long jdId,
             @RequestParam(name = "category") ToDoListType category,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
         String memberName = customUser.getName();
@@ -156,7 +156,7 @@ public class ToDoListController {
      */
     @PutMapping("/bulk-update")
     public ResponseEntity<HttpApiResponse<ToDoListGetByCategoryResponseDto>> bulkUpdateToDoLists(
-            @PathVariable Long jdId,
+            @PathVariable("jd_id")  Long jdId,
             @RequestBody BulkToDoListUpdateRequestDto dto,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
 
