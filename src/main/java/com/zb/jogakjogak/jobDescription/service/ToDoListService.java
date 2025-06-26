@@ -158,12 +158,10 @@ public class ToDoListService {
      * @param jdId       ToDoList가 속한 JD의 ID
      * @param dto        ToDoList 수정 내용 (생성/수정/삭제 목록 포함)
      * @param memberName 로그인한 유저
-     * @return 수정된 ToDoList들의 응답 DTO 리스트
      */
     @Transactional
-    public ToDoListGetByCategoryResponseDto bulkUpdateToDoLists(Long jdId, BulkToDoListUpdateRequestDto dto, String memberName) {
+    public void bulkUpdateToDoLists(Long jdId, BulkToDoListUpdateRequestDto dto, String memberName) {
         JD jd = getAuthorizedJd(jdId, memberName);
-
 
         ToDoListType targetCategory = dto.getCategory();
         if (targetCategory == null) {
@@ -178,7 +176,9 @@ public class ToDoListService {
             processDeletedToDoLists(jd, targetCategory, dto.getDeletedToDoListIds());
         }
 
-        List<ToDoList> updatedListsInTargetCategory = toDoListRepository.findByJdIdAndCategoryFetch(jd.getId(), targetCategory);
+        if (dto.getUpdatedOrCreateToDoLists() != null && !dto.getUpdatedOrCreateToDoLists().isEmpty()) {
+            processUpdatedOrCreateToDoLists(jd, targetCategory, dto.getUpdatedOrCreateToDoLists());
+        }
 
     }
 
@@ -218,19 +218,28 @@ public class ToDoListService {
         for (ToDoListUpdateRequestDto dto : dtoList) {
 
             if (dto.getId() != null) {
-                ToDoList toDoList = toDoListRepository.findByIdWithJd(dto.getId())
+                ToDoList updateToDoList = toDoListRepository.findByIdWithJd(dto.getId())
                         .orElseThrow(() -> new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_FOUND));
 
-                if (!toDoList.getJd().getId().equals(jd.getId()) || !toDoList.getCategory().equals(targetCategory)) {
+                if (!updateToDoList.getJd().getId().equals(jd.getId()) || !updateToDoList.getCategory().equals(targetCategory)) {
                     throw new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_BELONG_TO_JD);
                 }
-                toDoList.updateFromBulkUpdateToDoLists(dto, targetCategory);
+                updateToDoList.updateFromBulkUpdateToDoLists(dto, targetCategory);
+                toDoListRepository.save(updateToDoList);
             } else {
-                ToDoList newToDoList = ToDoList.fromDto(dto, jd, targetCategory);
+                ToDoList newToDoList = ToDoList.builder()
+                        .category(targetCategory)
+                        .title(dto.getTitle())
+                        .content(dto.getContent())
+                        .memo("")
+                        .isDone(dto.isDone())
+                        .jd(jd)
+                        .build();
                 toDoListRepository.save(newToDoList);
             }
         }
     }
+
     /**
      * 일괄 업데이트 요청에서 삭제될 ToDoList들을 처리.
      *
