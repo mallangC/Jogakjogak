@@ -27,6 +27,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -45,7 +46,7 @@ public class NotificationBatchConfig {
     private final NotificationService notificationService;
 
     @Bean
-    public Job firstJob(){
+    public Job notificationJob(){
 
         return new JobBuilder("sendNotification", jobRepository)
                 .start(sendNotification())
@@ -72,9 +73,10 @@ public class NotificationBatchConfig {
         return new RepositoryItemReaderBuilder<JD>()
                 .name("JDReader")
                 .pageSize(PAGE_SIZE)
-                //.methodName("findAll")
-                .methodName("findNotUpdatedJd")
-                .arguments(List.of(threeDaysAgo, now))
+                .methodName("findAll")
+                //.methodName("findNotUpdatedJd")
+                //.arguments(List.of(threeDaysAgo, now))
+                .arguments(List.of())
                 .repository(jdRepository)
                 .sorts(Map.of("id", Sort.Direction.ASC))
                 .build();
@@ -84,8 +86,9 @@ public class NotificationBatchConfig {
     public ItemProcessor<JD, JD> processor(){
         return jd -> {
             Notification notification = createNotification(jd);
-            sendNotification(notification);
+            jd.setNotification(notification);
 
+            notificationService.sendNotificationEmail(notification);
             return jd;
         };
     }
@@ -99,20 +102,13 @@ public class NotificationBatchConfig {
     }
 
     private Notification createNotification(JD jd){
-        Optional<Notification> existsNotification = notificationRepository.findByMemberId(jd.getMember().getId());
-        if (existsNotification.isPresent()){
-            existsNotification.get().getJdList().add(jd);
-        }
-        Notification notification = Notification.builder()
-                .member(jd.getMember())
-                .createdAt(LocalDateTime.now())
-                .build();
-        notification.getJdList().add(jd);
-        notificationRepository.save(notification);
-        return notification;
-    }
-    private void sendNotification(Notification notification) throws MessagingException {
-
-        notificationService.sendNotificationEmail(notification);
+        return notificationRepository.findByMemberId(jd.getMember().getId())
+                .orElseGet(() -> {
+                    Notification newNotification = Notification.builder()
+                            .member(jd.getMember())
+                            .createdAt(LocalDateTime.now())
+                            .build();
+                    return notificationRepository.save(newNotification);
+                });
     }
 }
