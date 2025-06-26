@@ -17,7 +17,9 @@ public interface ToDoListRepository extends JpaRepository<ToDoList, Long> {
 
     List<ToDoList> findByJdAndCategory(JD jd, ToDoListType targetCategory);
 
-    List<ToDoList> findByJdId(long jdId);
+    List<ToDoList> findByJdId(Long jdId);
+
+    List<ToDoList> findAllByJdId(Long jdId);
 
     @Query("SELECT t FROM ToDoList t JOIN FETCH t.jd j WHERE j.id = :jdId AND t.category = :category")
     List<ToDoList> findByJdIdAndCategoryFetch(@Param("jdId") Long jdId, @Param("category") ToDoListType category);
