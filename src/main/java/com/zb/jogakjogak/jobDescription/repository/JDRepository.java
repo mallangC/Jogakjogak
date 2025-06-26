@@ -1,7 +1,6 @@
 package com.zb.jogakjogak.jobDescription.repository;
 
 import com.zb.jogakjogak.jobDescription.entity.JD;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -39,5 +38,9 @@ public interface JDRepository extends JpaRepository<JD, Long> {
 
     @Query("SELECT jd FROM JD jd WHERE jd.updatedAt <= :oldDate AND jd.endedAt >= now AND jd.isAlarmOn = true")
     Page<JD> findNotUpdatedJd(@Param("oldDate")LocalDateTime oldDate, @Param("now") LocalDateTime now, Pageable pageable);
+
+    //테스트용
+    @EntityGraph(attributePaths = "member")
+    Page<JD> findAll(Pageable pageable);
 
 }
