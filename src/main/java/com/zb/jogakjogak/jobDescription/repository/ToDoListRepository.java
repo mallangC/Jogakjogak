@@ -26,4 +26,7 @@ public interface ToDoListRepository extends JpaRepository<ToDoList, Long> {
 
     @Query("SELECT t FROM ToDoList t JOIN FETCH t.jd WHERE t.id = :id")
     Optional<ToDoList> findByIdWithJd(@Param("id") Long id);
+
+    long countByJdIdAndCategory(Long id, ToDoListType targetCategory);
+
 }
