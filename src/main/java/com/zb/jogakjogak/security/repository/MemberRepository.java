@@ -10,7 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
-
     Optional<Member> findByUsername(String userName);
 
     @Query("SELECT COUNT(j) FROM JD j WHERE j.member.id = :memberId")

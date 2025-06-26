@@ -275,7 +275,9 @@ class ResumeServiceTest {
         resumeService.delete(resumeIdToDelete, mockMember.getName());
 
         // Then
-        verify(resumeRepository, times(1)).delete(sampleResume);
+        verify(resumeRepository, times(1)).findById(resumeIdToDelete);
+        verify(memberRepository, times(1)).findByUsername(mockMember.getName());
+        assertThat(mockMember.getResume()).isNull();
     }
 
     @DisplayName("이력서 삭제 실패 테스트 - 이력서를 찾을 수 없음")

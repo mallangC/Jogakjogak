@@ -30,11 +30,30 @@ env:
   GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET}}
   EMAIL_ID: ${{ secrets.EMAIL_ID}}
   EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD}}
+  KAKAO_REDIRECT_URI: ${{ secrets.KAKAO_REDIRECT_URI }}
 
 jobs:
   test:
     name: Test for Gradle
     runs-on: ubuntu-latest
+
+    services:
+      db_main:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: test_main_db
+        ports:
+          - 3306:3306
+
+      db_meta:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: test_meta_db
+        ports:
+          - 3307:3306
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -53,6 +72,7 @@ jobs:
       - name: Clean Gradle Cache and Build
         run: |
           ./gradlew --stop
+          rm -rf ~/.gradle/caches/
           rm -rf build/
 
       # gradle 세팅
@@ -65,10 +85,19 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build -x test
 
+      - name: Check application-test.yml exists
+        run: cat src/test/resources/application-test.yml || echo "application-test.yml not found"
+
       # 테스트 진행
       - name: Test with Gradle
-        run: ./gradlew test
-
+        env:
+          SPRING_PROFILES_ACTIVE: test
+          TEST_DB_MAIN_PORT: 3306
+          TEST_DB_META_PORT: 3307
+          TEST_DB_USERNAME: root
+          TEST_DB_PASSWORD: rootpassword
+          KAKAO_REDIRECT_URI: ${{ env.KAKAO_REDIRECT_URI }}
+        run: ./gradlew test --info
 
   build:
     name: Build Docker Image
@@ -123,6 +152,7 @@ jobs:
           echo "GOOGLE_CLIENT_SECRET=${{ env.GOOGLE_CLIENT_SECRET}}" >> .env 
           echo "EMAIL_ID=${{ env.EMAIL_ID}}" >> .env 
           echo "EMAIL_PASSWORD=${{ env.EMAIL_PASSWORD}}" >> .env    
+          echo "KAKAO_REDIRECT_URI=${{ env.KAKAO_REDIRECT_URI}}" >> .env    
 
         shell: bash
 
