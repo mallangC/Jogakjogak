@@ -159,11 +159,11 @@ public class ToDoListController {
             @PathVariable("jd_id")  Long jdId,
             @RequestBody BulkToDoListUpdateRequestDto dto,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
-
         String memberName = customUser.getName();
+        toDoListService.bulkUpdateToDoLists(jdId, dto, memberName);
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
-                        toDoListService.bulkUpdateToDoLists(jdId, dto, memberName),
+                        toDoListService.getToDoListsByJdAndCategory(jdId, dto.getCategory(), memberName),
                         "다중 투두리스트 수정 성공",
                         HttpStatus.OK
                 )
