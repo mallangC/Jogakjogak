@@ -128,7 +128,7 @@ public class ToDoListService {
         Member member = memberRepository.findByUsername(memberName)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
-        JD jd = jdRepository.findById(jdId)
+        JD jd = jdRepository.findByIdWithToDoLists(jdId)
                 .orElseThrow(() -> new JDException(JDErrorCode.NOT_FOUND_JD));
 
         if (!Objects.equals(member.getId(), jd.getMember().getId())) {

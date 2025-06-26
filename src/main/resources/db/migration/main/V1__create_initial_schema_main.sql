@@ -74,7 +74,7 @@ CREATE TABLE to_do_list
     id         BIGINT PRIMARY KEY AUTO_INCREMENT,
     jd_id      BIGINT        NOT NULL,
     category   VARCHAR(40)   NOT NULL,
-    title      VARCHAR(15)   NOT NULL,
+    title      VARCHAR(50)   NOT NULL,
     content    VARCHAR(1000) NOT NULL,
     `memo`     VARCHAR(255)  NOT NULL,
     is_done    BIT           NOT NULL,

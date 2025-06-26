@@ -8,6 +8,8 @@ import com.zb.jogakjogak.jobDescription.domain.requestDto.MemoRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.*;
 import com.zb.jogakjogak.jobDescription.service.JDService;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -17,6 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "분석 관리 API",
+        description = "GEMINI API 기반 JD/이력서 분석 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -31,6 +35,7 @@ public class JDController {
      * @param customOAuth2User 현재 인증된 사용자의 OAuth2 정보를 포함하는 Principal 객체.
      * @return 제목, JD의 URL, To Do List, 사용자 메모, 마감일
      */
+    //TODO: 삭제?
     @PostMapping("/jd")
     public ResponseEntity<HttpApiResponse<JDResponseDto>> requestSend(
             @RequestBody JDRequestDto jdRequestDto,
@@ -48,6 +53,8 @@ public class JDController {
      * @param customOAuth2User 현재 인증된 사용자의 OAuth2 정보를 포함하는 Principal 객체.
      * @return 제목, JD의 URL, To Do List, 사용자 메모, 마감일
      */
+    @Operation(summary = "JD와 이력서를 분석 후 Todolist 생성",
+            description = "등록된 이력서와 요청으로 받은 JD를 함께 분석 후 Todolist 형식으로 응답합니다")
     @PostMapping("/jds")
     public ResponseEntity<HttpApiResponse<JDResponseDto>> llmAnalyze(
             @RequestBody JDRequestDto jdRequestDto,
@@ -69,6 +76,7 @@ public class JDController {
      * @param customOAuth2User 현재 인증된 사용자의 OAuth2 정보를 포함하는 Principal 객체.
      * @return 조회된 jd의 응답 dto
      */
+    @Operation(summary = "특정 분석 내용 단건 조회", description = "jd_id를 통해 해당 분석 내용을 단건으로 조회합니다")
     @GetMapping("/jds/{jd_id}")
     public ResponseEntity<HttpApiResponse<JDResponseDto>> getJd(
             @PathVariable("jd_id") Long jdId,
@@ -90,6 +98,7 @@ public class JDController {
      * @param customOAuth2User 현재 인증된 사용자의 OAuth2 정보를 포함하는 Principal 객체.
      * @return 알림 설정을 변경한 JD 응답 dto
      */
+    @Operation(summary = "특정 분석 알림 설정", description = "jd_id를 통해 특정 분석에 대한 이메일 알림에 대한 설정/미설정합니다")
     @PatchMapping("/jds/{jd_id}/alarm")
     public ResponseEntity<HttpApiResponse<JDAlarmResponseDto>> alarm(
             @PathVariable("jd_id") Long jdId,
@@ -112,6 +121,7 @@ public class JDController {
      * @param customOAuth2User 현재 인증된 사용자의 OAuth2 정보를 포함하는 Principal 객체.
      * @return 삭제된 JD의 응답 Dto
      */
+    @Operation(summary = "특정 분석 삭제", description = "jd_id를 통해 특정 분석을 삭제합니다")
     @DeleteMapping("/jds/{jd_id}")
     public ResponseEntity<HttpApiResponse<String>> deleteJd(
             @PathVariable("jd_id") Long jdId,
@@ -139,6 +149,7 @@ public class JDController {
      * @param customOAuth2User 현재 인증된 사용자의 OAuth2 정보를 포함하는 Principal 객체.
      * @return 페이징된 JD 목록과 API 응답 상태를 포함하는 ResponseDto
      */
+    @Operation(summary = "모든 분석 목록 조회", description = "모든 분석 목록을 페이징하여 조회합니다")
     @GetMapping("/jds")
     public ResponseEntity<HttpApiResponse<PagedJdResponseDto>> getPaginatedJds(
             @PageableDefault(
@@ -166,6 +177,7 @@ public class JDController {
      * @param customOAuth2User 현재 인증된 사용자의 정보를 담고 있는 객체.
      * @return 업데이트된 즐겨찾기 상태 ResponseDto
      */
+    @Operation(summary = "특정 분석 즐겨찾기 설정", description = "jd_id를 통해 분석을 즐겨찾기로 설정/미설정합니다")
     @PatchMapping("/jds/{jd_id}/bookmark")
     public ResponseEntity<HttpApiResponse<BookmarkResponseDto>> toggleBookmark
     (@PathVariable("jd_id") Long jdId,
@@ -190,6 +202,7 @@ public class JDController {
      * @param customOAuth2User 현재 인증된 사용자의 정보를 담고 있는 객체.
      * @return 토글된 지원 완료 상태 ResponseDto
      */
+    @Operation(summary = "특정 분석 지원 완료 설정", description = "jd_id를 통해 분석된 채용공고에 지원을 완료/미완료로 설정합니다")
     @PatchMapping("/jds/{jd_id}/apply")
     public ResponseEntity<HttpApiResponse<ApplyStatusResponseDto>> toggleApplyStatus(
             @PathVariable("jd_id") Long jdId,
@@ -217,6 +230,7 @@ public class JDController {
      * @param customOAuth2User 현재 인증된 사용자의 정보를 담고 있는 객체.
      * @return 업데이트된 메모 내용을 담고 있는 ResponseDto
      */
+    @Operation(summary = "특정 분석 메모 수정", description = "jd_id를 통해 분석의 메모를 수정합니다")
     @PatchMapping("/jds/{jd_id}/memo")
     public ResponseEntity<HttpApiResponse<MemoResponseDto>> updateMemo(
             @PathVariable("jd_id") Long jdId,
