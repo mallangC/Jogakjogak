@@ -40,19 +40,10 @@ CREATE TABLE resume
     FOREIGN KEY (member_id) REFERENCES member (id)
 );
 
-CREATE TABLE notification
-(
-    id         BIGINT PRIMARY KEY AUTO_INCREMENT,
-    member_id  BIGINT NOT NULL,
-    created_at DATETIME,
-    FOREIGN KEY (member_id) REFERENCES member (id)
-);
-
 CREATE TABLE job_description
 (
     id           BIGINT PRIMARY KEY AUTO_INCREMENT,
     member_id    BIGINT        NOT NULL,
-    notification_id BIGINT,
     title        VARCHAR(30)   NOT NULL,
     company_name VARCHAR(30)   NOT NULL,
     job          VARCHAR(30)   NOT NULL,
@@ -65,7 +56,6 @@ CREATE TABLE job_description
     ended_at     DATETIME,
     created_at   DATETIME,
     updated_at   DATETIME,
-    FOREIGN KEY (notification_id) REFERENCES notification (id),
     FOREIGN KEY (member_id) REFERENCES member (id)
 );
 
@@ -83,3 +73,10 @@ CREATE TABLE to_do_list
     FOREIGN KEY (jd_id) REFERENCES job_description (id)
 );
 
+CREATE TABLE notification
+(
+    id         BIGINT PRIMARY KEY AUTO_INCREMENT,
+    member_id  BIGINT NOT NULL,
+    created_at DATETIME,
+    FOREIGN KEY (member_id) REFERENCES member (id)
+);

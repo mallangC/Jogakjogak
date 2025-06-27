@@ -27,8 +27,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Configuration
 @RequiredArgsConstructor
@@ -44,7 +46,7 @@ public class NotificationBatchConfig {
     private final NotificationService notificationService;
 
     @Bean
-    public Job firstJob(){
+    public Job notificationJob(){
 
         return new JobBuilder("sendNotification", jobRepository)
                 .start(sendNotification())
@@ -72,8 +74,9 @@ public class NotificationBatchConfig {
                 .name("JDReader")
                 .pageSize(PAGE_SIZE)
                 .methodName("findAll")
-                .methodName("findOutdatedJD")
-                .arguments(List.of(threeDaysAgo, now))
+                //.methodName("findNotUpdatedJd")
+                //.arguments(List.of(threeDaysAgo, now))
+                .arguments(List.of())
                 .repository(jdRepository)
                 .sorts(Map.of("id", Sort.Direction.ASC))
                 .build();
@@ -82,9 +85,10 @@ public class NotificationBatchConfig {
     @Bean
     public ItemProcessor<JD, JD> processor(){
         return jd -> {
-            createNotification(jd);
-            sendNotification(jd);
+            Notification notification = createNotification(jd);
+            jd.setNotification(notification);
 
+            notificationService.sendNotificationEmail(notification);
             return jd;
         };
     }
@@ -97,24 +101,14 @@ public class NotificationBatchConfig {
                 .build();
     }
 
-    private void createNotification(JD jd){
-        Notification notification = Notification.builder()
-                .member(jd.getMember())
-                .createdAt(LocalDateTime.now())
-                .build();
-        notificationRepository.save(notification);
-    }
-    private void sendNotification(JD jd) throws MessagingException {
-        List<ToDoList> toDoList = toDoListRepository.findByJdId(jd.getId());
-        int completedJogak = 0;
-        int notCompletedJogak = 0;
-        for(ToDoList todo : toDoList){
-            if(todo.isDone()){
-                completedJogak ++;
-            }else {
-                notCompletedJogak ++;
-            }
-        }
-        notificationService.sendNotificationEmail(jd.getTitle(), jd.getMember().getEmail(), completedJogak, notCompletedJogak);
+    private Notification createNotification(JD jd){
+        return notificationRepository.findByMemberId(jd.getMember().getId())
+                .orElseGet(() -> {
+                    Notification newNotification = Notification.builder()
+                            .member(jd.getMember())
+                            .createdAt(LocalDateTime.now())
+                            .build();
+                    return notificationRepository.save(newNotification);
+                });
     }
 }

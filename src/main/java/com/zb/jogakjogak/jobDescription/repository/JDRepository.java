@@ -37,8 +37,12 @@ public interface JDRepository extends JpaRepository<JD, Long> {
     @EntityGraph(attributePaths = "toDoLists")
     Page<JD> findByMemberId(Long memberId, Pageable pageable);
 
-    @Query("SELECT jd FROM JD jd WHERE jd.updatedAt <= :oldDate AND jd.endedAt >= now")
-    Page<JD> findOutdatedJD(@Param("oldDate") LocalDateTime oldDate, @Param("now") LocalDateTime now, Pageable pageable);
-
     List<JD> findAllByMember(Member member);
+
+    @Query("SELECT jd FROM JD jd WHERE jd.updatedAt <= :oldDate AND jd.endedAt >= now AND jd.isAlarmOn = true")
+    Page<JD> findNotUpdatedJd(@Param("oldDate")LocalDateTime oldDate, @Param("now") LocalDateTime now, Pageable pageable);
+
+    //테스트용
+    @EntityGraph(attributePaths = "member")
+    Page<JD> findAll(Pageable pageable);
 }
