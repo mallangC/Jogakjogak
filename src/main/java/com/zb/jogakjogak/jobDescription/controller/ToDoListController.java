@@ -62,7 +62,7 @@ public class ToDoListController {
      * @param customUser  현재 인증된 사용자 정보
      * @return 수정된 ToDoList의 상세 정보와 성공 메시지를 포함하는 응답.
      */
-    @Operation(summary = "특정 분석/카테고리의 Todolist 수정", description = "jd_id와 category를 통해 todolist를 수정합니다")
+    @Operation(summary = "특정 분석/카테고리의 Todolist 수정", description = "jd_id와 toDoList_id를 통해 todolist를 수정합니다")
     @PatchMapping("/{toDoListId}")
     public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> updateToDoList(
             @PathVariable Long jdId,
@@ -88,7 +88,7 @@ public class ToDoListController {
      * @param customUser 현재 인증된 사용자 정보
      * @return 조회된 ToDoList의 상세 정보와 성공 메시지를 포함하는 응답
      */
-    @Operation(summary = "특정 분석/카테고리의 Todolist 조회", description = "jd_id와 category를 통해 todolist를 조회합니다")
+    @Operation(summary = "특정 분석/카테고리의 Todolist 조회", description = "jd_id와 toDoList_id를 통해 todolist를 조회합니다")
     @GetMapping("/{toDoListId}")
     public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> getToDoList(
             @PathVariable Long jdId,
@@ -112,7 +112,7 @@ public class ToDoListController {
      * @param customUser 현재 인증된 사용자 정보
      * @return 빈 데이터와 성공 메시지를 포함하는 응답
      */
-    @Operation(summary = "특정 분석/카테고리의 Todolist 삭제", description = "jd_id와 category를 통해 todolist를 삭제합니다")
+    @Operation(summary = "특정 분석/카테고리의 Todolist 삭제", description = "jd_id와 toDoList_id를 통해 todolist를 삭제합니다")
     @DeleteMapping("/{toDoListId}")
     public ResponseEntity<HttpApiResponse<String>> deleteToDoList(
             @PathVariable Long jdId,
