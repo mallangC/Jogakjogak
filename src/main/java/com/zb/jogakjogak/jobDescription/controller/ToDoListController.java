@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Todolist 관리 API", description = "JD/이력서 분석으로 생성된 Todolist 관련 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/jds/{jdId}/to-do-lists")
+@RequestMapping("/api/jds/{jd_id}/to-do-lists")
 public class ToDoListController {
 
     private final ToDoListService toDoListService;
@@ -37,7 +37,7 @@ public class ToDoListController {
     @Operation(summary = "특정 분석/카테고리의 Todolist 생성", description = "jd_id와 category를 통해 todolist를 생성합니다")
     @PostMapping
     public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> createToDoList(
-            @PathVariable Long jdId,
+            @PathVariable("jd_id") Long jdId,
             @RequestBody @Valid CreateToDoListRequestDto dto,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
 
@@ -65,7 +65,7 @@ public class ToDoListController {
     @Operation(summary = "특정 분석/카테고리의 Todolist 수정", description = "jd_id와 toDoList_id를 통해 todolist를 수정합니다")
     @PatchMapping("/{toDoListId}")
     public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> updateToDoList(
-            @PathVariable Long jdId,
+            @PathVariable("jd_id") Long jdId,
             @PathVariable Long toDoListId,
             @RequestBody @Valid UpdateToDoListRequestDto toDoListDto,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
@@ -91,7 +91,7 @@ public class ToDoListController {
     @Operation(summary = "특정 분석/카테고리의 Todolist 조회", description = "jd_id와 toDoList_id를 통해 todolist를 조회합니다")
     @GetMapping("/{toDoListId}")
     public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> getToDoList(
-            @PathVariable Long jdId,
+            @PathVariable("jd_id") Long jdId,
             @PathVariable Long toDoListId,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
         String memberName = customUser.getName();
@@ -115,7 +115,7 @@ public class ToDoListController {
     @Operation(summary = "특정 분석/카테고리의 Todolist 삭제", description = "jd_id와 toDoList_id를 통해 todolist를 삭제합니다")
     @DeleteMapping("/{toDoListId}")
     public ResponseEntity<HttpApiResponse<String>> deleteToDoList(
-            @PathVariable Long jdId,
+            @PathVariable("jd_id") Long jdId,
             @PathVariable Long toDoListId,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
         String memberName = customUser.getName();
@@ -140,7 +140,7 @@ public class ToDoListController {
     @Operation(summary = "특정 분석/카테고리의 모든 Todolist 조회", description = "jd_id와 category를 통해 해당되는 모든 todolist를 조회합니다")
     @GetMapping
     public ResponseEntity<HttpApiResponse<ToDoListGetByCategoryResponseDto>> getToDoListsByCategory(
-            @PathVariable Long jdId,
+            @PathVariable("jd_id")  Long jdId,
             @RequestParam(name = "category") ToDoListType category,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
         String memberName = customUser.getName();
@@ -165,14 +165,14 @@ public class ToDoListController {
     @Operation(summary = "특정 분석/카테고리의 모든 Todolist 생성/수정/삭제", description = "jd_id와 category를 통해 생성, 수정, 삭제된 todolist 정보를 리스트 형식으로 받아 업데이트합니다")
     @PutMapping("/bulk-update")
     public ResponseEntity<HttpApiResponse<ToDoListGetByCategoryResponseDto>> bulkUpdateToDoLists(
-            @PathVariable Long jdId,
+            @PathVariable("jd_id")  Long jdId,
             @RequestBody BulkToDoListUpdateRequestDto dto,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
-
         String memberName = customUser.getName();
+        toDoListService.bulkUpdateToDoLists(jdId, dto, memberName);
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
-                        toDoListService.bulkUpdateToDoLists(jdId, dto, memberName),
+                        toDoListService.getToDoListsByJdAndCategory(jdId, dto.getCategory(), memberName),
                         "다중 투두리스트 수정 성공",
                         HttpStatus.OK
                 )

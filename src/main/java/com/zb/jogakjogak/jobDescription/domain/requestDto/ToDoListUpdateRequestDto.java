@@ -1,13 +1,17 @@
 package com.zb.jogakjogak.jobDescription.domain.requestDto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Schema(description = "다중 Todolist 생성/수정 요청 DTO")
 @Getter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ToDoListUpdateRequestDto {
     @Schema(description = "todolist 아이디", example = "1")
     @JsonProperty("checklist_id")

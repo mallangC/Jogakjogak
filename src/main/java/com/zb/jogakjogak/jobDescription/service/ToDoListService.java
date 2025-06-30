@@ -14,12 +14,15 @@ import com.zb.jogakjogak.jobDescription.repository.ToDoListRepository;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import com.zb.jogakjogak.security.entity.Member;
 import com.zb.jogakjogak.security.repository.MemberRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +32,13 @@ public class ToDoListService {
     private final JDRepository jdRepository;
     private final ToDoListRepository toDoListRepository;
     private final MemberRepository memberRepository;
+    private final EntityManager entityManager;
+
+    private static final Set<ToDoListType> ALLOWED_CATEGORIES = EnumSet.of(
+            ToDoListType.STRUCTURAL_COMPLEMENT_PLAN,
+            ToDoListType.CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL,
+            ToDoListType.SCHEDULE_MISC_ERROR
+    );
 
     /**
      * 특정 JD에 새로운 ToDoList를 추가하는 메서드
@@ -43,12 +53,16 @@ public class ToDoListService {
 
         JD jd = getAuthorizedJd(jdId, memberName);
         ToDoListType newCategory = toDoListDto.getCategory();
-        long countForCategory = jd.getToDoLists().stream()
+
+        validateAllowedCategory(newCategory);
+
+        long currentCountForCategory = jd.getToDoLists().stream()
                 .filter(toDoList -> toDoList.getCategory() == newCategory)
                 .count();
-        if (countForCategory >= 10) {
+        if (currentCountForCategory + 1 > 10) {
             throw new ToDoListException(ToDoListErrorCode.TODO_LIST_LIMIT_EXCEEDED_FOR_CATEGORY);
         }
+
         ToDoList toDoList = ToDoList.createToDoList(toDoListDto, jd);
         ToDoList savedToDoList = toDoListRepository.save(toDoList);
         return ToDoListResponseDto.fromEntity(savedToDoList);
@@ -95,6 +109,7 @@ public class ToDoListService {
      * @param toDoListId 조회할 ToDoList의 ID
      * @param memberName 로그인한 유저
      */
+    @Transactional
     public void deleteToDoList(Long jdId, Long toDoListId, String memberName) {
 
         JD jd = getAuthorizedJd(jdId, memberName);
@@ -143,37 +158,28 @@ public class ToDoListService {
      * @param jdId       ToDoList가 속한 JD의 ID
      * @param dto        ToDoList 수정 내용 (생성/수정/삭제 목록 포함)
      * @param memberName 로그인한 유저
-     * @return 수정된 ToDoList들의 응답 DTO 리스트
      */
     @Transactional
-    public ToDoListGetByCategoryResponseDto bulkUpdateToDoLists(Long jdId, BulkToDoListUpdateRequestDto dto, String memberName) {
+    public void bulkUpdateToDoLists(Long jdId, BulkToDoListUpdateRequestDto dto, String memberName) {
         JD jd = getAuthorizedJd(jdId, memberName);
-
 
         ToDoListType targetCategory = dto.getCategory();
         if (targetCategory == null) {
             throw new ToDoListException(ToDoListErrorCode.CATEGORY_REQUIRED);
         }
 
-        if (dto.getUpdatedOrCreateToDoLists() != null) {
-            processUpdatedOrCreateToDoLists(jd, targetCategory, dto.getUpdatedOrCreateToDoLists());
-        }
+        validateAllowedCategory(targetCategory);
+
+        validateToDoListCount(jd.getId(), targetCategory, dto.getUpdatedOrCreateToDoLists(), dto.getDeletedToDoListIds());
 
         if (dto.getDeletedToDoListIds() != null && !dto.getDeletedToDoListIds().isEmpty()) {
             processDeletedToDoLists(jd, targetCategory, dto.getDeletedToDoListIds());
         }
 
-        List<ToDoList> updatedListsInTargetCategory = toDoListRepository.findByJdIdAndCategoryFetch(jd.getId(), targetCategory);
+        if (dto.getUpdatedOrCreateToDoLists() != null && !dto.getUpdatedOrCreateToDoLists().isEmpty()) {
+            processUpdatedOrCreateToDoLists(jd, targetCategory, dto.getUpdatedOrCreateToDoLists());
+        }
 
-        List<ToDoListResponseDto> responseDtoList = updatedListsInTargetCategory.stream()
-                .map(ToDoListResponseDto::fromEntity)
-                .collect(Collectors.toList());
-
-        return ToDoListGetByCategoryResponseDto.builder()
-                .jdId(jdId)
-                .category(dto.getCategory())
-                .toDoLists(responseDtoList)
-                .build();
     }
 
     /**
@@ -186,8 +192,6 @@ public class ToDoListService {
      */
     @Transactional(readOnly = true)
     public ToDoListGetByCategoryResponseDto getToDoListsByJdAndCategory(Long jdId, ToDoListType category, String memberName) {
-
-
         JD jd = getAuthorizedJd(jdId, memberName);
 
         List<ToDoList> toDoLists = toDoListRepository.findByJdAndCategory(jd, category);
@@ -214,19 +218,28 @@ public class ToDoListService {
         for (ToDoListUpdateRequestDto dto : dtoList) {
 
             if (dto.getId() != null) {
-                ToDoList toDoList = toDoListRepository.findByIdWithJd(dto.getId())
+                ToDoList updateToDoList = toDoListRepository.findByIdWithJd(dto.getId())
                         .orElseThrow(() -> new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_FOUND));
 
-                if (!toDoList.getJd().getId().equals(jd.getId()) || !toDoList.getCategory().equals(targetCategory)) {
+                if (!updateToDoList.getJd().getId().equals(jd.getId()) || !updateToDoList.getCategory().equals(targetCategory)) {
                     throw new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_BELONG_TO_JD);
                 }
-                toDoList.updateFromBulkUpdateToDoLists(dto, targetCategory);
+                updateToDoList.updateFromBulkUpdateToDoLists(dto, targetCategory);
+                toDoListRepository.save(updateToDoList);
             } else {
-                ToDoList newToDoList = ToDoList.fromDto(dto, jd, targetCategory);
+                ToDoList newToDoList = ToDoList.builder()
+                        .category(targetCategory)
+                        .title(dto.getTitle())
+                        .content(dto.getContent())
+                        .memo("")
+                        .isDone(dto.isDone())
+                        .jd(jd)
+                        .build();
                 toDoListRepository.save(newToDoList);
             }
         }
     }
+
     /**
      * 일괄 업데이트 요청에서 삭제될 ToDoList들을 처리.
      *
@@ -247,4 +260,49 @@ public class ToDoListService {
         }
         toDoListRepository.deleteAllById(verifiedIdsToDelete);
     }
+
+    /**
+     * 특정 ToDoListType이 허용되는 카테고리인지 검증합니다.
+     *
+     * @param category 검증할 ToDoListType
+     */
+    private void validateAllowedCategory(ToDoListType category) {
+        if (!ALLOWED_CATEGORIES.contains(category)) {
+            throw new ToDoListException(ToDoListErrorCode.INVALID_TODO_LIST_CATEGORY);
+        }
+    }
+
+    /**
+     * 특정 카테고리의 ToDoList 총 개수가 10개를 초과하는지 검증합니다.
+     * 새로 생성될 항목, 삭제될 항목을 모두 고려하여 최종 개수를 예상합니다.
+     *
+     * @param jdId                현재 JD의 ID
+     * @param targetCategory      대상 ToDoList 카테고리
+     * @param updatedOrCreateList 생성 또는 수정될 ToDoList DTO 목록
+     * @param deletedIds          삭제될 ToDoList ID 목록
+     */
+    private void validateToDoListCount(Long jdId, ToDoListType targetCategory,
+                                       List<ToDoListUpdateRequestDto> updatedOrCreateList,
+                                       List<Long> deletedIds) {
+        long currentDbCount = toDoListRepository.countByJdIdAndCategory(jdId, targetCategory);
+
+        long numToCreate = 0;
+        if (updatedOrCreateList != null) {
+            numToCreate = updatedOrCreateList.stream()
+                    .filter(item -> item.getId() == null)
+                    .count();
+        }
+
+        long numToDelete = 0;
+        if (deletedIds != null) {
+            numToDelete = deletedIds.size();
+        }
+
+        long potentialFinalCount = currentDbCount + numToCreate - numToDelete;
+
+        if (potentialFinalCount > 10) {
+            throw new ToDoListException(ToDoListErrorCode.TODO_LIST_LIMIT_EXCEEDED_FOR_CATEGORY);
+        }
+    }
+
 }
