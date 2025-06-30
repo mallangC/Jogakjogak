@@ -40,6 +40,7 @@ public class JDService {
      * @param memberName   로그인한 유저
      * @return 제목, JD의 URL, To Do List, 사용자 메모, 마감일
      */
+    //TODO: 삭제?
     public JDResponseDto analyze(JDRequestDto jdRequestDto, String memberName) {
 
         Member member = memberRepository.findByUsername(memberName)
@@ -170,9 +171,10 @@ public class JDService {
     public JDAlarmResponseDto alarm(Long jdId, JDAlarmRequestDto dto, String memberName) {
         JD jd = getAuthorizedJd(jdId, memberName);
         jd.isAlarmOn(dto.isAlarmOn());
+        JD updatedJd = jdRepository.save(jd);
         return JDAlarmResponseDto.builder()
-                .isAlarmOn(jd.isAlarmOn())
-                .jdId(jd.getId())
+                .isAlarmOn(updatedJd.isAlarmOn())
+                .jdId(updatedJd.getId())
                 .build();
     }
 
@@ -305,7 +307,7 @@ public class JDService {
         Member member = memberRepository.findByUsername(memberName)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
-        JD jd = jdRepository.findById(jdId)
+        JD jd = jdRepository.findByIdWithToDoLists(jdId)
                 .orElseThrow(() -> new JDException(JDErrorCode.NOT_FOUND_JD));
 
         if (!Objects.equals(member.getId(), jd.getMember().getId())) {

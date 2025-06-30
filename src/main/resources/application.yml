@@ -86,6 +86,7 @@ spring:
 
 kakao:
   admin-key: ${KAKAO_ADMIN_KEY}
+  redirect-uri: ${KAKAO_REDIRECT_URI}
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}

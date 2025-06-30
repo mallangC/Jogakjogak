@@ -1,9 +1,13 @@
 package com.zb.jogakjogak.jobDescription.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.genai.Client;
 import com.google.genai.types.*;
 import com.zb.jogakjogak.global.exception.AIServiceException;
+import com.zb.jogakjogak.global.exception.JDErrorCode;
+import com.zb.jogakjogak.global.exception.JDException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -38,9 +42,9 @@ public class LLMService {
                     - 'category': 다음 영문 Enum 상수 이름 중 하나여야 합니다:
                       - "STRUCTURAL_COMPLEMENT_PLAN" (구조적 보완 계획): 이력서나 자기소개서의 형식, 구성, 필수 정보 누락 등 구조적인 부분을 보완하는 계획.
                       - "CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL" (내용 강조/재구성 제안): 이력서/자기소개서의 내용 중 JD에 맞춰 강조하거나 재구성해야 할 부분, 혹은 실제 경험을 기반으로 한 구체적인 피드백.
-                      - "EMPLOYMENT_SCHEDULE_RELATED" (취업 일정 관련): 코딩 테스트 준비, 면접 준비, 추가 학습 등 취업 일정과 관련된 계획.
+                      - "SCHEDULE_MISC_ERROR" (취업 일정 관련 및 기타 ): 코딩 테스트 준비, 면접 준비, 추가 학습 등 취업 일정과 관련된 계획.
                     
-                    - 'title': 해당 To-Do 항목의 간략하고 명확한 제목입니다. **명령형 동사로 시작하는 행동 중심의 키워드 구문이어야 하며, 무조건 공백 포함 15자 이하로 작성하세요.** (예: "이력서 프로젝트 경험 재구성", "클라우드 경험 구체화", "코딩 테스트 대비") 질문형이나 설명형 문구는 금지됩니다.
+                    - 'title': 해당 To-Do 항목의 간략하고 명확한 제목입니다. **명령형 동사로 시작하는 행동 중심의 키워드 구문이어야 하며, 무조건 공백 포함 50자 이하로 작성하세요(가장 중요: 이 제약을 반드시 지켜야 합니다. 50자를 초과할 경우 데이터베이스 저장에 실패합니다.).** (예: "이력서 프로젝트 경험 재구성", "클라우드 경험 구체화", "코딩 테스트 대비") 질문형이나 설명형 문구는 금지됩니다.
                     
                     - 'content': 해당 To-Do Item의 한글 설명입니다. **이 설명은 지원자가 실제 취해야 할 구체적인 행동, 학습 내용, 강조할 포인트, 예상 결과 등을 포함하여 상세하고 명확하며, 최소 30자 이상, 최대 250자 이내의 충분한 길이로 작성되어야 합니다.** 최대한 비전문가도 알 수 있도록 쉽게 설명하며, 필요한 경우 설명에 숫자 기반의 성과 지표(예: 매출, 사용자 수 등)를 포함하여 구체성을 높이세요. 이 설명은 독립적인 문장으로 구성되어 투두팁이나 상세 모달에 바로 쓸 수 있는 형태여야 합니다.
                     
@@ -72,8 +76,8 @@ public class LLMService {
                         "isDone": false
                       },
                       {
-                        "category": "EMPLOYMENT_SCHEDULE_RELATED",
-                        "title": "A사 서류 제출 및 면접 준비",
+                        "category": "SCHEDULE_MISC_ERROR",
+                        "title": "서류 제출 및 면접 준비",
                         "content": "A사의 서류 마감일(2025/07/15)에 맞춰 이력서와 자기소개서의 최종 검토 및 제출을 완료하고, 예상 면접 질문 리스트를 작성하여 답변을 준비합니다. 특히, 회사의 비전, 주요 서비스, 최근 기술 동향 등을 면밀히 조사하여 면접 시 회사에 대한 깊은 이해와 관심을 보여줄 수 있도록 합니다. 모의 면접을 통해 답변의 논리성 및 전달력을 점검하는 것도 중요합니다. 최소 30자 이상으로 작성되어야 합니다.",
                         "memo": "",
                         "isDone": false
@@ -148,8 +152,23 @@ public class LLMService {
 
             GenerateContentResponse response = client.models.generateContent(MODEL_NAME, contents, config);
 
+            String responseText = response.text();
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode rootNode = objectMapper.readTree(responseText);
+
+            if (rootNode.isArray()) {
+                for (JsonNode node : rootNode) {
+                    if (node.has("title")) {
+                        String title = node.get("title").asText();
+                        if (title.length() > 50) {
+                            throw new JDException(JDErrorCode.FAILED_ANALYSIS_REQUEST_TEXT_LENGTH_EXCEED);
+                        }
+                    }
+                }
+            }
             // 응답에서 텍스트 추출
-            return response.text();
+            return responseText;
 
         } catch (Exception e) {
             throw new AIServiceException("LLM 서비스 알 수 없는 오류 발생", e);

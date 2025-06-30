@@ -17,11 +17,27 @@ public interface ToDoListRepository extends JpaRepository<ToDoList, Long> {
 
     List<ToDoList> findByJdAndCategory(JD jd, ToDoListType targetCategory);
 
-    List<ToDoList> findByJdId(long jdId);
+    List<ToDoList> findByJdId(Long jdId);
+
+    List<ToDoList> findAllByJdId(Long jdId);
 
     @Query("SELECT t FROM ToDoList t JOIN FETCH t.jd j WHERE j.id = :jdId AND t.category = :category")
     List<ToDoList> findByJdIdAndCategoryFetch(@Param("jdId") Long jdId, @Param("category") ToDoListType category);
 
     @Query("SELECT t FROM ToDoList t JOIN FETCH t.jd WHERE t.id = :id")
     Optional<ToDoList> findByIdWithJd(@Param("id") Long id);
+
+    long countByJdIdAndCategory(Long id, ToDoListType targetCategory);
+    /*
+    @Query("SELECT COUNT(t) FROM toDoList t JOIN t.jd j WHERE t.isDone = true AND j.Id = :jdId")
+    Integer countByIsDoneTrueAndJd_JdId(@Param("jdId") Long jdId);
+    */
+    Integer countByIsDoneTrueAndJd_Id(Long jdId);
+
+    /*
+    @Query("SELECT COUNT(t) FROM toDoList t JOIN t.jd j WHERE t.isDone = false AND j.Id = :jdId")
+    Integer countByIsDoneFalseAndJd_JdId(@Param("jdId") Long jdId);
+    */
+    Integer countByIsDoneFalseAndJd_Id(Long jdId);
+
 }

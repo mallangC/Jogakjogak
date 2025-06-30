@@ -30,6 +30,7 @@ env:
   GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET}}
   EMAIL_ID: ${{ secrets.EMAIL_ID}}
   EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD}}
+  KAKAO_REDIRECT_URI: ${{ secrets.KAKAO_REDIRECT_URI }}
 
 jobs:
   test:
@@ -95,6 +96,7 @@ jobs:
           TEST_DB_META_PORT: 3307
           TEST_DB_USERNAME: root
           TEST_DB_PASSWORD: rootpassword
+          KAKAO_REDIRECT_URI: ${{ env.KAKAO_REDIRECT_URI }}
         run: ./gradlew test --info
 
   build:
@@ -150,6 +152,7 @@ jobs:
           echo "GOOGLE_CLIENT_SECRET=${{ env.GOOGLE_CLIENT_SECRET}}" >> .env 
           echo "EMAIL_ID=${{ env.EMAIL_ID}}" >> .env 
           echo "EMAIL_PASSWORD=${{ env.EMAIL_PASSWORD}}" >> .env    
+          echo "KAKAO_REDIRECT_URI=${{ env.KAKAO_REDIRECT_URI}}" >> .env    
 
         shell: bash
 
