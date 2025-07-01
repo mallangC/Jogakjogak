@@ -104,7 +104,6 @@ public class ResumeService {
      * 사용자가 이력서를 삭제할 떄 사용하는 서비스 메서드
      *
      * @param resumeId 삭제하려는 이력서의 id
-     * @return 삭제한 이력서의 응답 dto
      */
     @Transactional
     public void delete(Long resumeId, String username) {
