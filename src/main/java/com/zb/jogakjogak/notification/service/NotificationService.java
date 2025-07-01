@@ -30,6 +30,7 @@ public class NotificationService {
     public void sendNotificationEmail(Notification notification) throws MessagingException{
         String email = notification.getMember().getEmail();
 
+
         notification.getJdList().removeIf(jd -> jd.getEndedAt().isBefore(LocalDateTime.now()));
         notification.getJdList().sort((jd1, jd2) -> jd1.getEndedAt().compareTo(jd2.getEndedAt()));
 

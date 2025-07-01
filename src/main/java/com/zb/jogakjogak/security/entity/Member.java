@@ -4,6 +4,7 @@ import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.notification.entity.Notification;
 import com.zb.jogakjogak.resume.entity.Resume;
 import com.zb.jogakjogak.security.Role;
+import com.zb.jogakjogak.security.config.EmailEncryptor;
 import com.zb.jogakjogak.security.dto.OAuth2ResponseDto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -31,6 +32,7 @@ public class Member {
     private String username;
 
     @Email
+    @Convert(converter = EmailEncryptor.class)
     private String email;
 
     private String password;
