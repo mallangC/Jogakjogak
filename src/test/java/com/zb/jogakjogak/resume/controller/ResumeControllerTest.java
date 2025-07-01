@@ -234,11 +234,11 @@ class ResumeControllerTest {
                 .orElseThrow(() -> new AssertionError("삭제 후에도 멤버를 찾을 수 없습니다."));
         assertThat(updatedMember.getResume()).isNull();
 
-        Optional<Resume> deletedResume = resumeRepository.findById(resumeIdToDelete);
+        Optional<Resume> deletedResume = resumeRepository.findResumeWithMemberByIdAndMemberId(resumeIdToDelete, setupMember.getId());
         assertThat(deletedResume).isEmpty();
 
         mockMvc.perform(get("/api/resume/{resumeId}", resumeIdToDelete))
-                .andExpect(status().isNotFound())
+                .andExpect(status().isForbidden())
                 .andDo(print());
     }
 }
