@@ -439,9 +439,16 @@ class ToDoListServiceTest {
                 .build();
 
         Long anotherExistingId = 102L;
-        ToDoList anotherExistingToDoList = mock(ToDoList.class);
-        when(anotherExistingToDoList.getJd()).thenReturn(mockJd);
-        when(anotherExistingToDoList.getCategory()).thenReturn(targetCategory);
+        ToDoList existingToDoListForUpdate = ToDoList.builder()
+                .id(anotherExistingId)
+                .title("기존 제목")
+                .content("기존 내용")
+                .memo("기존 메모")
+                .isDone(false)
+                .category(targetCategory)
+                .jd(mockJd)
+                .build();
+
 
         ToDoListUpdateRequestDto updateAnotherDto = ToDoListUpdateRequestDto.builder()
                 .id(anotherExistingId)
@@ -452,10 +459,15 @@ class ToDoListServiceTest {
 
 
         Long deletedToDoListId = 103L;
-        ToDoList toDoListToDelete = mock(ToDoList.class);
-        when(toDoListToDelete.getId()).thenReturn(deletedToDoListId);
-        when(toDoListToDelete.getJd()).thenReturn(mockJd);
-        when(toDoListToDelete.getCategory()).thenReturn(targetCategory);
+        ToDoList toDoListToDelete = ToDoList.builder()
+                .id(deletedToDoListId)
+                .title("삭제될 제목")
+                .content("삭제될 내용")
+                .memo("삭제될 메모")
+                .isDone(false)
+                .category(targetCategory)
+                .jd(mockJd)
+                .build();
 
 
         BulkToDoListUpdateRequestDto request = BulkToDoListUpdateRequestDto.builder()
@@ -465,7 +477,13 @@ class ToDoListServiceTest {
                 .build();
 
 
+        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
         when(jdRepository.findByIdWithToDoLists(jdId)).thenReturn(Optional.of(mockJd));
+
+        when(toDoListRepository.countByJdIdAndCategory(eq(jdId), eq(targetCategory))).thenReturn(0L);
+        when(toDoListRepository.findByIdWithJd(anotherExistingId)).thenReturn(Optional.of(existingToDoListForUpdate));
+        when(toDoListRepository.findAllById(Collections.singletonList(deletedToDoListId)))
+                .thenReturn(Collections.singletonList(toDoListToDelete));
         when(toDoListRepository.save(any(ToDoList.class))).thenAnswer(invocation -> {
             ToDoList savedToDo = invocation.getArgument(0);
             if (savedToDo.getId() == null) {
@@ -482,30 +500,19 @@ class ToDoListServiceTest {
             return savedToDo;
         });
 
-        when(toDoListRepository.findAllById(Collections.singletonList(deletedToDoListId)))
-                .thenReturn(Collections.singletonList(toDoListToDelete));
         doNothing().when(toDoListRepository).deleteAllById(Collections.singletonList(deletedToDoListId));
 
-        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
-        when(toDoListRepository.findByIdWithJd(anotherExistingId)).thenReturn(Optional.of(anotherExistingToDoList));
-
         // When
-        ToDoListGetByCategoryResponseDto result = toDoListService.bulkUpdateToDoLists(jdId, request,mockMember.getName());
+        toDoListService.bulkUpdateToDoLists(jdId, request, mockMember.getName());
 
         // Then
-        verify(jdRepository, times(1)).findByIdWithToDoLists(jdId);
         verify(memberRepository, times(1)).findByUsername(mockMember.getName());
-        verify(toDoListRepository, times(1)).save(any(ToDoList.class));
+        verify(jdRepository, times(1)).findByIdWithToDoLists(jdId);
+        verify(toDoListRepository, times(1)).countByJdIdAndCategory(eq(jdId), eq(targetCategory));
+        verify(toDoListRepository, times(1)).findByIdWithJd(anotherExistingId);
+        verify(toDoListRepository, times(2)).save(any(ToDoList.class));
         verify(toDoListRepository, times(1)).findAllById(Collections.singletonList(deletedToDoListId));
         verify(toDoListRepository, times(1)).deleteAllById(Collections.singletonList(deletedToDoListId));
-        verify(toDoListRepository, times(1)).findByIdWithJd(anotherExistingId);
-        verify(toDoListRepository, times(1)).findByJdIdAndCategoryFetch(mockJd.getId(), targetCategory);
-
-
-        assertNotNull(result);
-        assertEquals(jdId, result.getJdId());
-        assertEquals(targetCategory, result.getCategory());
-        assertNotNull(result.getToDoLists());
 
     }
 

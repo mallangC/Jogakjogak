@@ -4,6 +4,8 @@ package com.zb.jogakjogak.security.controller;
 import com.zb.jogakjogak.global.HttpApiResponse;
 import com.zb.jogakjogak.security.dto.ReissueResultDto;
 import com.zb.jogakjogak.security.service.ReissueService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Access Token 관리 API", description = "새로운 access token 발급 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/member")
@@ -24,6 +27,7 @@ public class ReissueController {
     /**
      * 클라이언트로부터 refresh토큰을 받아 새로운 access토큰 + refresh토큰을 재발급하는 api
      */
+    @Operation(summary = "Access Token 재발급 API", description = "새로운 access token을 refresh token으로 재발급 받습니다")
     @PostMapping("/reissue")
     public ResponseEntity reissue(HttpServletRequest request, HttpServletResponse response) {
 

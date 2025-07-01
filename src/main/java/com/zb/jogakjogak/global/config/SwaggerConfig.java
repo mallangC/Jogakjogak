@@ -3,8 +3,13 @@ package com.zb.jogakjogak.global.config;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.media.Schema;
+import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Iterator;
+import java.util.Map;
 
 @Configuration
 public class SwaggerConfig {
@@ -28,6 +33,35 @@ public class SwaggerConfig {
                         .email("jogakjogakhelp@gmail.com")));
 
     }
+
+    @Bean
+    public OpenApiCustomizer customOpenApiCustomizer() {
+        return new OpenApiCustomizer() {
+            @Override
+            public void customise(OpenAPI openApi) {
+                if (openApi.getComponents() != null && openApi.getComponents().getSchemas() != null) {
+                    openApi.getComponents().getSchemas().remove("Pageable");
+                    openApi.getComponents().getSchemas().remove("PageableObject");
+                    openApi.getComponents().getSchemas().remove("OpenAIRequestDto");
+                    openApi.getComponents().getSchemas().remove("AllGetJDResponseDto");
+                    Map<String, Schema> schemas = openApi.getComponents().getSchemas();
+                    Iterator<Map.Entry<String, Schema>> iterator = schemas.entrySet().iterator();
+
+                    while (iterator.hasNext()) {
+                        Map.Entry<String, Schema> entry = iterator.next();
+                        String schemaName = entry.getKey();
+
+                        if (schemaName.contains("HttpApiResponse")) {
+                            iterator.remove();
+                            continue;
+                        }
+                    }
+
+                }
+            }
+        };
+    }
+
 
 
 }
