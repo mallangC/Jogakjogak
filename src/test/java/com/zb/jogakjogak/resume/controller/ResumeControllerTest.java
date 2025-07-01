@@ -138,7 +138,7 @@ class ResumeControllerTest {
 
     @Test
     @DisplayName("이력서 등록 성공")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail, role = "USER")
+    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail)
     void registerResume_success() throws Exception {
         // Given
         ResumeRequestDto requestDto = new ResumeRequestDto("테스트 이력서 제목", "테스트 이력서 내용입니다.");
@@ -165,7 +165,7 @@ class ResumeControllerTest {
 
     @Test
     @DisplayName("이력서 수정 성공")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail, role = "USER")
+    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail)
     void modifyResume_success() throws Exception {
         // Given
         Long resumeId = registerResumeThroughApi("원본 이력서", "원본 내용");
@@ -194,7 +194,7 @@ class ResumeControllerTest {
 
     @Test
     @DisplayName("이력서 조회 성공")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail, role = "USER")
+    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail)
     void getResume_success() throws Exception {
         //Given
         Long resumeId = registerResumeThroughApi("조회할 이력서 제목", "조회할 내용");
@@ -212,7 +212,7 @@ class ResumeControllerTest {
 
     @Test
     @DisplayName("이력서 삭제 성공")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail, role = "USER")
+    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail)
     @Transactional
     @Commit
     void deleteResume_success() throws Exception {
@@ -234,11 +234,11 @@ class ResumeControllerTest {
                 .orElseThrow(() -> new AssertionError("삭제 후에도 멤버를 찾을 수 없습니다."));
         assertThat(updatedMember.getResume()).isNull();
 
-        Optional<Resume> deletedResume = resumeRepository.findById(resumeIdToDelete);
+        Optional<Resume> deletedResume = resumeRepository.findResumeWithMemberByIdAndMemberId(resumeIdToDelete, setupMember.getId());
         assertThat(deletedResume).isEmpty();
 
         mockMvc.perform(get("/api/resume/{resumeId}", resumeIdToDelete))
-                .andExpect(status().isNotFound())
+                .andExpect(status().isForbidden())
                 .andDo(print());
     }
 }
