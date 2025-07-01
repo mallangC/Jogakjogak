@@ -38,6 +38,7 @@ public class NotificationBatchConfig {
     private static final int CHUNK_SIZE = 20;
     private static final int PAGE_SIZE = 20;
     private static final int RETRY_LIMIT = 3;
+    private static final int NOTIFICATION_THRESHOLD_DAYS = 3;
     private final JobRepository jobRepository;
     private final PlatformTransactionManager platformTransactionManager;
     private final JDRepository jdRepository;
@@ -62,21 +63,25 @@ public class NotificationBatchConfig {
                 .reader(JDReader())
                 .processor(processor())
                 .writer(JDWriter())
+                .faultTolerant()
+                .skip(Exception.class)
+                .skipLimit(10)
                 .build();
     }
 
     @Bean
     @StepScope
     public RepositoryItemReader<JD> JDReader(){
-        LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(1);
+        LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(NOTIFICATION_THRESHOLD_DAYS);
         LocalDateTime now = LocalDateTime.now();
+        LocalDateTime todayStart = now.toLocalDate().atStartOfDay();
+
         return new RepositoryItemReaderBuilder<JD>()
                 .name("JDReader")
                 .pageSize(PAGE_SIZE)
                 .methodName("findAll")
-                //.methodName("findNotUpdatedJd")
-                //.arguments(List.of(threeDaysAgo, now))
-                .arguments(List.of())
+                //.methodName("findJdToNotify")
+                //.arguments(List.of(now, threeDaysAgo, todayStart))
                 .repository(jdRepository)
                 .sorts(Map.of("id", Sort.Direction.ASC))
                 .build();
@@ -89,6 +94,9 @@ public class NotificationBatchConfig {
             jd.setNotification(notification);
 
             notificationService.sendNotificationEmail(notification);
+
+            jd.setNotificationCount(jd.getNotificationCount() + 1);
+            jd.setLastNotifiedAt(LocalDateTime.now());
             return jd;
         };
     }
@@ -106,6 +114,7 @@ public class NotificationBatchConfig {
                 .orElseGet(() -> {
                     Notification newNotification = Notification.builder()
                             .member(jd.getMember())
+                            .jdList(new ArrayList<>())
                             .createdAt(LocalDateTime.now())
                             .build();
                     return notificationRepository.save(newNotification);

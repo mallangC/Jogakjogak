@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -30,9 +31,7 @@ public class NotificationService {
     public void sendNotificationEmail(Notification notification) throws MessagingException{
         String email = notification.getMember().getEmail();
 
-
-        notification.getJdList().removeIf(jd -> jd.getEndedAt().isBefore(LocalDateTime.now()));
-        notification.getJdList().sort((jd1, jd2) -> jd1.getEndedAt().compareTo(jd2.getEndedAt()));
+        List<JD> validJdList = getValidAndSortedJdList(notification);
 
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
@@ -63,5 +62,14 @@ public class NotificationService {
         }catch(MessagingException e){
             log.warn("메일전송 실패 - JD ID: {}, 사유: {}", 1, e.getMessage());
             }
+    }
+
+    private List<JD> getValidAndSortedJdList(Notification notification){
+        LocalDateTime now = LocalDateTime.now();
+
+        return notification.getJdList().stream()
+                .filter(jd -> jd.getEndedAt().isAfter(now))
+                .sorted((jd1, jd2) -> jd1.getEndedAt().compareTo(jd2.getEndedAt()))
+                .toList();
     }
 }
