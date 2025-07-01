@@ -1,82 +1,120 @@
-CREATE TABLE member
+-- BATCH_JOB_INSTANCE (잡 인스턴스)
+CREATE TABLE BATCH_JOB_INSTANCE
 (
-    id            BIGINT PRIMARY KEY AUTO_INCREMENT,
-    username      VARCHAR(50),
-    email         VARCHAR(50) NOT NULL UNIQUE,
-    password      VARCHAR(50),
-    name          VARCHAR(50),
-    nickname      VARCHAR(50),
-    phone_number  VARCHAR(20) NOT NULL,
-    role          VARCHAR(50) NOT NULL,
-    registered_at DATETIME    NOT NULL,
-    last_login_at DATETIME    NOT NULL
+    JOB_INSTANCE_ID BIGINT       NOT NULL PRIMARY KEY,
+    VERSION         BIGINT,
+    JOB_NAME        VARCHAR(100) NOT NULL,
+    JOB_KEY         VARCHAR(32)  NOT NULL,
+    constraint JOB_INST_UN unique (JOB_NAME, JOB_KEY)
 );
 
-CREATE TABLE refresh_token
+-- BATCH_JOB_EXECUTION (잡 실행)
+CREATE TABLE BATCH_JOB_EXECUTION
 (
-    id         BIGINT PRIMARY KEY AUTO_INCREMENT,
-    username   VARCHAR(50)  NOT NULL,
-    token      VARCHAR(255) NOT NULL,
-    expiration DATETIME     NOT NULL
+    JOB_EXECUTION_ID BIGINT      NOT NULL PRIMARY KEY,
+    VERSION          BIGINT,
+    JOB_INSTANCE_ID  BIGINT      NOT NULL,
+    CREATE_TIME      DATETIME(6) NOT NULL,
+    START_TIME       DATETIME(6) DEFAULT NULL,
+    END_TIME         DATETIME(6) DEFAULT NULL,
+    STATUS           VARCHAR(10),
+    EXIT_CODE        VARCHAR(2500),
+    EXIT_MESSAGE     VARCHAR(2500),
+    LAST_UPDATED     DATETIME(6),
+    constraint JOB_INST_EXEC_FK foreign key (JOB_INSTANCE_ID)
+        references BATCH_JOB_INSTANCE (JOB_INSTANCE_ID)
 );
 
-CREATE TABLE oauth2_info
+-- BATCH_JOB_EXECUTION_PARAMS (잡 실행 파라미터)
+CREATE TABLE BATCH_JOB_EXECUTION_PARAMS
 (
-    id          BIGINT PRIMARY KEY AUTO_INCREMENT,
-    member_id   BIGINT      NOT NULL,
-    provider    VARCHAR(10) NOT NULL,
-    provider_id VARCHAR(50) NOT NULL,
-    FOREIGN KEY (member_id) REFERENCES member (id)
+    JOB_EXECUTION_ID BIGINT       NOT NULL,
+    PARAMETER_NAME   VARCHAR(100) NOT NULL,
+    PARAMETER_TYPE   VARCHAR(100) NOT NULL,
+    PARAMETER_VALUE  VARCHAR(2500),
+    IDENTIFYING      CHAR(1)      NOT NULL,
+    constraint JOB_EXEC_PARAMS_FK foreign key (JOB_EXECUTION_ID)
+        references BATCH_JOB_EXECUTION (JOB_EXECUTION_ID)
 );
 
-CREATE TABLE resume
+-- BATCH_STEP_EXECUTION (스텝 실행)
+CREATE TABLE BATCH_STEP_EXECUTION
 (
-    id         BIGINT PRIMARY KEY AUTO_INCREMENT,
-    member_id  BIGINT        NOT NULL,
-    title      VARCHAR(30)   NOT NULL,
-    content    VARCHAR(5000) NOT NULL,
-    created_at DATETIME,
-    updated_at DATETIME,
-    FOREIGN KEY (member_id) REFERENCES member (id)
+    STEP_EXECUTION_ID  BIGINT       NOT NULL PRIMARY KEY,
+    VERSION            BIGINT       NOT NULL,
+    STEP_NAME          VARCHAR(100) NOT NULL,
+    JOB_EXECUTION_ID   BIGINT       NOT NULL,
+    CREATE_TIME        DATETIME(6)  NOT NULL,
+    START_TIME         DATETIME(6) DEFAULT NULL,
+    END_TIME           DATETIME(6) DEFAULT NULL,
+    STATUS             VARCHAR(10),
+    COMMIT_COUNT       BIGINT,
+    READ_COUNT         BIGINT,
+    FILTER_COUNT       BIGINT,
+    WRITE_COUNT        BIGINT,
+    READ_SKIP_COUNT    BIGINT,
+    WRITE_SKIP_COUNT   BIGINT,
+    PROCESS_SKIP_COUNT BIGINT,
+    ROLLBACK_COUNT     BIGINT,
+    EXIT_CODE          VARCHAR(2500),
+    EXIT_MESSAGE       VARCHAR(2500),
+    LAST_UPDATED       DATETIME(6),
+    constraint JOB_EXEC_STEP_FK foreign key (JOB_EXECUTION_ID)
+        references BATCH_JOB_EXECUTION (JOB_EXECUTION_ID)
 );
 
-CREATE TABLE job_description
+-- BATCH_JOB_EXECUTION_CONTEXT (잡 실행 컨텍스트)
+CREATE TABLE BATCH_JOB_EXECUTION_CONTEXT
 (
-    id           BIGINT PRIMARY KEY AUTO_INCREMENT,
-    member_id    BIGINT        NOT NULL,
-    title        VARCHAR(30)   NOT NULL,
-    company_name VARCHAR(30)   NOT NULL,
-    job          VARCHAR(30)   NOT NULL,
-    content      VARCHAR(4000) NOT NULL,
-    jd_url       VARCHAR(1000) NOT NULL,
-    `memo`       VARCHAR(1000) NOT NULL,
-    is_bookmark  BIT           NOT NULL,
-    is_alarm_on  BIT           NOT NULL,
-    apply_at     DATETIME,
-    ended_at     DATETIME,
-    created_at   DATETIME,
-    updated_at   DATETIME,
-    FOREIGN KEY (member_id) REFERENCES member (id)
+    JOB_EXECUTION_ID BIGINT NOT NULL PRIMARY KEY,
+    SHORT_CONTEXT VARCHAR(2500) DEFAULT '',
+    SERIALIZED_CONTEXT LONGTEXT,
+    CONSTRAINT JOB_EXEC_CTX_FK FOREIGN KEY (JOB_EXECUTION_ID)
+        REFERENCES BATCH_JOB_EXECUTION (JOB_EXECUTION_ID)
 );
 
-CREATE TABLE to_do_list
+-- BATCH_STEP_EXECUTION_CONTEXT (스텝 실행 컨텍스트)
+CREATE TABLE BATCH_STEP_EXECUTION_CONTEXT
 (
-    id         BIGINT PRIMARY KEY AUTO_INCREMENT,
-    jd_id      BIGINT        NOT NULL,
-    category   VARCHAR(40)   NOT NULL,
-    title      VARCHAR(50)   NOT NULL,
-    content    VARCHAR(1000) NOT NULL,
-    `memo`     VARCHAR(255)  NOT NULL,
-    is_done    BIT           NOT NULL,
-    created_at DATETIME,
-    updated_at DATETIME,
-    FOREIGN KEY (jd_id) REFERENCES job_description (id)
+    STEP_EXECUTION_ID BIGINT        NOT NULL PRIMARY KEY,
+    SHORT_CONTEXT     VARCHAR(2500) DEFAULT '',
+    SERIALIZED_CONTEXT LONGTEXT,
+    CONSTRAINT STEP_EXEC_CTX_FK FOREIGN KEY (STEP_EXECUTION_ID)
+        REFERENCES BATCH_STEP_EXECUTION (STEP_EXECUTION_ID)
 );
 
-CREATE TABLE notification
+
+-- BATCH_JOB_SEQ, BATCH_JOB_EXECUTION_SEQ, BATCH_STEP_EXECUTION_SEQ
+-- 이 테이블들은 ID를 생성하기 위한 시퀀스 역할을 합니다.
+-- MySQL 에서는 IDENTITY (AUTO_INCREMENT)를 사용하거나, 별도의 테이블을 시퀀스처럼 사용합니다.
+-- Spring Batch는 기본적으로 내부적으로 시퀀스 테이블을 사용하도록 설정되어 있습니다.
+
+CREATE TABLE BATCH_STEP_EXECUTION_SEQ
 (
-    id         BIGINT PRIMARY KEY AUTO_INCREMENT,
-    member_id  BIGINT NOT NULL,
-    created_at DATETIME,
-    FOREIGN KEY (member_id) REFERENCES member (id)
+    ID         BIGINT  NOT NULL,
+    UNIQUE_KEY CHAR(1) NOT NULL,
+    constraint UNIQUE_KEY_UN unique (UNIQUE_KEY)
 );
+
+INSERT INTO BATCH_STEP_EXECUTION_SEQ (ID, UNIQUE_KEY)
+values (0, '0');
+
+CREATE TABLE BATCH_JOB_EXECUTION_SEQ
+(
+    ID         BIGINT  NOT NULL,
+    UNIQUE_KEY CHAR(1) NOT NULL,
+    constraint UNIQUE_KEY_UN unique (UNIQUE_KEY)
+);
+
+INSERT INTO BATCH_JOB_EXECUTION_SEQ (ID, UNIQUE_KEY)
+values (0, '0');
+
+CREATE TABLE BATCH_JOB_SEQ
+(
+    ID         BIGINT  NOT NULL,
+    UNIQUE_KEY CHAR(1) NOT NULL,
+    constraint UNIQUE_KEY_UN unique (UNIQUE_KEY)
+);
+
+INSERT INTO BATCH_JOB_SEQ (ID, UNIQUE_KEY)
+values (0, '0');
