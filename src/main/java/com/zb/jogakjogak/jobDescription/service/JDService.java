@@ -97,7 +97,7 @@ public class JDService {
         if (member.getResume() == null) {
             throw new ResumeException(ResumeErrorCode.RESUME_NOT_FOUND_PLEASE_REGISTER);
         }
-
+        //TODO: 테스트 후 갯수 변경 필요
         if(memberRepository.countJdByMemberId(member.getId()) >= 20) {
             throw new JDException(JDErrorCode.JD_LIMIT_EXCEEDED);
         }
@@ -169,6 +169,7 @@ public class JDService {
      */
     @Transactional
     public JDAlarmResponseDto alarm(Long jdId, JDAlarmRequestDto dto, String memberName) {
+
         JD jd = getAuthorizedJd(jdId, memberName);
         jd.isAlarmOn(dto.isAlarmOn());
         JD updatedJd = jdRepository.save(jd);
@@ -192,7 +193,7 @@ public class JDService {
         Member member = memberRepository.findByUsername(memberName)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
-        Page<JD> jdEntitiesPage = jdRepository.findByMemberId(member.getId(), pageable);
+        Page<JD> jdEntitiesPage = jdRepository.findAllJdsByMemberIdWithToDoLists(member.getId(), pageable);
 
         List<AllGetJDResponseDto> dtos = jdEntitiesPage.getContent().stream()
                 .map(this::convertToDto)
@@ -307,12 +308,7 @@ public class JDService {
         Member member = memberRepository.findByUsername(memberName)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
-        JD jd = jdRepository.findByIdWithToDoLists(jdId)
-                .orElseThrow(() -> new JDException(JDErrorCode.NOT_FOUND_JD));
-
-        if (!Objects.equals(member.getId(), jd.getMember().getId())) {
-            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
-        }
-        return jd;
+        return jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, member.getId())
+                .orElseThrow(() -> new JDException(JDErrorCode.UNAUTHORIZED_ACCESS));
     }
 }
