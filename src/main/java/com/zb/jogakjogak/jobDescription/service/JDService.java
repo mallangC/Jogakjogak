@@ -40,6 +40,7 @@ public class JDService {
      * @param memberName   로그인한 유저
      * @return 제목, JD의 URL, To Do List, 사용자 메모, 마감일
      */
+    //TODO: 삭제?
     public JDResponseDto analyze(JDRequestDto jdRequestDto, String memberName) {
 
         Member member = memberRepository.findByUsername(memberName)

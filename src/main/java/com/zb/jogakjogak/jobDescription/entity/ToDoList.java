@@ -55,7 +55,7 @@ public class ToDoList extends BaseEntity {
         ToDoListType category = dto.getCategory();
         if (category == null) {
             logger.warn("LLM 응답에서 ToDoList category가 누락되었습니다. 기본값으로 설정합니다.");
-            category = ToDoListType.STRUCTURAL_COMPLEMENT_PLAN;
+            category = ToDoListType.SCHEDULE_MISC_ERROR;
         }
 
         String title = dto.getTitle();

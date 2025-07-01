@@ -12,23 +12,24 @@ import org.hibernate.validator.constraints.URL;
 
 import java.time.LocalDateTime;
 
+@Schema(description = "JD 분석 요청 DTO")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class JDRequestDto {
-    @Schema(description = "생성할 분석 내용의 제목", example = "J사 백엔드 취업 해보자!")
+    @Schema(description = "생성할 분석 내용의 제목", example = "J사 백엔드 취업 해보자!", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "제목은 필수 입력 항목입니다.")
     @Size(max = 30, message = "제목의 최대 길이는 30자입니다.")
     private String title;
-    @Schema(description = "채용 공고의 URL", example = "https://jogakjogak.com")
+    @Schema(description = "채용 공고의 URL", example = "https://jogakjogak.com", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "채용 공고 URL은 필수 입력 항목입니다.")
     @URL(message = "유효한 URL 형식이 아닙니다.")
     private String jdUrl;
-    @Schema(description = "채용 공고의 회사명", example = "Jogakjogak")
+    @Schema(description = "채용 공고의 회사명", example = "Jogakjogak", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "회사 이름은 필수 항목입니다.")
     private String companyName;
-    @Schema(description = "지원하는 직무명", example = "백엔드 개발자")
+    @Schema(description = "지원하는 직무명", example = "백엔드 개발자", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "직무 이름은 필수 항목입니다.")
     private String job;
     @Schema(description = "채용 공고 내용", example =
@@ -53,10 +54,11 @@ public class JDRequestDto {
             "채용 절차" +
             "서류 전형: 이력서 및 경력 기술서 코딩 테스트: 알고리즘 및 코딩 역량 평가 1차 면접: 직무 역량 및 기술 면접 2차 면접: 문화 적합성 및 최종 면접" +
             "지원 방법" +
-            "제출 서류: 자유 형식의 이력서, 경력 기술서 지원 경로: [채용 플랫폼 링크, 이메일 주소 등] 조각조각에 관심 있는 분들의 많은 지원 바랍니다. 감사합니다.")
+            "제출 서류: 자유 형식의 이력서, 경력 기술서 지원 경로: [채용 플랫폼 링크, 이메일 주소 등] 조각조각에 관심 있는 분들의 많은 지원 바랍니다. 감사합니다.",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "채용 공고는 필수 항목입니다.")
     private String content;
-    @Schema(description = "채용 공고의 마감일", example = "2025-06-22T10:30:00Z")
+    @Schema(description = "채용 공고의 마감일", example = "2025-06-22T10:30:00Z", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "마감일은 필수 항목입니다.")
     private LocalDateTime endedAt;
 }
