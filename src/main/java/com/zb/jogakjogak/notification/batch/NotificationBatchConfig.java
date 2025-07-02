@@ -42,7 +42,6 @@ public class NotificationBatchConfig {
     private final JobRepository jobRepository;
     private final PlatformTransactionManager platformTransactionManager;
     private final JDRepository jdRepository;
-    private final ToDoListRepository toDoListRepository;
     private final NotificationRepository notificationRepository;
     private final NotificationService notificationService;
 
@@ -110,7 +109,7 @@ public class NotificationBatchConfig {
     }
 
     private Notification createNotification(JD jd){
-        return notificationRepository.findByMemberId(jd.getMember().getId())
+        Notification notification = notificationRepository.findByMemberId(jd.getMember().getId())
                 .orElseGet(() -> {
                     Notification newNotification = Notification.builder()
                             .member(jd.getMember())
@@ -119,5 +118,10 @@ public class NotificationBatchConfig {
                             .build();
                     return notificationRepository.save(newNotification);
                 });
+        if (!notification.getJdList().contains(jd)) {
+            notification.getJdList().add(jd);
+            jd.setNotification(notification);
+        }
+        return notificationRepository.save(notification);
     }
 }
