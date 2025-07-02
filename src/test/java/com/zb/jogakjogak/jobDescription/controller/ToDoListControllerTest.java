@@ -210,7 +210,7 @@ class ToDoListControllerTest {
      */
     @Test
     @DisplayName("ToDoList 생성 성공")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail, role = "USER")
+    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail)
     void createToDoList_success() throws Exception {
         // Given
         JD jd = createAndSaveJd(
@@ -263,7 +263,7 @@ class ToDoListControllerTest {
      */
     @Test
     @DisplayName("ToDoList 수정 성공")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail, role = "USER")
+    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail)
     void updateToDoList_success() throws Exception {
         // Given
         JD jd = createAndSaveJd(setupMember,
@@ -280,7 +280,7 @@ class ToDoListControllerTest {
                 null
         );
         Long jdId = jd.getId();
-        ToDoList existingToDoList = toDoListRepository.findAllByJdId(jdId).get(0); // 첫 번째 ToDoList 가져오기
+        ToDoList existingToDoList = toDoListRepository.findAllByJdId(jdId).get(0);
         Long toDoListId = existingToDoList.getId();
 
         UpdateToDoListRequestDto dto = new UpdateToDoListRequestDto(
@@ -319,7 +319,7 @@ class ToDoListControllerTest {
      */
     @Test
     @DisplayName("ToDoList 단건 조회 성공")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail, role = "USER")
+    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail)
     void getToDoList_success() throws Exception {
         // Given
         JD jd = createAndSaveJd(
@@ -357,7 +357,7 @@ class ToDoListControllerTest {
      */
     @Test
     @DisplayName("ToDoList 삭제 성공")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail, role = "USER")
+    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail)
     void deleteToDoList_success() throws Exception {
         // Given
         JD jd = createAndSaveJd(
@@ -398,7 +398,7 @@ class ToDoListControllerTest {
      */
     @Test
     @DisplayName("ToDoList 카테고리별 조회 성공")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail, role = "USER")
+    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail)
     void getToDoListsByCategory_success() throws Exception {
         // Given
         JD jd = createAndSaveJd(
@@ -462,7 +462,7 @@ class ToDoListControllerTest {
      */
     @Test
     @DisplayName("ToDoList 일괄 업데이트 성공 - 생성, 수정, 삭제")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail, role = "USER")
+    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail)
     void bulkUpdateToDoLists_success_createUpdateDelete() throws Exception {
         // Given
         JD jd = createAndSaveJd(
@@ -482,7 +482,7 @@ class ToDoListControllerTest {
         Long jdId = jd.getId();
         entityManager.clear();
 
-        List<ToDoList> existingToDoLists = toDoListRepository.findByJdIdAndCategoryFetch(jdId, ToDoListType.STRUCTURAL_COMPLEMENT_PLAN);
+        List<ToDoList> existingToDoLists = toDoListRepository.findToDoListsByJdIdAndCategoryWithJd(jdId, ToDoListType.STRUCTURAL_COMPLEMENT_PLAN);
         Long toDoListIdToUpdate = existingToDoLists.get(0).getId();
         Long toDoListIdToDelete = existingToDoLists.get(1).getId();
 
@@ -526,7 +526,7 @@ class ToDoListControllerTest {
 
         // DB에서 최종 상태 확인
         entityManager.clear();
-        List<ToDoList> finalToDoLists = toDoListRepository.findByJdIdAndCategoryFetch(jdId, ToDoListType.STRUCTURAL_COMPLEMENT_PLAN);
+        List<ToDoList> finalToDoLists = toDoListRepository.findToDoListsByJdIdAndCategoryWithJd(jdId, ToDoListType.STRUCTURAL_COMPLEMENT_PLAN);
         assertThat(finalToDoLists).hasSize(4);
 
         // 생성된 항목 확인
@@ -549,7 +549,7 @@ class ToDoListControllerTest {
 
     @Test
     @DisplayName("ToDoList 일괄 업데이트 성공 - 빈 요청으로 변경 없음")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail, role = "USER")
+    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail)
     void bulkUpdateToDoLists_success_emptyRequest() throws Exception {
         // Given
         JD jd = createAndSaveJd(setupMember, "빈 요청 JD", "http://empty.com", "회사", "내용", "직무", LocalDateTime.now(), "", false, false, null, null);
@@ -557,7 +557,7 @@ class ToDoListControllerTest {
         entityManager.clear();
 
         // 초기 ToDoList 개수 확인
-        List<ToDoList> initialToDoLists = toDoListRepository.findByJdIdAndCategoryFetch(jdId, ToDoListType.STRUCTURAL_COMPLEMENT_PLAN);
+        List<ToDoList> initialToDoLists = toDoListRepository.findToDoListsByJdIdAndCategoryWithJd(jdId, ToDoListType.STRUCTURAL_COMPLEMENT_PLAN);
         int initialSize = initialToDoLists.size();
 
         // 빈 Bulk 요청 DTO 생성 (아무런 생성, 수정, 삭제 요청 없음)
@@ -583,7 +583,7 @@ class ToDoListControllerTest {
 
         // DB에서 변경 없음 확인
         entityManager.clear();
-        List<ToDoList> finalToDoLists = toDoListRepository.findByJdIdAndCategoryFetch(jdId, ToDoListType.STRUCTURAL_COMPLEMENT_PLAN);
+        List<ToDoList> finalToDoLists = toDoListRepository.findToDoListsByJdIdAndCategoryWithJd(jdId, ToDoListType.STRUCTURAL_COMPLEMENT_PLAN);
 
         // 두 리스트의 ID를 추출하여 비교합니다.
         List<Long> initialToDoListIds = initialToDoLists.stream().map(ToDoList::getId).collect(Collectors.toList());
