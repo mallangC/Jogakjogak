@@ -180,7 +180,7 @@ class ToDoListServiceTest {
     void createToDoList_jdNotFound() {
         // Given
         when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(anyLong(),eq(mockMember.getId()))).thenReturn(Optional.empty());
+        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(anyLong(), eq(mockMember.getId()))).thenReturn(Optional.empty());
 
         // When & Then
         JDException exception = assertThrows(JDException.class, () ->
@@ -197,17 +197,11 @@ class ToDoListServiceTest {
     @DisplayName("실패: ToDoList가 카테고리별 제한 10개를 초과할 때 예외 발생")
     void createToDoList_fail_exceeds_category_limit() {
         // Given
-        for (int i = 0; i < 10; i++) {
-            mockJd.getToDoLists().add(ToDoList.builder()
-                    .id((long) (i + 1))
-                    .category(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN)
-                    .title("기존 ToDo " + i)
-                    .content("내용")
-                    .jd(mockJd)
-                    .build());
-        }
         when(memberRepository.findByUsername(mockMember.getUsername())).thenReturn(Optional.of(mockMember));
         when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId())).thenReturn(Optional.of(mockJd));
+        when(toDoListRepository.countToDoListsByJdIdAndCategory(eq(jdId), eq(createToDoListDto.getCategory()))).thenReturn(10L);
+
+        // When & Then
         ToDoListException exception = assertThrows(ToDoListException.class, () -> {
             toDoListService.createToDoList(mockJd.getId(), createToDoListDto, mockMember.getUsername());
         });
@@ -218,6 +212,7 @@ class ToDoListServiceTest {
         verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId());
         verify(memberRepository, times(1)).findByUsername(mockMember.getUsername());
         verify(toDoListRepository, never()).save(any(ToDoList.class));
+        verify(toDoListRepository, times(1)).countToDoListsByJdIdAndCategory(eq(jdId), eq(createToDoListDto.getCategory()));
     }
 
 
@@ -264,7 +259,7 @@ class ToDoListServiceTest {
     void updateToDoList_success() {
         // Given
         when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId())).thenReturn(Optional.of(mockJd));
-        when(toDoListRepository.findById(toDoListId)).thenReturn(Optional.of(mockToDoList));
+        when(toDoListRepository.findToDoListWithJdByIdAndJdId(toDoListId, jdId)).thenReturn(Optional.of(mockToDoList));
         when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
         when(toDoListRepository.save(any(ToDoList.class))).thenAnswer(invocation -> invocation.<ToDoList>getArgument(0));
 
@@ -275,7 +270,7 @@ class ToDoListServiceTest {
         // Then
         verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId());
         verify(memberRepository, times(1)).findByUsername(mockMember.getName());
-        verify(toDoListRepository, times(1)).findById(toDoListId);
+        verify(toDoListRepository, times(1)).findToDoListWithJdByIdAndJdId(toDoListId, jdId);
         verify(toDoListRepository, times(1)).save(any(ToDoList.class));
 
         assertNotNull(result);
@@ -294,7 +289,7 @@ class ToDoListServiceTest {
         // Given
         when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
         when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId())).thenReturn(Optional.of(mockJd));
-        when(toDoListRepository.findById(toDoListId)).thenReturn(Optional.of(mockToDoList));
+        when(toDoListRepository.findToDoListWithJdByIdAndJdId(toDoListId, jdId)).thenReturn(Optional.of(mockToDoList));
 
         // When
         ToDoListResponseDto result = toDoListService.getToDoList(jdId, toDoListId, mockMember.getName());
@@ -302,6 +297,7 @@ class ToDoListServiceTest {
         // Then
         verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId());
         verify(memberRepository, times(1)).findByUsername(mockMember.getName());
+        verify(toDoListRepository, times(1)).findToDoListWithJdByIdAndJdId(toDoListId, jdId);
 
         assertNotNull(result);
         assertEquals(toDoListId, result.getChecklist_id());
@@ -318,11 +314,10 @@ class ToDoListServiceTest {
     void deleteToDoList_success() {
         // Given
         ToDoList mockToDoList = mock(ToDoList.class);
-        when(mockToDoList.getJd()).thenReturn(mockJd);
 
         when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId())).thenReturn(Optional.of(mockJd));
         when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
-        when(toDoListRepository.findById(toDoListId)).thenReturn(Optional.of(mockToDoList));
+        when(toDoListRepository.findToDoListWithJdByIdAndJdId(toDoListId, jdId)).thenReturn(Optional.of(mockToDoList));
 
         // When
         toDoListService.deleteToDoList(jdId, toDoListId, mockMember.getName());
@@ -331,6 +326,7 @@ class ToDoListServiceTest {
         verify(toDoListRepository).delete(mockToDoList);
         verify(memberRepository, times(1)).findByUsername(mockMember.getName());
         verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId());
+        verify(toDoListRepository, times(1)).findToDoListWithJdByIdAndJdId(toDoListId, jdId);
     }
 
     @Test
@@ -339,7 +335,7 @@ class ToDoListServiceTest {
         // Given
         when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId())).thenReturn(Optional.of(mockJd));
         when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
-        when(toDoListRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(toDoListRepository.findToDoListWithJdByIdAndJdId(toDoListId, jdId)).thenReturn(Optional.empty());
 
         // When & Then
         assertThrowsToDoListNotFound(() ->
@@ -363,8 +359,91 @@ class ToDoListServiceTest {
     }
 
     @Test
-    @DisplayName("ToDoList가 해당 JD에 속하지 않을 때 업데이트, 조회, 삭제 작업 실패")
-    void updateGetDelete_fail_notBelongToJd() {
+    @DisplayName("업데이트 실패: ToDoList가 해당 JD에 속하지 않음 (조회 불가)")
+    void updateToDoList_fail_toDoListNotFoundOrNotBelongToJd() {
+        // Given
+        when(memberRepository.findByUsername(mockMember.getUsername())).thenReturn(Optional.of(mockMember));
+        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId())).thenReturn(Optional.of(mockJd));
+        when(toDoListRepository.findToDoListWithJdByIdAndJdId(eq(toDoListId), eq(mockJd.getId())))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        assertThrowsToDoListNotFound(() ->
+                toDoListService.updateToDoList(jdId, toDoListId, updateToDoListDto, mockMember.getUsername()));
+
+        verify(memberRepository, times(1)).findByUsername(mockMember.getUsername());
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId());
+        verify(toDoListRepository, times(1)).findToDoListWithJdByIdAndJdId(eq(toDoListId), eq(mockJd.getId()));
+        verify(toDoListRepository, never()).save(any(ToDoList.class));
+    }
+
+    @Test
+    @DisplayName("조회 실패: ToDoList가 해당 JD에 속하지 않음 (조회 불가)")
+    void getToDoList_fail_toDoListNotFoundOrNotBelongToJd() {
+        // Given
+        when(memberRepository.findByUsername(mockMember.getUsername())).thenReturn(Optional.of(mockMember));
+        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId())).thenReturn(Optional.of(mockJd));
+        when(toDoListRepository.findToDoListWithJdByIdAndJdId(eq(toDoListId), eq(mockJd.getId())))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        assertThrowsToDoListNotFound(() ->
+                toDoListService.getToDoList(jdId, toDoListId, mockMember.getUsername()));
+
+        verify(memberRepository, times(1)).findByUsername(mockMember.getUsername());
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId());
+        verify(toDoListRepository, times(1)).findToDoListWithJdByIdAndJdId(eq(toDoListId), eq(mockJd.getId()));
+    }
+
+    @Test
+    @DisplayName("삭제 실패: ToDoList가 해당 JD에 속하지 않음 (조회 불가)")
+    void deleteToDoList_fail_toDoListNotFoundOrNotBelongToJd() {
+        // Given
+        when(memberRepository.findByUsername(mockMember.getUsername())).thenReturn(Optional.of(mockMember));
+        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId())).thenReturn(Optional.of(mockJd));
+        when(toDoListRepository.findToDoListWithJdByIdAndJdId(eq(toDoListId), eq(mockJd.getId())))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        assertThrowsToDoListNotFound(() ->
+                toDoListService.deleteToDoList(jdId, toDoListId, mockMember.getUsername()));
+
+        verify(memberRepository, times(1)).findByUsername(mockMember.getUsername());
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId());
+        verify(toDoListRepository, times(1)).findToDoListWithJdByIdAndJdId(eq(toDoListId), eq(mockJd.getId()));
+        verify(toDoListRepository, never()).delete(any(ToDoList.class));
+    }
+
+    @Test
+    @DisplayName("벌크 업데이트 실패: 생성/수정 ToDoList가 해당 JD에 속하지 않음 (조회 불가)")
+    void bulkUpdateToDoLists_updateOrCreate_fail_toDoListNotFound() {
+        // Given
+        when(memberRepository.findByUsername(mockMember.getUsername())).thenReturn(Optional.of(mockMember));
+        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId())).thenReturn(Optional.of(mockJd));
+        when(toDoListRepository.countToDoListsByJdIdAndCategory(eq(jdId), eq(targetCategory))).thenReturn(0L);
+        when(toDoListRepository.findToDoListWithJdByIdAndJdId(eq(toDoListId), eq(mockJd.getId())))
+                .thenReturn(Optional.empty());
+
+        BulkToDoListUpdateRequestDto bulkReqWrongJd = BulkToDoListUpdateRequestDto.builder()
+                .category(targetCategory)
+                .updatedOrCreateToDoLists(Collections.singletonList(updateToDoListUpdateReqDto))
+                .deletedToDoListIds(Collections.emptyList())
+                .build();
+
+        // When & Then
+        assertThrowsToDoListNotFound(() ->
+                toDoListService.bulkUpdateToDoLists(jdId, bulkReqWrongJd, mockMember.getUsername()));
+
+        verify(memberRepository, times(1)).findByUsername(mockMember.getUsername());
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId());
+        verify(toDoListRepository, times(1)).countToDoListsByJdIdAndCategory(eq(jdId), eq(targetCategory));
+        verify(toDoListRepository, times(1)).findToDoListWithJdByIdAndJdId(eq(toDoListId), eq(mockJd.getId()));
+        verify(toDoListRepository, never()).save(any(ToDoList.class));
+    }
+
+    @Test
+    @DisplayName("벌크 업데이트 실패: 삭제할 ToDoList가 해당 JD에 속하지 않음")
+    void bulkUpdateToDoLists_delete_fail_toDoListNotBelongToJd() {
         // Given
         Long anotherJdId = 99L;
         JD anotherMockJd = JD.builder()
@@ -378,30 +457,12 @@ class ToDoListServiceTest {
                 .memo(faker.lorem().sentence())
                 .build();
 
-        ToDoList toDoListForBulkBelongingToAnotherJd = mock(ToDoList.class);
-        when(toDoListForBulkBelongingToAnotherJd.getJd()).thenReturn(anotherMockJd);
-        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId,mockMember.getId())).thenReturn(Optional.of(mockJd));
+        ToDoList toDoListBelongingToAnotherJd = mock(ToDoList.class);
+        when(toDoListBelongingToAnotherJd.getJd()).thenReturn(anotherMockJd);
 
-
-        assertThrowsToDoListNotFound(() ->
-                toDoListService.updateToDoList(jdId, toDoListId, updateToDoListDto, mockMember.getName()));
-        verify(toDoListRepository, never()).save(any(ToDoList.class));
-
-        assertThrowsToDoListNotFound(() ->
-                toDoListService.getToDoList(jdId, toDoListId, mockMember.getName()));
-
-        assertThrowsToDoListNotFound(() ->
-                toDoListService.deleteToDoList(jdId, toDoListId, mockMember.getName()));
-        verify(toDoListRepository, never()).delete(any(ToDoList.class));
-
-        BulkToDoListUpdateRequestDto bulkReqWrongJd = BulkToDoListUpdateRequestDto.builder()
-                .category(targetCategory)
-                .updatedOrCreateToDoLists(Collections.singletonList(updateToDoListUpdateReqDto))
-                .deletedToDoListIds(Collections.emptyList())
-                .build();
-        assertThrowsToDoListNotFound(() ->
-                toDoListService.bulkUpdateToDoLists(jdId, bulkReqWrongJd, mockMember.getName()));
+        when(memberRepository.findByUsername(mockMember.getUsername())).thenReturn(Optional.of(mockMember));
+        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId())).thenReturn(Optional.of(mockJd));
+        when(toDoListRepository.countToDoListsByJdIdAndCategory(eq(jdId), eq(targetCategory))).thenReturn(0L);
 
         List<Long> deletedIdsWrongJd = Collections.singletonList(toDoListId);
         BulkToDoListUpdateRequestDto bulkReqDeleteWrongJd = BulkToDoListUpdateRequestDto.builder()
@@ -409,23 +470,19 @@ class ToDoListServiceTest {
                 .updatedOrCreateToDoLists(Collections.emptyList())
                 .deletedToDoListIds(deletedIdsWrongJd)
                 .build();
-        when(toDoListRepository.findAllById(deletedIdsWrongJd)).thenReturn(Collections.singletonList(toDoListForBulkBelongingToAnotherJd));
-        assertThrowsToDoListNotBelongToJd(() ->
-                toDoListService.bulkUpdateToDoLists(jdId, bulkReqDeleteWrongJd,mockMember.getName()));
 
-        ToDoListUpdateRequestDto wrongJdInDto = ToDoListUpdateRequestDto.builder()
-                .id(toDoListId)
-                .title("Wrong JD DTO")
-                .content("Content")
-                .isDone(false)
-                .build();
-        BulkToDoListUpdateRequestDto bulkReqInitialWrongJd = BulkToDoListUpdateRequestDto.builder()
-                .category(targetCategory)
-                .updatedOrCreateToDoLists(Collections.singletonList(wrongJdInDto))
-                .deletedToDoListIds(Collections.emptyList())
-                .build();
-        assertThrowsToDoListNotFound(() ->
-                toDoListService.bulkUpdateToDoLists(jdId, bulkReqInitialWrongJd,mockMember.getName()));
+        when(toDoListRepository.findAllByIdsWithJd(eq(deletedIdsWrongJd)))
+                .thenReturn(Collections.singletonList(toDoListBelongingToAnotherJd));
+
+        // When & Then
+        assertThrowsToDoListNotBelongToJd(() ->
+                toDoListService.bulkUpdateToDoLists(jdId, bulkReqDeleteWrongJd, mockMember.getUsername()));
+
+        verify(memberRepository, times(1)).findByUsername(mockMember.getUsername());
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId());
+        verify(toDoListRepository, times(1)).countToDoListsByJdIdAndCategory(eq(jdId), eq(targetCategory));
+        verify(toDoListRepository, times(1)).findAllByIdsWithJd(eq(deletedIdsWrongJd));
+        verify(toDoListRepository, never()).deleteAllById(anyList()); // 삭제는 일어나지 않아야 함
     }
 
     @Test
@@ -478,12 +535,12 @@ class ToDoListServiceTest {
                 .build();
 
 
-        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
+        when(memberRepository.findByUsername(mockMember.getUsername())).thenReturn(Optional.of(mockMember));
         when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId())).thenReturn(Optional.of(mockJd));
 
-        when(toDoListRepository.countByJdIdAndCategory(eq(jdId), eq(targetCategory))).thenReturn(0L);
-        when(toDoListRepository.findByIdWithJd(anotherExistingId)).thenReturn(Optional.of(existingToDoListForUpdate));
-        when(toDoListRepository.findAllById(Collections.singletonList(deletedToDoListId)))
+        when(toDoListRepository.countToDoListsByJdIdAndCategory(eq(jdId), eq(targetCategory))).thenReturn(0L);
+        when(toDoListRepository.findToDoListWithJdByIdAndJdId(eq(anotherExistingId), eq(jdId))).thenReturn(Optional.of(existingToDoListForUpdate));
+        when(toDoListRepository.findAllByIdsWithJd(eq(Collections.singletonList(deletedToDoListId))))
                 .thenReturn(Collections.singletonList(toDoListToDelete));
         when(toDoListRepository.save(any(ToDoList.class))).thenAnswer(invocation -> {
             ToDoList savedToDo = invocation.getArgument(0);
@@ -504,17 +561,16 @@ class ToDoListServiceTest {
         doNothing().when(toDoListRepository).deleteAllById(Collections.singletonList(deletedToDoListId));
 
         // When
-        toDoListService.bulkUpdateToDoLists(jdId, request, mockMember.getName());
+        toDoListService.bulkUpdateToDoLists(jdId, request, mockMember.getUsername());
 
         // Then
-        verify(memberRepository, times(1)).findByUsername(mockMember.getName());
+        verify(memberRepository, times(1)).findByUsername(mockMember.getUsername());
         verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId());
-        verify(toDoListRepository, times(1)).countByJdIdAndCategory(eq(jdId), eq(targetCategory));
-        verify(toDoListRepository, times(1)).findByIdWithJd(anotherExistingId);
+        verify(toDoListRepository, times(1)).countToDoListsByJdIdAndCategory(eq(jdId), eq(targetCategory));
+        verify(toDoListRepository, times(1)).findToDoListWithJdByIdAndJdId(eq(anotherExistingId), eq(jdId));
         verify(toDoListRepository, times(2)).save(any(ToDoList.class));
-        verify(toDoListRepository, times(1)).findAllById(Collections.singletonList(deletedToDoListId));
+        verify(toDoListRepository, times(1)).findAllByIdsWithJd(eq(Collections.singletonList(deletedToDoListId)));
         verify(toDoListRepository, times(1)).deleteAllById(Collections.singletonList(deletedToDoListId));
-
     }
 
     @Test
@@ -539,45 +595,7 @@ class ToDoListServiceTest {
     @DisplayName("Bulk Update: 업데이트/삭제 시 ToDoList가 해당 JD/카테고리에 속하지 않으면 실패")
     void bulkUpdateToDoLists_fail_notBelongToJdOrCategory() {
         // Given
-        Long anotherJdId = 99L;
-        JD anotherMockJd = JD.builder()
-                .id(anotherJdId)
-                .title("Another JD")
-                .jdUrl("https://www.test.com")
-                .companyName(faker.company().name())
-                .job(faker.job().position())
-                .content(faker.lorem().paragraph())
-                .endedAt(LocalDate.now().atStartOfDay())
-                .memo(faker.lorem().sentence())
-                .build();
-
-        ToDoListUpdateRequestDto dtoWithWrongJdId = ToDoListUpdateRequestDto.builder()
-                .id(null)
-                .title("Wrong JD DTO")
-                .content("Content")
-                .isDone(false)
-                .build();
-        BulkToDoListUpdateRequestDto requestWrongJdInDto = BulkToDoListUpdateRequestDto.builder()
-                .category(targetCategory)
-                .updatedOrCreateToDoLists(Collections.singletonList(dtoWithWrongJdId))
-                .deletedToDoListIds(Collections.emptyList())
-                .build();
-
-        ToDoListUpdateRequestDto dtoWithWrongCategory = ToDoListUpdateRequestDto.builder()
-                .id(null)
-                .title("Wrong Category DTO")
-                .content("Content")
-                .isDone(false)
-                .build();
-        BulkToDoListUpdateRequestDto requestWrongCategoryInDto = BulkToDoListUpdateRequestDto.builder()
-                .category(targetCategory)
-                .updatedOrCreateToDoLists(Collections.singletonList(dtoWithWrongCategory))
-                .deletedToDoListIds(Collections.emptyList())
-                .build();
-
         Long deletedIdWrongOwner = 200L;
-        ToDoList toDoListWrongOwner = mock(ToDoList.class);
-        when(toDoListWrongOwner.getJd()).thenReturn(anotherMockJd);
 
         BulkToDoListUpdateRequestDto requestDeleteWrongOwner = BulkToDoListUpdateRequestDto.builder()
                 .category(targetCategory)
@@ -586,10 +604,9 @@ class ToDoListServiceTest {
                 .build();
 
 
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId,mockMember.getId())).thenReturn(Optional.of(mockJd));
+        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId())).thenReturn(Optional.of(mockJd));
         when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
-        when(toDoListRepository.findAllById(Collections.singletonList(deletedIdWrongOwner)))
-                .thenReturn(Collections.singletonList(toDoListWrongOwner));
+
 
 
         // When & Then
@@ -627,7 +644,7 @@ class ToDoListServiceTest {
 
         when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId())).thenReturn(Optional.of(mockJd));
         when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
-        when(toDoListRepository.findByJdAndCategory(mockJd, targetCategory)).thenReturn(mockToDoLists);
+        when(toDoListRepository.findToDoListsByJdIdAndCategoryWithJd(jdId, targetCategory)).thenReturn(mockToDoLists);
 
         // When
         ToDoListGetByCategoryResponseDto result = toDoListService.getToDoListsByJdAndCategory(jdId, targetCategory, mockMember.getName());
@@ -635,7 +652,7 @@ class ToDoListServiceTest {
         // Then
         verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId());
         verify(memberRepository, times(1)).findByUsername(mockMember.getName());
-        verify(toDoListRepository, times(1)).findByJdAndCategory(mockJd, targetCategory);
+        verify(toDoListRepository, times(1)).findToDoListsByJdIdAndCategoryWithJd(jdId, targetCategory);
 
         assertNotNull(result);
         assertEquals(jdId, result.getJdId());
@@ -658,7 +675,7 @@ class ToDoListServiceTest {
         // When & Then
         assertThrowsUnauthorizedAccess(() -> toDoListService.getToDoListsByJdAndCategory(jdId, targetCategory, mockMember.getName()));
 
-        verify(toDoListRepository, never()).findByJdAndCategory(any(JD.class), any(ToDoListType.class));
+        verify(toDoListRepository, never()).findToDoListsByJdIdAndCategoryWithJd(jdId, targetCategory);
         verify(memberRepository, times(1)).findByUsername(mockMember.getName());
     }
 
@@ -668,14 +685,14 @@ class ToDoListServiceTest {
         // Given
         when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId())).thenReturn(Optional.of(mockJd));
         when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
-        when(toDoListRepository.findByJdAndCategory(mockJd, targetCategory)).thenReturn(Collections.emptyList());
+        when(toDoListRepository.findToDoListsByJdIdAndCategoryWithJd(jdId, targetCategory)).thenReturn(Collections.emptyList());
 
         // When
         ToDoListGetByCategoryResponseDto result = toDoListService.getToDoListsByJdAndCategory(jdId, targetCategory, mockMember.getName());
 
         // Then
         verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId());
-        verify(toDoListRepository, times(1)).findByJdAndCategory(mockJd, targetCategory);
+        verify(toDoListRepository, times(1)).findToDoListsByJdIdAndCategoryWithJd(jdId, targetCategory);
         verify(memberRepository, times(1)).findByUsername(mockMember.getName());
 
         assertNotNull(result);
@@ -693,8 +710,8 @@ class ToDoListServiceTest {
 
     private void assertThrowsToDoListNotFound(Executable executable) {
         ToDoListException exception = assertThrows(ToDoListException.class, executable);
-        assertEquals(ToDoListErrorCode.TODO_LIST_NOT_FOUND, exception.getErrorCode());
-        assertEquals("ToDoList를 찾을 수 없습니다.", exception.getMessage());
+        assertEquals(ToDoListErrorCode.UNAUTHORIZED_ACCESS, exception.getErrorCode());
+        assertEquals("해당 투두리스트 대한 권한이 없습니다.", exception.getMessage());
     }
 
     private void assertThrowsToDoListNotBelongToJd(Executable executable) {
