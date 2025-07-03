@@ -38,8 +38,4 @@ public interface JDRepository extends JpaRepository<JD, Long>, JDRepositoryCusto
     List<JD> findJdToNotify(@Param("today") LocalDateTime today,
                             @Param("threeDaysAgo") LocalDateTime threeDaysAgo,
                             @Param("todayStart") LocalDateTime todayStart);
-
-    //테스트용
-    @EntityGraph(attributePaths = "member")
-    Page<JD> findAll(Pageable pageable);
 }
