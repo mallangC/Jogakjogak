@@ -15,27 +15,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    services:
-      db_main:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: rootpassword
-          MYSQL_DATABASE: test_main_db
-        ports:
-          - 3306:3306
-        volumes:
-          - ./src/test/resource/test_mysql.cnf:/etc/mysql/conf.d/custom.cnf
-
-      db_meta:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: rootpassword
-          MYSQL_DATABASE: test_meta_db
-        ports:
-          - 3307:3306
-        volumes:
-          - ./src/test/resource/test_mysql.cnf:/etc/mysql/conf.d/custom.cnf
-
     steps:
       - uses: actions/checkout@v4
         with:
@@ -57,6 +36,14 @@ jobs:
           ./gradlew --stop
           rm -rf ~/.gradle/caches/
           rm -rf build/
+
+      # docker-compose 실행
+      - name: Build and Start MySQL Containers with Docker Compose
+        run: |
+          docker compose -f ./src/resource/test/ci/docker-compose.yml up -d --build --wait
+
+      - name: Verify MySQL Containers are Running
+        run: docker ps -a
 
       # 7.6.4버전으로 gradle 세팅 (JaCoCo와 호환성이 좋은 버전으로 세팅)
       - name: Set up Gradle
