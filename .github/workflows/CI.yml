@@ -23,7 +23,7 @@ jobs:
           MYSQL_DATABASE: test_main_db
         ports:
           - 3306:3306
-        options: --lower-case-table-names=1
+        options: --entrypoint mysqld --lower-case-table-names=1
 
       db_meta:
         image: mysql:8.0
@@ -32,7 +32,7 @@ jobs:
           MYSQL_DATABASE: test_meta_db
         ports:
           - 3307:3306
-        options: --lower-case-table-names=1
+        options: --entrypoint mysqld --lower-case-table-names=1
 
     steps:
       - uses: actions/checkout@v4
