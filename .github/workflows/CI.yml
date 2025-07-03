@@ -34,7 +34,7 @@ jobs:
         ports:
           - 3307:3306
         volumes:
-          - ./mysql/tset_mysql.cnf:/etc/mysql/conf.d/custom.cnf
+          - ./src/resource/tset_mysql.cnf:/etc/mysql/conf.d/custom.cnf
 
     steps:
       - uses: actions/checkout@v4
