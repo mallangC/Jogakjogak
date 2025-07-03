@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  mysql_main:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: my-custom-mysql:latest
+    container_name: mysql-main
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+
+  mysql_meta:
+    image: my-custom-mysql:latest
+    container_name: mysql-meta
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: test_meta_db
