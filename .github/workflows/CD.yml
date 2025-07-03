@@ -31,28 +31,13 @@ env:
   EMAIL_ID: ${{ secrets.EMAIL_ID}}
   EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD}}
   KAKAO_REDIRECT_URI: ${{ secrets.KAKAO_REDIRECT_URI }}
+  EMAIL_AES_KEY: ${{ secrets.EMAIL_AES_KEY }}
+  PHONE_AES_KEY: ${{ secrets.PHONE_AES_KEY }}
 
 jobs:
   test:
     name: Test for Gradle
     runs-on: ubuntu-latest
-
-    services:
-      db_main:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: rootpassword
-          MYSQL_DATABASE: test_main_db
-        ports:
-          - 3306:3306
-
-      db_meta:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: rootpassword
-          MYSQL_DATABASE: test_meta_db
-        ports:
-          - 3307:3306
 
     steps:
       - name: Checkout code
@@ -75,6 +60,14 @@ jobs:
           rm -rf ~/.gradle/caches/
           rm -rf build/
 
+      # docker-compose 실행
+      - name: Build and Start MySQL Containers with Docker Compose
+        run: |
+          docker compose -f ./src/test/resources/ci/docker-compose.yml up -d --build --wait
+
+      - name: Verify MySQL Containers are Running
+        run: docker ps -a
+
       # gradle 세팅
       - name: Set up Gradle
         uses: gradle/gradle-build-action@v2
@@ -96,7 +89,9 @@ jobs:
           TEST_DB_META_PORT: 3307
           TEST_DB_USERNAME: root
           TEST_DB_PASSWORD: rootpassword
-          KAKAO_REDIRECT_URI: ${{ env.KAKAO_REDIRECT_URI }}
+          KAKAO_REDIRECT_URI: ${{ secrets.KAKAO_REDIRECT_URI }}
+          EMAIL_AES_KEY: ${{ secrets.EMAIL_AES_KEY }}
+          PHONE_AES_KEY: ${{ secrets.PHONE_AES_KEY }}
         run: ./gradlew test --info
 
   build:
@@ -153,6 +148,8 @@ jobs:
           echo "EMAIL_ID=${{ env.EMAIL_ID}}" >> .env 
           echo "EMAIL_PASSWORD=${{ env.EMAIL_PASSWORD}}" >> .env    
           echo "KAKAO_REDIRECT_URI=${{ env.KAKAO_REDIRECT_URI}}" >> .env    
+          echo "EMAIL_AES_KEY=${{ env.EMAIL_AES_KEY}}" >> .env            
+          echo "PHONE_AES_KEY=${{ env.PHONE_AES_KEY}}" >> .env            
 
         shell: bash
 

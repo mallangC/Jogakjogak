@@ -21,6 +21,8 @@ services:
       EMAIL_ID: ${EMAIL_ID}
       EMAIL_PASSWORD: ${EMAIL_PASSWORD}
       KAKAO_REDIRECT_URI: ${KAKAO_REDIRECT_URL}
+      EMAIL_AES_KEY: ${EMAIL_AES_KEY}
+      PHONE_AES_KEY: ${PHONE_AES_KEY}
     ports:
       - "8080:8080"
     volumes:
