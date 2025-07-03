@@ -58,12 +58,6 @@ jobs:
       - name: Check application-test.yml exists
         run: cat src/test/resources/application-test.yml || echo "application-test.yml not found"
 
-      #lower_case_table_names세팅이 잘 되었는지 확인
-      - name: Check MySQL lower_case_table_names setting
-        run: |
-          docker exec $(docker ps -q --filter "name=db_main" --filter "status=running") mysql -u root -prootpassword -e "SHOW VARIABLES LIKE 'lower_case_table_names';"
-
-
       # 테스트 진행
       - name: Test with Gradle
         env:
