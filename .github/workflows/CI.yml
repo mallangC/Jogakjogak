@@ -40,7 +40,7 @@ jobs:
       # docker-compose 실행
       - name: Build and Start MySQL Containers with Docker Compose
         run: |
-          docker compose -f "${GITHUB_WORKSPACE}/src/resource/test/ci/docker-compose.yml" up -d --build --wait
+          docker compose -f "${GITHUB_WORKSPACE}/src/resources/test/ci/docker-compose.yml" up -d --build --wait
 
       - name: Verify MySQL Containers are Running
         run: docker ps -a
