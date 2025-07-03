@@ -11,6 +11,7 @@ services:
       - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: test_main_db
 
   mysql_meta:
     image: my-custom-mysql:latest
