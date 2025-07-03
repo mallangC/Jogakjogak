@@ -24,7 +24,7 @@ jobs:
         ports:
           - 3306:3306
         volumes:
-          - ./src/resource/tset_mysql.cnf:/etc/mysql/conf.d/custom.cnf
+          - ./src/test/resource/test_mysql.cnf:/etc/mysql/conf.d/custom.cnf
 
       db_meta:
         image: mysql:8.0
@@ -34,10 +34,12 @@ jobs:
         ports:
           - 3307:3306
         volumes:
-          - ./src/resource/tset_mysql.cnf:/etc/mysql/conf.d/custom.cnf
+          - ./src/test/resource/test_mysql.cnf:/etc/mysql/conf.d/custom.cnf
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          clean: false
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
