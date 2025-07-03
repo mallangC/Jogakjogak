@@ -2,14 +2,12 @@ package com.zb.jogakjogak.notification.batch;
 
 
 import com.zb.jogakjogak.jobDescription.entity.JD;
-import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repository.JDRepository;
-import com.zb.jogakjogak.jobDescription.repository.ToDoListRepository;
-import com.zb.jogakjogak.notification.entity.Notification;
-import com.zb.jogakjogak.notification.repository.NotificationRepository;
+import com.zb.jogakjogak.notification.dto.NotificationDto;
 import com.zb.jogakjogak.notification.service.NotificationService;
-import jakarta.mail.MessagingException;
+import com.zb.jogakjogak.security.entity.Member;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -17,10 +15,9 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.data.RepositoryItemReader;
-import org.springframework.batch.item.data.RepositoryItemWriter;
 import org.springframework.batch.item.data.builder.RepositoryItemReaderBuilder;
-import org.springframework.batch.item.data.builder.RepositoryItemWriterBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Sort;
@@ -28,21 +25,22 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class NotificationBatchConfig {
     private static final int CHUNK_SIZE = 20;
     private static final int PAGE_SIZE = 20;
     private static final int RETRY_LIMIT = 3;
+    private static final int SKIP_SIZE = 10;
     private static final int NOTIFICATION_THRESHOLD_DAYS = 3;
     private final JobRepository jobRepository;
     private final PlatformTransactionManager platformTransactionManager;
     private final JDRepository jdRepository;
-    private final NotificationRepository notificationRepository;
     private final NotificationService notificationService;
 
     @Bean
@@ -59,27 +57,26 @@ public class NotificationBatchConfig {
         return new StepBuilder("sendNotification", jobRepository)
                 .<JD, JD> chunk(CHUNK_SIZE, platformTransactionManager)
                 .startLimit(RETRY_LIMIT)
-                .reader(JDReader())
-                .processor(processor())
-                .writer(JDWriter())
-                .faultTolerant()
-                .skip(Exception.class)
-                .skipLimit(10)
+                .reader(jdReader())
+                .processor(jdProcessor())
+                .writer(jdWriter())
+                //.faultTolerant()
+                //.skipLimit(SKIP_SIZE)
+                //.skip(Exception.class)
                 .build();
     }
 
     @Bean
     @StepScope
-    public RepositoryItemReader<JD> JDReader(){
+    public RepositoryItemReader<JD> jdReader(){
         LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(NOTIFICATION_THRESHOLD_DAYS);
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime todayStart = now.toLocalDate().atStartOfDay();
 
         return new RepositoryItemReaderBuilder<JD>()
-                .name("JDReader")
+                .name("jDReader")
                 .pageSize(PAGE_SIZE)
-                .methodName("findAll")
-                //.methodName("findJdToNotify")
+                .methodName("findAllJdsWithMember")
                 //.arguments(List.of(now, threeDaysAgo, todayStart))
                 .repository(jdRepository)
                 .sorts(Map.of("id", Sort.Direction.ASC))
@@ -87,13 +84,8 @@ public class NotificationBatchConfig {
     }
 
     @Bean
-    public ItemProcessor<JD, JD> processor(){
+    public ItemProcessor<JD, JD> jdProcessor(){
         return jd -> {
-            Notification notification = createNotification(jd);
-            jd.setNotification(notification);
-
-            notificationService.sendNotificationEmail(notification);
-
             jd.setNotificationCount(jd.getNotificationCount() + 1);
             jd.setLastNotifiedAt(LocalDateTime.now());
             return jd;
@@ -101,27 +93,32 @@ public class NotificationBatchConfig {
     }
 
     @Bean
-    public RepositoryItemWriter<JD> JDWriter(){
-        return new RepositoryItemWriterBuilder<JD>()
-                .repository(jdRepository)
-                .methodName("save")
-                .build();
-    }
+    public ItemWriter<JD> jdWriter() {
+        return jds -> {
+            Map<Member, List<JD>> groupedByMember = new HashMap<>();
+            for (JD jd : jds) {
+                Member member = jd.getMember();
+                groupedByMember.computeIfAbsent(member, k -> new ArrayList<>()).add(jd);
+            }
 
-    private Notification createNotification(JD jd){
-        Notification notification = notificationRepository.findByMemberId(jd.getMember().getId())
-                .orElseGet(() -> {
-                    Notification newNotification = Notification.builder()
-                            .member(jd.getMember())
-                            .jdList(new ArrayList<>())
-                            .createdAt(LocalDateTime.now())
-                            .build();
-                    return notificationRepository.save(newNotification);
-                });
-        if (!notification.getJdList().contains(jd)) {
-            notification.getJdList().add(jd);
-            jd.setNotification(notification);
-        }
-        return notificationRepository.save(notification);
+            if (!jds.isEmpty()) {
+                jdRepository.saveAll(jds);
+            }
+
+            for (Map.Entry<Member, List<JD>> entry : groupedByMember.entrySet()) {
+                Member member = entry.getKey();
+                List<JD> jdList = entry.getValue();
+
+                NotificationDto notificationDto = NotificationDto.builder()
+                        .member(member)
+                        .jdList(jdList)
+                        .build();
+                try {
+                    notificationService.sendNotificationEmail(notificationDto);
+                } catch (Exception e) {
+                    log.warn("이메일 전송에 실패했습니다." + e.getMessage());
+                }
+            }
+        };
     }
 }

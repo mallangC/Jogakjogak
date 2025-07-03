@@ -6,7 +6,7 @@ CREATE TABLE member
     password      VARCHAR(50),
     name          VARCHAR(50),
     nickname      VARCHAR(50),
-    phone_number  VARCHAR(20) NOT NULL,
+    phone_number  VARCHAR(100) NOT NULL,
     role          VARCHAR(50) NOT NULL,
     registered_at DATETIME    NOT NULL,
     last_login_at DATETIME    NOT NULL

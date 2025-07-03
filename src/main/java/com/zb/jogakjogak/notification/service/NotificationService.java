@@ -3,7 +3,9 @@ package com.zb.jogakjogak.notification.service;
 
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.repository.ToDoListRepository;
+import com.zb.jogakjogak.notification.dto.NotificationDto;
 import com.zb.jogakjogak.notification.entity.Notification;
+import com.zb.jogakjogak.security.entity.Member;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -27,19 +29,15 @@ public class NotificationService {
     private final ToDoListRepository toDoListRepository;
 
     @Async("taskExecutor")
-    public void sendNotificationEmail(Notification notification) throws MessagingException{
-        String email = notification.getMember().getEmail();
-
-        List<JD> validJdList = getValidAndSortedJdList(notification);
-
+    public void sendNotificationEmail(NotificationDto notificationDto) throws MessagingException{
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper messageHelper = new MimeMessageHelper(message);
             messageHelper.setSubject(EMAIL_TITLE);
-            messageHelper.setTo(email);
+            messageHelper.setTo(notificationDto.getMember().getEmail());
             String text = " ";
-            for (JD jd : notification.getJdList()) {
 
+            for (JD jd : notificationDto.getJdList()) {
                 String title = jd.getTitle();
                 Integer completedTodoListCount = toDoListRepository.countByIsDoneTrueAndJd_Id(jd.getId());
                 Integer notCompletedTodoListCount = toDoListRepository.countByIsDoneFalseAndJd_Id(jd.getId());
@@ -56,19 +54,10 @@ public class NotificationService {
                         "조각조각이 함께 이어드릴게요.\n\n" +
                         "========================================================\n\n";
             }
-            messageHelper.setText(text);
+            messageHelper.setText(text, false);
             javaMailSender.send(message);
         }catch(MessagingException e){
             log.warn("메일전송 실패 - JD ID: {}, 사유: {}", 1, e.getMessage());
             }
-    }
-
-    private List<JD> getValidAndSortedJdList(Notification notification){
-        LocalDateTime now = LocalDateTime.now();
-
-        return notification.getJdList().stream()
-                .filter(jd -> jd.getEndedAt().isAfter(now))
-                .sorted((jd1, jd2) -> jd1.getEndedAt().compareTo(jd2.getEndedAt()))
-                .toList();
     }
 }
