@@ -23,6 +23,7 @@ jobs:
           MYSQL_DATABASE: test_main_db
         ports:
           - 3306:3306
+        options: --lower-case-table-names=1
 
       db_meta:
         image: mysql:8.0
@@ -31,6 +32,7 @@ jobs:
           MYSQL_DATABASE: test_meta_db
         ports:
           - 3307:3306
+        options: --lower-case-table-names=1
 
     steps:
       - uses: actions/checkout@v4
@@ -75,6 +77,7 @@ jobs:
           TEST_DB_PASSWORD: rootpassword
           KAKAO_REDIRECT_URI: ${{ secrets.KAKAO_REDIRECT_URI }}
           EMAIL_AES_KEY: ${{ secrets.EMAIL_AES_KEY }}
+          PHONE_AES_KEY: ${{ secrets.PHONE_AES_KEY }}
         run: ./gradlew test --info
 
       # 테스트를 기반으로 JaCoCo 리포트 작성
