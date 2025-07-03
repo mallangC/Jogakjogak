@@ -16,6 +16,10 @@ import java.util.List;
 public interface JDRepository extends JpaRepository<JD, Long>, JDRepositoryCustom {
 
 
+
+    //테스트용
+    List<JD> findAllByMember(Member member);
+
     /** 테스트용
      *
      * @param pageable
@@ -38,4 +42,5 @@ public interface JDRepository extends JpaRepository<JD, Long>, JDRepositoryCusto
     List<JD> findJdToNotify(@Param("today") LocalDateTime today,
                             @Param("threeDaysAgo") LocalDateTime threeDaysAgo,
                             @Param("todayStart") LocalDateTime todayStart);
+
 }
