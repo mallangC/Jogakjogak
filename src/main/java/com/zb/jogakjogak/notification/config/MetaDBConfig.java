@@ -39,6 +39,4 @@ public class MetaDBConfig {
                 .table("flyway_schema_history_meta")
                 .load();
     }
-
-
 }
