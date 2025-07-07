@@ -41,7 +41,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         addRefreshToken(username, refreshToken);
 
         addSameSiteCookieAttribute(response, "refresh", refreshToken);
-        response.sendRedirect(kakaoRedirectUri);
+        response.sendRedirect("https://jogakjogak-web.vercel.app");
     }
 
     private String getRole(Authentication authentication){
@@ -52,8 +52,10 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     }
 
     private void addSameSiteCookieAttribute(HttpServletResponse response, String cookieName, String cookieValue) {
-        String cookieHeader = String.format("%s=%s; Max-Age=%d; Path=/; Secure; HttpOnly; SameSite=None; Domain=.jogakjogak.com",
-                cookieName, cookieValue, 60 * 60 * 24 * 7);
+        String cookieHeader = String.format(
+                "%s=%s; Max-Age=%d; Path=/; Secure; HttpOnly; SameSite=None",
+                cookieName, cookieValue, 60 * 60 * 24 * 7
+        );
         response.addHeader("Set-Cookie", cookieHeader);
     }
 
