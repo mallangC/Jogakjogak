@@ -41,10 +41,6 @@ public class ReissueController {
                                 HttpStatus.OK));
     }
 
-    @GetMapping("/favicon.ico")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void ignoreFavicon() {}
-
     private String extractRefreshTokenFromCookie(Cookie[] cookies) {
             if (cookies == null) return null;
             for (Cookie cookie : cookies) {
