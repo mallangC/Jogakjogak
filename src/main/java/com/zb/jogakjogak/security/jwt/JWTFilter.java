@@ -26,6 +26,7 @@ public class JWTFilter extends OncePerRequestFilter {
             "/actuator/health",
             "/api/member/reissue",
             "/api/member/logout",
+            "/login/oauth2/code/kakao",
             "/oauth2",
             "/login/oauth2",
             "/v3/api-docs",
