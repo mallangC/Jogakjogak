@@ -104,7 +104,8 @@ openai:
 
 server:
   port: 8080
-  
+  use-forward-headers: true
+
 gemini:
   api:
     key: ${GEMINI_API_KEY}
