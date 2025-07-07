@@ -52,7 +52,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     }
 
     private void addSameSiteCookieAttribute(HttpServletResponse response, String cookieName, String cookieValue) {
-        String cookieHeader = String.format("%s=%s; Max-Age=%d; Path=/; Secure; HttpOnly; SameSite=None Domain=.jogakjogak.com",
+        String cookieHeader = String.format("%s=%s; Max-Age=%d; Path=/; Secure; HttpOnly; SameSite=None; Domain=.jogakjogak.com",
                 cookieName, cookieValue, 60 * 60 * 24 * 7);
         response.addHeader("Set-Cookie", cookieHeader);
     }
