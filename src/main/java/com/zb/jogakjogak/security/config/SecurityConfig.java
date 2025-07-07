@@ -46,7 +46,7 @@ public class SecurityConfig {
                                 "https://jogakjogak-web.vercel.app",
                                 "https://www.jogakjogak.com"
                                 ));
-                        corsConfiguration.setAllowedMethods(Collections.singletonList("*"));
+                        corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                         corsConfiguration.setAllowCredentials(true);
                         corsConfiguration.setAllowedHeaders(Collections.singletonList("*"));
                         corsConfiguration.setMaxAge(3600L);
