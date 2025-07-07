@@ -27,7 +27,7 @@ public class JWTFilter extends OncePerRequestFilter {
             "/api/member/reissue",
             "/api/member/logout",
             "/oauth2",
-            "/login/oauth2",
+            "/login/oauth2/code",
             "/v3/api-docs",
             "/swagger-ui",
             "/swagger-resources",
