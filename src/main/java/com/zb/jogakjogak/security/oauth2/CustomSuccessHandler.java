@@ -42,7 +42,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         addRefreshToken(username, refreshToken);
 
         addSameSiteCookieAttribute(response, "refresh", refreshToken);
-        response.sendRedirect("https://jogakjogak-web.vercel.app/");
+        response.sendRedirect(kakaoRedirectUri);
     }
 
     private String getRole(Authentication authentication){
