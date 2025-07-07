@@ -40,12 +40,21 @@ public class SecurityConfig {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration corsConfiguration = new CorsConfiguration();
-                        corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://jogakjogak.com", "https://localhost:3000"));
+                        corsConfiguration.setAllowedOrigins(Arrays.asList(
+                                "http://localhost:3000",
+                                "https://jogakjogak.com",
+                                "https://jogakjogak-web.vercel.app",
+                                "https://www.jogakjogak.com"
+                                ));
                         corsConfiguration.setAllowedMethods(Collections.singletonList("*"));
                         corsConfiguration.setAllowCredentials(true);
                         corsConfiguration.setAllowedHeaders(Collections.singletonList("*"));
                         corsConfiguration.setMaxAge(3600L);
-                        corsConfiguration.setExposedHeaders(Arrays.asList("Set-Cookie", "Authorization"));
+                        corsConfiguration.setExposedHeaders(Arrays.asList(
+                                "Set-Cookie",
+                                "Authorization",
+                                "Access-Control-Allow-Credentials"
+                        ));
                         return corsConfiguration;
                     }}));
         http.
@@ -67,6 +76,7 @@ public class SecurityConfig {
                         .requestMatchers("/",
                                 "/actuator/health",
                                 "/oauth2/**",
+                                "/login/oauth2/code/**",
                                 "/api/member/reissue",
                                 "/api/member/logout",
                                 "/swagger-ui/**",

@@ -37,9 +37,10 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String username = customOAuth2User.getName();
         String role = getRole(authentication);
         String refreshToken = jwtUtil.createJwt(username, role, REFRESH_TOKEN_EXPIRATION, Token.REFRESH_TOKEN);
+
         addRefreshToken(username, refreshToken);
 
-        response.addCookie(createCookie("refresh", refreshToken));
+        addSameSiteCookieAttribute(response, "refresh", refreshToken);
         response.sendRedirect(kakaoRedirectUri);
     }
 
@@ -48,6 +49,12 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
         return auth.getAuthority();
+    }
+
+    private void addSameSiteCookieAttribute(HttpServletResponse response, String cookieName, String cookieValue) {
+        String cookieHeader = String.format("%s=%s; Max-Age=%d; Path=/; Secure; HttpOnly; SameSite=None",
+                cookieName, cookieValue, 60 * 60 * 24 * 7);
+        response.addHeader("Set-Cookie", cookieHeader);
     }
 
     private Cookie createCookie(String key, String value) {
