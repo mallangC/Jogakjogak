@@ -68,7 +68,9 @@ public class SecurityConfig {
         http.
                 addFilterBefore(new CustomLogoutFilter(refreshTokenRepository, jwtUtil), LogoutFilter.class);
         http.
-                oauth2Login((oauth2) -> oauth2.userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig.userService(customOauth2UserService))
+                oauth2Login((oauth2) -> oauth2
+                        .failureUrl("/login?error")
+                        .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig.userService(customOauth2UserService))
                         .successHandler(customSuccessHandler)
                 );
         http.
