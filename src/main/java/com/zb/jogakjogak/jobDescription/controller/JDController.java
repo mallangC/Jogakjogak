@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
         description = "GEMINI API 기반 JD/이력서 분석 관련 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
 public class JDController {
 
     private final JDService jdService;
