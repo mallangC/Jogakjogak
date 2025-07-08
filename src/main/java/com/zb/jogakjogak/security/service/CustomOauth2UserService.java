@@ -10,6 +10,7 @@ import com.zb.jogakjogak.security.entity.Member;
 import com.zb.jogakjogak.security.entity.OAuth2Info;
 import com.zb.jogakjogak.security.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CustomOauth2UserService extends DefaultOAuth2UserService {
@@ -31,6 +33,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
 
         OAuth2User oAuth2User = super.loadUser(userRequest);
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
+        System.out.println(">>> 로그인 사용자: " + oAuth2User.getName());
 
         OAuth2ResponseDto oAuth2ResponseDto = null;
         if(registrationId.equals("kakao")){
@@ -38,7 +41,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         }else if(registrationId.equals("google")){
             oAuth2ResponseDto = new GoogleResponseDto(oAuth2User.getAttributes());
         } else{
-            return null;
+            throw new OAuth2AuthenticationException("Unsupported provider: " + registrationId);
         }
         String username = oAuth2ResponseDto.getProvider() + " " + oAuth2ResponseDto.getProviderId();
         Optional<Member> existMember = memberRepository.findByUsername(username);
