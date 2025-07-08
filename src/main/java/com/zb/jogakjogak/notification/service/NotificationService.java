@@ -5,7 +5,9 @@ import com.zb.jogakjogak.ga.service.GaMeasurementProtocolService;
 import com.zb.jogakjogak.global.util.HashingUtil;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.repository.ToDoListRepository;
+import com.zb.jogakjogak.notification.dto.NotificationDto;
 import com.zb.jogakjogak.notification.entity.Notification;
+import com.zb.jogakjogak.security.entity.Member;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -14,11 +16,13 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -32,25 +36,15 @@ public class NotificationService {
     private final GaMeasurementProtocolService gaService;
 
     @Async("taskExecutor")
-    public void sendNotificationEmail(Notification notification) throws MessagingException{
-        String email = notification.getMember().getEmail();
-        String userId = notification.getMember().getId().toString();
-        String hashedEmail = HashingUtil.sha256(email);
-
-        notification.getJdList().removeIf(jd -> jd.getEndedAt().isBefore(LocalDateTime.now()));
-        notification.getJdList().sort((jd1, jd2) -> jd1.getEndedAt().compareTo(jd2.getEndedAt()));
-
-        String emailType = "notification_jd_reminder";
-        String campaignName = "jd_deadline_reminder";
-
+    public void sendNotificationEmail(NotificationDto notificationDto) throws MessagingException{
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper messageHelper = new MimeMessageHelper(message);
             messageHelper.setSubject(EMAIL_TITLE);
-            messageHelper.setTo(email);
+            messageHelper.setTo(notificationDto.getMember().getEmail());
             String text = " ";
-            for (JD jd : notification.getJdList()) {
 
+            for (JD jd : notificationDto.getJdList()) {
                 String title = jd.getTitle();
                 Integer completedTodoListCount = toDoListRepository.countByIsDoneTrueAndJd_Id(jd.getId());
                 Integer notCompletedTodoListCount = toDoListRepository.countByIsDoneFalseAndJd_Id(jd.getId());
@@ -67,7 +61,7 @@ public class NotificationService {
                         "조각조각이 함께 이어드릴게요.\n\n" +
                         "========================================================\n\n";
             }
-            messageHelper.setText(text);
+            messageHelper.setText(text, false);
             javaMailSender.send(message);
 
             Map<String, Object> eventParams = new HashMap<>();
@@ -96,7 +90,6 @@ public class NotificationService {
             gaService.sendGaEvent(gaClientId, userId, "email_send_failed", eventParams).subscribe();
 
             log.warn("메일전송 실패 - JD ID: {}, 사유: {}", 1, e.getMessage());
-            throw e;
             }
     }
 }

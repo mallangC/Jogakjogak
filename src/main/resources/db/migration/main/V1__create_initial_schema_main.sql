@@ -6,7 +6,7 @@ CREATE TABLE member
     password      VARCHAR(50),
     name          VARCHAR(50),
     nickname      VARCHAR(50),
-    phone_number  VARCHAR(20) NOT NULL,
+    phone_number  VARCHAR(100) NOT NULL,
     role          VARCHAR(50) NOT NULL,
     registered_at DATETIME    NOT NULL,
     last_login_at DATETIME    NOT NULL
@@ -53,6 +53,7 @@ CREATE TABLE job_description
     id           BIGINT PRIMARY KEY AUTO_INCREMENT,
     member_id    BIGINT        NOT NULL,
     notification_id BIGINT,
+    notification_count INT,
     title        VARCHAR(30)   NOT NULL,
     company_name VARCHAR(30)   NOT NULL,
     job          VARCHAR(30)   NOT NULL,
@@ -65,6 +66,7 @@ CREATE TABLE job_description
     ended_at     DATETIME,
     created_at   DATETIME,
     updated_at   DATETIME,
+    last_notified_at DATETIME,
     FOREIGN KEY (notification_id) REFERENCES notification (id),
     FOREIGN KEY (member_id) REFERENCES member (id)
 );

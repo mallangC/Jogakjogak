@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -37,10 +38,26 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String username = customOAuth2User.getName();
         String role = getRole(authentication);
         String refreshToken = jwtUtil.createJwt(username, role, REFRESH_TOKEN_EXPIRATION, Token.REFRESH_TOKEN);
+
         addRefreshToken(username, refreshToken);
 
-        response.addCookie(createCookie("refresh", refreshToken));
-        response.sendRedirect(kakaoRedirectUri);
+        addSameSiteCookieAttribute(response, "refresh", refreshToken);
+
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("text/html;charset=UTF-8");
+
+        response.getWriter().write("""
+                <html>
+                  <head>
+                    <meta http-equiv="refresh" content="0;url=%s" />
+                  </head>
+                  <body>
+                    <p>Redirecting to frontend...</p>
+                  </body>
+                </html>
+        """.formatted(kakaoRedirectUri));
+
+        //response.sendRedirect(kakaoRedirectUri);
     }
 
     private String getRole(Authentication authentication){
@@ -48,6 +65,20 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
         return auth.getAuthority();
+    }
+
+    private void addSameSiteCookieAttribute(HttpServletResponse response, String cookieName, String cookieValue) {
+        boolean isLocal = kakaoRedirectUri.contains("localhost");
+
+        String cookieHeader = String.format(
+                "%s=%s; Max-Age=%d; Path=/; %s HttpOnly; SameSite=None",
+                cookieName,
+                cookieValue,
+                60 * 60 * 24 * 7,
+                isLocal ? "" : "Secure;"
+        );
+
+        response.addHeader("Set-Cookie", cookieHeader);
     }
 
     private Cookie createCookie(String key, String value) {
@@ -61,8 +92,10 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         return cookie;
     }
 
+    @Transactional
     private void addRefreshToken(String userName, String refresh) {
-
+        refreshTokenRepository.findByUsername(userName)
+                .ifPresent(refreshTokenRepository::delete);
         RefreshToken refreshToken = RefreshToken.builder()
                 .username(userName)
                 .token(refresh)

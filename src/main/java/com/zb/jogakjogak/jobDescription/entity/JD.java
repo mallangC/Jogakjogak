@@ -51,6 +51,12 @@ public class JD extends BaseEntity {
     @Column
     private LocalDateTime applyAt;
 
+    @Column
+    private int notificationCount = 0;
+
+    @Column
+    private LocalDateTime lastNotifiedAt;
+
     @Column(nullable = false, columnDefinition = "DATE")
     private LocalDateTime endedAt;
 
@@ -92,5 +98,10 @@ public class JD extends BaseEntity {
 
     public void updateMemo(MemoRequestDto dto) {
         this.memo = dto.getMemo();
+    }
+
+    public void markAsUpdated() {
+        this.notificationCount = 0;
+        this.lastNotifiedAt = null;
     }
 }
