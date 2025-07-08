@@ -51,7 +51,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
               <head><meta charset='UTF-8'></head>
               <body>
                 <script>
-                  window.location.href = 'https://jogakjogak-web.vercel.app';
+                  window.location.href = 'https://jogakjogak.com';
                 </script>
               </body>
             </html>

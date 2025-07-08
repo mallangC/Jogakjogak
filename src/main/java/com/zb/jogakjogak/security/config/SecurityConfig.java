@@ -44,7 +44,8 @@ public class SecurityConfig {
                                 "http://localhost:3000",
                                 "https://jogakjogak.com",
                                 "https://jogakjogak-web.vercel.app",
-                                "https://www.jogakjogak.com"
+                                "https://www.jogakjogak.com",
+                                "https://api.jogakjogak.com"
                                 ));
                         corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                         corsConfiguration.setAllowCredentials(true);
