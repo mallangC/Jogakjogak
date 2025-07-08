@@ -37,6 +37,17 @@ public class NotificationService {
 
     @Async("taskExecutor")
     public void sendNotificationEmail(NotificationDto notificationDto) throws MessagingException{
+        String email = notificationDto.getMember().getEmail();
+        String userId = notificationDto.getMember().getId().toString();
+        String hashedEmail = HashingUtil.sha256(email);
+
+        notificationDto.getJdList().removeIf(jd -> jd.getEndedAt().isBefore(LocalDateTime.now()));
+        notificationDto.getJdList().sort((jd1, jd2) -> jd1.getEndedAt().compareTo(jd2.getEndedAt()));
+
+        String emailType = "notification_jd_reminder";
+        String campaignName = "jd_deadline_reminder";
+
+
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper messageHelper = new MimeMessageHelper(message);
@@ -70,9 +81,9 @@ public class NotificationService {
             eventParams.put("send_status", "success");
             eventParams.put("recipient_email", hashedEmail);
             eventParams.put("recipient_user_id", userId);
-            eventParams.put("num_jds_notified", notification.getJdList().size());
+            eventParams.put("num_jds_notified", notificationDto.getJdList().size());
 
-            String gaClientId = "backend_notification_" + UUID.randomUUID().toString();
+            String gaClientId = "backend_notification_" + UUID.randomUUID();
 
             gaService.sendGaEvent(gaClientId, userId, "email_sent", eventParams).subscribe();
             log.info("메일 전송 성공: {}", email);
@@ -86,7 +97,7 @@ public class NotificationService {
             eventParams.put("error_message_summary", e.getMessage() != null ? e.getMessage().substring(0, Math.min(e.getMessage().length(), 250)) : "Unknown email error");
             eventParams.put("error_code_custom", "EMAIL_SEND_FAILED");
 
-            String gaClientId = "backend_notification_error_" + UUID.randomUUID().toString();
+            String gaClientId = "backend_notification_error_" + UUID.randomUUID();
             gaService.sendGaEvent(gaClientId, userId, "email_send_failed", eventParams).subscribe();
 
             log.warn("메일전송 실패 - JD ID: {}, 사유: {}", 1, e.getMessage());

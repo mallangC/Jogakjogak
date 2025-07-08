@@ -66,7 +66,6 @@ public class GaApiCallInterceptor implements HandlerInterceptor {
         } else {
             apiStatus = "failure";
             errorCode = "HTTP_STATUS_ERROR_" + httpStatusCode;
-            errorMessage = ex.getMessage();
         }
 
         Map<String, Object> eventParams = new HashMap<>();
