@@ -8,13 +8,14 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import java.io.IOException;
 import java.util.Optional;
 
 @RequiredArgsConstructor
 public class CustomLogoutFilter extends GenericFilter {
-    private final RefreshTokenRepository refreshEntityRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final JWTUtil jwtUtil;
     private static final String LOGOUT_URI = "/api/member/logout";
 
@@ -32,16 +33,20 @@ public class CustomLogoutFilter extends GenericFilter {
         }
 
         String refreshToken = extractRefreshTokenFromCookie(request.getCookies());
+        String username = jwtUtil.getUserName(refreshToken);
+        refreshTokenRepository.deleteByUsername(username);
         jwtUtil.validateToken(refreshToken, Token.REFRESH_TOKEN);
 
-        Optional<RefreshToken> existingToken = refreshEntityRepository.findByToken(refreshToken);
+        /*
+        Optional<RefreshToken> existingToken = refreshTokenRepository.findByToken(refreshToken);
         if (existingToken.isEmpty()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
         //로그아웃 진행
-        refreshEntityRepository.deleteByToken(refreshToken);
+        refreshTokenRepository.deleteByToken(refreshToken);
+        */
         //Cookie 값 0
         Cookie cookie = resetRefreshTokenInCookie();
         response.addCookie(cookie);
