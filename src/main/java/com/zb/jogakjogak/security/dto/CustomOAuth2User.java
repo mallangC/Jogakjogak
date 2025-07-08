@@ -56,4 +56,8 @@ public class CustomOAuth2User implements OAuth2User {
     public String getNickName(){
         return member.getNickname();
     }
+
+    public Member getMember() {
+        return member;
+    }
 }
