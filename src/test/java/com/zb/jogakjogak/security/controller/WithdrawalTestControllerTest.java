@@ -57,7 +57,7 @@ class WithdrawalTestControllerTest {
         );
 
         // when
-        MockHttpServletResponse response = mockMvc.perform(post("/api/member/withdrawal")
+        MockHttpServletResponse response = mockMvc.perform(post("/member/withdrawal")
                         .with(csrf())
                         .with(authentication(authentication)))
                 .andReturn()

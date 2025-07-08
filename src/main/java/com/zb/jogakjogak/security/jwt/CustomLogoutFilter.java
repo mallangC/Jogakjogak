@@ -2,7 +2,6 @@ package com.zb.jogakjogak.security.jwt;
 
 import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.security.Token;
-import com.zb.jogakjogak.security.entity.RefreshToken;
 import com.zb.jogakjogak.security.repository.RefreshTokenRepository;
 import jakarta.servlet.*;
 import jakarta.servlet.http.Cookie;
@@ -10,17 +9,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import java.io.IOException;
-import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
 public class CustomLogoutFilter extends GenericFilter {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JWTUtil jwtUtil;
-    private static final String LOGOUT_URI = "/api/member/logout";
+    private static final String LOGOUT_URI = "/member/logout";
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {

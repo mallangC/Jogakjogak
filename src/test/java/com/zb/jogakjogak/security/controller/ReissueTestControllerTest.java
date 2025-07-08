@@ -50,7 +50,7 @@ class ReissueTestControllerTest {
         when(reissueService.reissue(oldRefresh)).thenReturn(mockResult);
 
         // when
-        MockHttpServletResponse response = mockMvc.perform(post("/api/member/reissue")
+        MockHttpServletResponse response = mockMvc.perform(post("/member/reissue")
                         .with(csrf())
                         .with(user("testUser"))
                         .cookie(new Cookie("refresh", oldRefresh)))

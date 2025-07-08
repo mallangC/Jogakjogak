@@ -44,7 +44,8 @@ public class SecurityConfig {
                                 "http://localhost:3000",
                                 "https://jogakjogak.com",
                                 "https://jogakjogak-web.vercel.app",
-                                "https://www.jogakjogak.com"
+                                "https://www.jogakjogak.com",
+                                "https://api.jogakjogak.com"
                                 ));
                         corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                         corsConfiguration.setAllowCredentials(true);
@@ -78,8 +79,8 @@ public class SecurityConfig {
                                 "/actuator/health",
                                 "/oauth2/**",
                                 "/login/oauth2/code/**",
-                                "/api/member/reissue",
-                                "/api/member/logout",
+                                "/member/reissue",
+                                "/member/logout",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
