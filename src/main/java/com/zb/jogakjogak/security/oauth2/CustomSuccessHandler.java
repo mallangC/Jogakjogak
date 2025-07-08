@@ -42,7 +42,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         addRefreshToken(username, refreshToken);
 
         addSameSiteCookieAttribute(request, response, "refresh", refreshToken);
-        response.sendRedirect(kakaoRedirectUri);
+        response.sendRedirect("https://jogakjogak-web.vercel.app/");
     }
 
     private String getRole(Authentication authentication){
@@ -58,13 +58,12 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         boolean isLocal = serverName.contains("localhost");
 
         String cookieHeader = String.format(
-                "%s=%s; Max-Age=%d; Path=/; %s HttpOnly; SameSite=None",
+                "%s=%s; Max-Age=%d; Path=/; HttpOnly; SameSite=None%s",
                 cookieName,
                 cookieValue,
                 60 * 60 * 24 * 7,
-                isLocal ? "" : "Secure;"
+                isLocal ? "" : "; Secure"
         );
-
         response.addHeader("Set-Cookie", cookieHeader);
     }
 
