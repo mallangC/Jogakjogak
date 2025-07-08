@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Iterator;
@@ -42,7 +43,20 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         addRefreshToken(username, refreshToken);
 
         addSameSiteCookieAttribute(request, response, "refresh", refreshToken);
-        response.sendRedirect("https://jogakjogak-web.vercel.app/");
+
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter writer = response.getWriter();
+        writer.println("""
+            <html>
+              <head><meta charset='UTF-8'></head>
+              <body>
+                <script>
+                  window.location.href = 'https://jogakjogak-web.vercel.app';
+                </script>
+              </body>
+            </html>
+        """);
+        writer.flush();
     }
 
     private String getRole(Authentication authentication){
