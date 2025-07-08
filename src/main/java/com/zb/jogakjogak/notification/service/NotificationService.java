@@ -1,6 +1,8 @@
 package com.zb.jogakjogak.notification.service;
 
 
+import com.zb.jogakjogak.ga.service.GaMeasurementProtocolService;
+import com.zb.jogakjogak.global.util.HashingUtil;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.repository.ToDoListRepository;
 import com.zb.jogakjogak.notification.entity.Notification;
@@ -12,9 +14,11 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -25,13 +29,19 @@ public class NotificationService {
     private final JavaMailSender javaMailSender;
 
     private final ToDoListRepository toDoListRepository;
+    private final GaMeasurementProtocolService gaService;
 
     @Async("taskExecutor")
     public void sendNotificationEmail(Notification notification) throws MessagingException{
         String email = notification.getMember().getEmail();
+        String userId = notification.getMember().getId().toString();
+        String hashedEmail = HashingUtil.sha256(email);
 
         notification.getJdList().removeIf(jd -> jd.getEndedAt().isBefore(LocalDateTime.now()));
         notification.getJdList().sort((jd1, jd2) -> jd1.getEndedAt().compareTo(jd2.getEndedAt()));
+
+        String emailType = "notification_jd_reminder";
+        String campaignName = "jd_deadline_reminder";
 
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
@@ -59,8 +69,34 @@ public class NotificationService {
             }
             messageHelper.setText(text);
             javaMailSender.send(message);
+
+            Map<String, Object> eventParams = new HashMap<>();
+            eventParams.put("email_type", emailType);
+            eventParams.put("campaign_name", campaignName);
+            eventParams.put("send_status", "success");
+            eventParams.put("recipient_email", hashedEmail);
+            eventParams.put("recipient_user_id", userId);
+            eventParams.put("num_jds_notified", notification.getJdList().size());
+
+            String gaClientId = "backend_notification_" + UUID.randomUUID().toString();
+
+            gaService.sendGaEvent(gaClientId, userId, "email_sent", eventParams).subscribe();
+            log.info("메일 전송 성공: {}", email);
         }catch(MessagingException e){
+            Map<String, Object> eventParams = new HashMap<>();
+            eventParams.put("email_type", emailType);
+            eventParams.put("campaign_name", campaignName);
+            eventParams.put("send_status", "failure");
+            eventParams.put("recipient_email", hashedEmail);
+            eventParams.put("recipient_user_id", userId);
+            eventParams.put("error_message_summary", e.getMessage() != null ? e.getMessage().substring(0, Math.min(e.getMessage().length(), 250)) : "Unknown email error");
+            eventParams.put("error_code_custom", "EMAIL_SEND_FAILED");
+
+            String gaClientId = "backend_notification_error_" + UUID.randomUUID().toString();
+            gaService.sendGaEvent(gaClientId, userId, "email_send_failed", eventParams).subscribe();
+
             log.warn("메일전송 실패 - JD ID: {}, 사유: {}", 1, e.getMessage());
+            throw e;
             }
     }
 }
