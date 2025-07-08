@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Date;
 
 @RestController
-@RequestMapping("/api/biz/send")
+@RequestMapping("/biz/send")
 @RequiredArgsConstructor
 public class TestController {
 
