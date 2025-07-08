@@ -42,7 +42,22 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         addRefreshToken(username, refreshToken);
 
         addSameSiteCookieAttribute(response, "refresh", refreshToken);
-        response.sendRedirect(kakaoRedirectUri);
+
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("text/html;charset=UTF-8");
+
+        response.getWriter().write("""
+                <html>
+                  <head>
+                    <meta http-equiv="refresh" content="0;url=%s" />
+                  </head>
+                  <body>
+                    <p>Redirecting to frontend...</p>
+                  </body>
+                </html>
+        """.formatted(kakaoRedirectUri));
+
+        //response.sendRedirect(kakaoRedirectUri);
     }
 
     private String getRole(Authentication authentication){
@@ -53,10 +68,16 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     }
 
     private void addSameSiteCookieAttribute(HttpServletResponse response, String cookieName, String cookieValue) {
+        boolean isLocal = kakaoRedirectUri.contains("localhost");
+
         String cookieHeader = String.format(
-                "%s=%s; Max-Age=%d; Path=/; Secure; HttpOnly; SameSite=None",
-                cookieName, cookieValue, 60 * 60 * 24 * 7
+                "%s=%s; Max-Age=%d; Path=/; %s HttpOnly; SameSite=None",
+                cookieName,
+                cookieValue,
+                60 * 60 * 24 * 7,
+                isLocal ? "" : "Secure;"
         );
+
         response.addHeader("Set-Cookie", cookieHeader);
     }
 
