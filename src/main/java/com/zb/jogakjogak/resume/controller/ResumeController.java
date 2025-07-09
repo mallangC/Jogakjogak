@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "이력서 관리 API", description = "이력서 등록, 수정, 조회, 삭제 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/resume")
+@RequestMapping("/resume")
 public class ResumeController {
 
     private final ResumeService resumeService;

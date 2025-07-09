@@ -27,8 +27,8 @@ public class JWTFilter extends OncePerRequestFilter {
 
     private static final Set<String> WHITELIST = Set.of(
             "/actuator/health",
-            "/api/member/reissue",
-            "/api/member/logout",
+            "/member/reissue",
+            "/member/logout",
             "/login/oauth2/code",
             "/oauth2",
             "/login/oauth2",

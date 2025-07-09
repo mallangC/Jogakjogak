@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Iterator;
@@ -41,23 +42,21 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         addRefreshToken(username, refreshToken);
 
-        addSameSiteCookieAttribute(response, "refresh", refreshToken);
+        addSameSiteCookieAttribute(request, response, "refresh", refreshToken);
 
-        response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("text/html;charset=UTF-8");
-
-        response.getWriter().write("""
-                <html>
-                  <head>
-                    <meta http-equiv="refresh" content="0;url=%s" />
-                  </head>
-                  <body>
-                    <p>Redirecting to frontend...</p>
-                  </body>
-                </html>
-        """.formatted(kakaoRedirectUri));
-
-        //response.sendRedirect(kakaoRedirectUri);
+        PrintWriter writer = response.getWriter();
+        writer.println("""
+            <html>
+              <head><meta charset='UTF-8'></head>
+              <body>
+                <script>
+                  window.location.href = 'https://jogakjogak.com';
+                </script>
+              </body>
+            </html>
+        """);
+        writer.flush();
     }
 
     private String getRole(Authentication authentication){
@@ -67,17 +66,18 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         return auth.getAuthority();
     }
 
-    private void addSameSiteCookieAttribute(HttpServletResponse response, String cookieName, String cookieValue) {
-        boolean isLocal = kakaoRedirectUri.contains("localhost");
+    private void addSameSiteCookieAttribute(HttpServletRequest request, HttpServletResponse response, String cookieName, String cookieValue) {
+        String serverName = request.getServerName();
+
+        boolean isLocal = serverName.contains("localhost");
 
         String cookieHeader = String.format(
-                "%s=%s; Max-Age=%d; Path=/; %s HttpOnly; SameSite=None",
+                "%s=%s; Max-Age=%d; Path=/; HttpOnly; SameSite=None%s",
                 cookieName,
                 cookieValue,
                 60 * 60 * 24 * 7,
-                isLocal ? "" : "Secure;"
+                isLocal ? "" : "; Secure"
         );
-
         response.addHeader("Set-Cookie", cookieHeader);
     }
 
