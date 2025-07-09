@@ -14,6 +14,7 @@ import java.util.Map;
 public class CustomOAuth2User implements OAuth2User {
 
     private final Member member;
+    private String provider;
 
     @Override
     public Map<String, Object> getAttributes() {
@@ -62,9 +63,6 @@ public class CustomOAuth2User implements OAuth2User {
     }
 
     public String getProvider() {
-        if (member.getOauth2Info() != null && !member.getOauth2Info().isEmpty()) {
-            return member.getOauth2Info().get(0).getProvider();
-        }
-        return "unknown_provider";
+        return provider;
     }
 }
