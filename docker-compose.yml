@@ -5,6 +5,7 @@ services:
     image: mallangc/jogakjogak-backend:1.0.0
     container_name: jogak-backend
     environment:
+      TZ: Asia/Seoul
       DB_URL: ${DB_URL}
       DB_META_URL: ${DB_META_URL}
       DB_USERNAME: ${DB_USERNAME}
