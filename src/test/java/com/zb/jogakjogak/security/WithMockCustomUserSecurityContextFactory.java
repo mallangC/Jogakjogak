@@ -40,7 +40,7 @@ public class WithMockCustomUserSecurityContextFactory implements WithSecurityCon
                 .lastLoginAt(LocalDateTime.now())
                 .build();
 
-        CustomOAuth2User principal = new CustomOAuth2User(mockMember, mockMember.getOauth2Info().get(0).getProvider());
+        CustomOAuth2User principal = new CustomOAuth2User(mockMember);
 
         Authentication auth = new UsernamePasswordAuthenticationToken(
                 principal,

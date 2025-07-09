@@ -197,6 +197,6 @@ class CustomOauth2UserServiceTest {
             member.updateExistingMember(kakaoResponseDto);
         }
         member = memberRepository.save(member);
-        return new CustomOAuth2User(member, registrationId);
+        return new CustomOAuth2User(member);
     }
 }
