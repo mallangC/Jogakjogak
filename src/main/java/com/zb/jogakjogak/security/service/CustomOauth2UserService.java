@@ -68,12 +68,12 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
                     .build();
             member.getOauth2Info().add(oAuth2Info);
             member = memberRepository.save(member);
-            return new CustomOAuth2User(member, oAuth2Info.getProvider());
+            return new CustomOAuth2User(member);
         } else{
             member = existMember.get();
             member.updateExistingMember(oAuth2ResponseDto);
             memberRepository.save(member);
-            return new CustomOAuth2User(member,  oAuth2ResponseDto.getProvider());
+            return new CustomOAuth2User(member);
         }
     }
 }

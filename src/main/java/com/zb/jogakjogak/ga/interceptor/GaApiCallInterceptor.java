@@ -72,6 +72,7 @@ public class GaApiCallInterceptor implements HandlerInterceptor {
         eventParams.put("api_path", apiPath);
         eventParams.put("api_method", apiMethod);
         eventParams.put("api_status", apiStatus);
+        eventParams.put("member_id", userId);
         eventParams.put("response_time_ms", responseTime);
         eventParams.put("http_status_code", httpStatusCode);
 

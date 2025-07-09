@@ -59,7 +59,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String eventName = "user_login";
 
         Map<String, Object> eventParams = new HashMap<>();
-        eventParams.put("login_method", getLoginMethod(authentication));
+        eventParams.put("member_id", member.getId());
         eventParams.put("user_role", role);
         gaService.sendGaEvent(clientId, gaUserId, eventName, eventParams)
                 .subscribe();
@@ -145,20 +145,5 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             }
         }
         return null;
-    }
-
-    /**
-     * Authentication 객체에서 로그인 방식을 추출합니다.
-     * CustomOAuth2User에 포함된 provider 정보를 직접 사용하여 구체적인 제공자 이름을 반환합니다.
-     *
-     * @param authentication Authentication 객체
-     * @return 로그인 방식 (예: "kakao_oauth", "google_oauth", "form_login", "unknown_login_method")
-     */
-    private String getLoginMethod(Authentication authentication) {
-        if (authentication.getPrincipal() instanceof CustomOAuth2User) {
-            CustomOAuth2User customOAuth2User = (CustomOAuth2User) authentication.getPrincipal();
-            return customOAuth2User.getProvider() + "_oauth";
-        }
-        return "unknown_login_method";
     }
 }

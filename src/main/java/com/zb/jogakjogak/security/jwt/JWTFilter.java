@@ -78,7 +78,7 @@ public class JWTFilter extends OncePerRequestFilter {
         Member member = memberRepository.findByUsername(userName)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
-        CustomOAuth2User customOAuth2User = new CustomOAuth2User(member, member.getOauth2Info().get(0).getProvider());
+        CustomOAuth2User customOAuth2User = new CustomOAuth2User(member);
         Authentication authToken = new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
