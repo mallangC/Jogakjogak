@@ -15,8 +15,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Iterator;
@@ -37,10 +39,24 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String username = customOAuth2User.getName();
         String role = getRole(authentication);
         String refreshToken = jwtUtil.createJwt(username, role, REFRESH_TOKEN_EXPIRATION, Token.REFRESH_TOKEN);
+
         addRefreshToken(username, refreshToken);
 
-        response.addCookie(createCookie("refresh", refreshToken));
-        response.sendRedirect(kakaoRedirectUri);
+        addSameSiteCookieAttribute(request, response, "refresh", refreshToken);
+
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter writer = response.getWriter();
+        writer.println("""
+            <html>
+              <head><meta charset='UTF-8'></head>
+              <body>
+                <script>
+                  window.location.href = 'https://jogakjogak-web.vercel.app';
+                </script>
+              </body>
+            </html>
+        """);
+        writer.flush();
     }
 
     private String getRole(Authentication authentication){
@@ -48,6 +64,21 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
         return auth.getAuthority();
+    }
+
+    private void addSameSiteCookieAttribute(HttpServletRequest request, HttpServletResponse response, String cookieName, String cookieValue) {
+        String serverName = request.getServerName();
+
+        boolean isLocal = serverName.contains("localhost");
+
+        String cookieHeader = String.format(
+                "%s=%s; Max-Age=%d; Path=/; HttpOnly; SameSite=None%s",
+                cookieName,
+                cookieValue,
+                60 * 60 * 24 * 7,
+                isLocal ? "" : "; Secure"
+        );
+        response.addHeader("Set-Cookie", cookieHeader);
     }
 
     private Cookie createCookie(String key, String value) {
@@ -61,8 +92,10 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         return cookie;
     }
 
+    @Transactional
     private void addRefreshToken(String userName, String refresh) {
-
+        refreshTokenRepository.findByUsername(userName)
+                .ifPresent(refreshTokenRepository::delete);
         RefreshToken refreshToken = RefreshToken.builder()
                 .username(userName)
                 .token(refresh)

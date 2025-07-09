@@ -1,22 +1,23 @@
 package com.zb.jogakjogak.security.jwt;
 
+import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.security.Token;
-import com.zb.jogakjogak.security.entity.RefreshToken;
 import com.zb.jogakjogak.security.repository.RefreshTokenRepository;
 import jakarta.servlet.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.util.Optional;
 
+@Slf4j
 @RequiredArgsConstructor
 public class CustomLogoutFilter extends GenericFilter {
-    private final RefreshTokenRepository refreshEntityRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final JWTUtil jwtUtil;
-    private static final String LOGOUT_URI = "/api/member/logout";
+    private static final String LOGOUT_URI = "/member/logout";
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
@@ -32,16 +33,43 @@ public class CustomLogoutFilter extends GenericFilter {
         }
 
         String refreshToken = extractRefreshTokenFromCookie(request.getCookies());
-        jwtUtil.validateToken(refreshToken, Token.REFRESH_TOKEN);
 
-        Optional<RefreshToken> existingToken = refreshEntityRepository.findByToken(refreshToken);
+        if (refreshToken == null) {
+            log.warn("[LogoutFilter] Refresh token 쿠키가 없음");
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+
+        try {
+            jwtUtil.validateToken(refreshToken, Token.REFRESH_TOKEN);
+        } catch (AuthException e) {
+            log.warn("[LogoutFilter] Refresh token 검증 실패: {}", e.getMessage());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        String username;
+        try {
+            username = jwtUtil.getUserName(refreshToken);
+        } catch (Exception e) {
+            log.error("[LogoutFilter] Refresh token에서 username 추출 실패", e);
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+
+        refreshTokenRepository.deleteByUsername(username);
+        log.info("[LogoutFilter] {} 사용자 로그아웃 처리 (refresh token 삭제)", username);
+
+        /*
+        Optional<RefreshToken> existingToken = refreshTokenRepository.findByToken(refreshToken);
         if (existingToken.isEmpty()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
         //로그아웃 진행
-        refreshEntityRepository.deleteByToken(refreshToken);
+        refreshTokenRepository.deleteByToken(refreshToken);
+        */
         //Cookie 값 0
         Cookie cookie = resetRefreshTokenInCookie();
         response.addCookie(cookie);
@@ -66,6 +94,9 @@ public class CustomLogoutFilter extends GenericFilter {
         Cookie cookie = new Cookie("refresh", null);
         cookie.setMaxAge(0);
         cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
         return cookie;
     }
+
 }

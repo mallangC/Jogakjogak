@@ -236,7 +236,7 @@ class ToDoListControllerTest {
         String content = objectMapper.writeValueAsString(dto);
 
         // When
-        ResultActions result = mockMvc.perform(post("/api/jds/{jdId}/to-do-lists", jdId)
+        ResultActions result = mockMvc.perform(post("/jds/{jdId}/to-do-lists", jdId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content));
 
@@ -292,7 +292,7 @@ class ToDoListControllerTest {
         String content = objectMapper.writeValueAsString(dto);
 
         // When
-        ResultActions result = mockMvc.perform(patch("/api/jds/{jdId}/to-do-lists/{toDoListId}", jdId, toDoListId)
+        ResultActions result = mockMvc.perform(patch("/jds/{jdId}/to-do-lists/{toDoListId}", jdId, toDoListId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content));
 
@@ -341,7 +341,7 @@ class ToDoListControllerTest {
         Long toDoListId = existingToDoList.getId();
 
         // When
-        ResultActions result = mockMvc.perform(get("/api/jds/{jdId}/to-do-lists/{toDoListId}", jdId, toDoListId));
+        ResultActions result = mockMvc.perform(get("/jds/{jdId}/to-do-lists/{toDoListId}", jdId, toDoListId));
 
         // Then
         result.andExpect(status().isOk())
@@ -379,7 +379,7 @@ class ToDoListControllerTest {
         Long toDoListId = toDoListToDelete.getId();
 
         // When
-        ResultActions result = mockMvc.perform(delete("/api/jds/{jdId}/to-do-lists/{toDoListId}", jdId, toDoListId));
+        ResultActions result = mockMvc.perform(delete("/jds/{jdId}/to-do-lists/{toDoListId}", jdId, toDoListId));
 
         // Then
         result.andExpect(status().isOk())
@@ -433,7 +433,7 @@ class ToDoListControllerTest {
         entityManager.clear();
 
         // When
-        ResultActions result = mockMvc.perform(get("/api/jds/{jdId}/to-do-lists", jdId)
+        ResultActions result = mockMvc.perform(get("/jds/{jdId}/to-do-lists", jdId)
                 .param("category", ToDoListType.STRUCTURAL_COMPLEMENT_PLAN.name()));
 
         // Then
@@ -445,7 +445,7 @@ class ToDoListControllerTest {
                 .andDo(print());
 
         // When
-        ResultActions result2 = mockMvc.perform(get("/api/jds/{jdId}/to-do-lists", jdId)
+        ResultActions result2 = mockMvc.perform(get("/jds/{jdId}/to-do-lists", jdId)
                 .param("category", ToDoListType.CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL.name()));
 
         // Then
@@ -512,7 +512,7 @@ class ToDoListControllerTest {
         String content = objectMapper.writeValueAsString(bulkDto);
 
         // When
-        ResultActions result = mockMvc.perform(put("/api/jds/{jdId}/to-do-lists/bulk-update", jdId)
+        ResultActions result = mockMvc.perform(put("/jds/{jdId}/to-do-lists/bulk-update", jdId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content));
 
@@ -569,7 +569,7 @@ class ToDoListControllerTest {
         String content = objectMapper.writeValueAsString(bulkDto);
 
         // When
-        ResultActions result = mockMvc.perform(put("/api/jds/{jdId}/to-do-lists/bulk-update", jdId)
+        ResultActions result = mockMvc.perform(put("/jds/{jdId}/to-do-lists/bulk-update", jdId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content));
 

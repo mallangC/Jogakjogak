@@ -40,12 +40,21 @@ public class SecurityConfig {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration corsConfiguration = new CorsConfiguration();
-                        corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://jogakjogak.com", "https://localhost:3000"));
-                        corsConfiguration.setAllowedMethods(Collections.singletonList("*"));
+                        corsConfiguration.setAllowedOrigins(Arrays.asList(
+                                "http://localhost:3000",
+                                "https://jogakjogak.com",
+                                "https://jogakjogak-web.vercel.app",
+                                "https://www.jogakjogak.com"
+                                ));
+                        corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                         corsConfiguration.setAllowCredentials(true);
                         corsConfiguration.setAllowedHeaders(Collections.singletonList("*"));
                         corsConfiguration.setMaxAge(3600L);
-                        corsConfiguration.setExposedHeaders(Arrays.asList("Set-Cookie", "Authorization"));
+                        corsConfiguration.setExposedHeaders(Arrays.asList(
+                                "Set-Cookie",
+                                "Authorization",
+                                "Access-Control-Allow-Credentials"
+                        ));
                         return corsConfiguration;
                     }}));
         http.
@@ -59,7 +68,8 @@ public class SecurityConfig {
         http.
                 addFilterBefore(new CustomLogoutFilter(refreshTokenRepository, jwtUtil), LogoutFilter.class);
         http.
-                oauth2Login((oauth2) -> oauth2.userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig.userService(customOauth2UserService))
+                oauth2Login((oauth2) -> oauth2
+                        .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig.userService(customOauth2UserService))
                         .successHandler(customSuccessHandler)
                 );
         http.
@@ -67,8 +77,9 @@ public class SecurityConfig {
                         .requestMatchers("/",
                                 "/actuator/health",
                                 "/oauth2/**",
-                                "/api/member/reissue",
-                                "/api/member/logout",
+                                "/login/oauth2/code/**",
+                                "/member/reissue",
+                                "/member/logout",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",

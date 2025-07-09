@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Access Token 관리 API", description = "새로운 access token 발급 관련 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/member")
+@RequestMapping("/member")
 public class ReissueController {
 
     private final ReissueService reissueService;

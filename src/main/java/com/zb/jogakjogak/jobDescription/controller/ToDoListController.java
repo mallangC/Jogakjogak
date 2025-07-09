@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Todolist 관리 API", description = "JD/이력서 분석으로 생성된 Todolist 관련 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/jds/{jd_id}/to-do-lists")
+@RequestMapping("/jds/{jd_id}/to-do-lists")
 public class ToDoListController {
 
     private final ToDoListService toDoListService;

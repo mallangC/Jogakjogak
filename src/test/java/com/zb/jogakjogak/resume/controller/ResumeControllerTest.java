@@ -116,7 +116,7 @@ class ResumeControllerTest {
         ResumeRequestDto requestDto = new ResumeRequestDto(title, content);
         String requestContent = objectMapper.writeValueAsString(requestDto);
 
-        ResultActions registerResult = mockMvc.perform(post("/api/resume")
+        ResultActions registerResult = mockMvc.perform(post("/resume")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestContent)
         );
@@ -145,7 +145,7 @@ class ResumeControllerTest {
         String content = objectMapper.writeValueAsString(requestDto);
 
         // When
-        ResultActions result = mockMvc.perform(post("/api/resume")
+        ResultActions result = mockMvc.perform(post("/resume")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content));
 
@@ -174,7 +174,7 @@ class ResumeControllerTest {
         String content = objectMapper.writeValueAsString(updateRequestDto);
 
         // When
-        ResultActions result = mockMvc.perform(patch("/api/resume/{resume_id}", resumeId)
+        ResultActions result = mockMvc.perform(patch("/resume/{resume_id}", resumeId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content));
         // Then
@@ -200,7 +200,7 @@ class ResumeControllerTest {
         Long resumeId = registerResumeThroughApi("조회할 이력서 제목", "조회할 내용");
 
         //When
-        ResultActions result = mockMvc.perform(get("/api/resume/{resumeId}", resumeId));
+        ResultActions result = mockMvc.perform(get("/resume/{resumeId}", resumeId));
 
         //Then
         result.andExpect(status().isOk())
@@ -220,7 +220,7 @@ class ResumeControllerTest {
         Long resumeIdToDelete = registerResumeThroughApi("삭제할 이력서 제목", "삭제할 내용");
 
         //When
-        ResultActions result = mockMvc.perform(delete("/api/resume/{resumeId}", resumeIdToDelete));
+        ResultActions result = mockMvc.perform(delete("/resume/{resumeId}", resumeIdToDelete));
 
         //Then
         result.andExpect(status().isOk())
@@ -237,7 +237,7 @@ class ResumeControllerTest {
         Optional<Resume> deletedResume = resumeRepository.findResumeWithMemberByIdAndMemberId(resumeIdToDelete, setupMember.getId());
         assertThat(deletedResume).isEmpty();
 
-        mockMvc.perform(get("/api/resume/{resumeId}", resumeIdToDelete))
+        mockMvc.perform(get("/resume/{resumeId}", resumeIdToDelete))
                 .andExpect(status().isForbidden())
                 .andDo(print());
     }

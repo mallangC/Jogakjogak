@@ -29,7 +29,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -38,7 +37,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -212,7 +210,7 @@ class JDControllerTest {
                 .thenReturn(mockTodoListJson);
 
         // When
-        ResultActions result = mockMvc.perform(post("/api/jds")
+        ResultActions result = mockMvc.perform(post("/jds")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content));
 
@@ -253,7 +251,7 @@ class JDControllerTest {
         Long jdId = jd.getId();
 
         // When
-        ResultActions result = mockMvc.perform(get("/api/jds/{jd_id}", jdId));
+        ResultActions result = mockMvc.perform(get("/jds/{jd_id}", jdId));
 
         // Then
         result.andExpect(status().isOk())
@@ -286,7 +284,7 @@ class JDControllerTest {
 
         // When: 알림 켜기
         JDAlarmRequestDto turnOnRequest = new JDAlarmRequestDto(true);
-        ResultActions resultOn = mockMvc.perform(patch("/api/jds/{jd_id}/alarm", jdId)
+        ResultActions resultOn = mockMvc.perform(patch("/jds/{jd_id}/alarm", jdId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(turnOnRequest)));
 
@@ -302,7 +300,7 @@ class JDControllerTest {
 
         // When: 알림 끄기
         JDAlarmRequestDto turnOffRequest = new JDAlarmRequestDto(false);
-        ResultActions resultOff = mockMvc.perform(patch("/api/jds/{jd_id}/alarm", jdId)
+        ResultActions resultOff = mockMvc.perform(patch("/jds/{jd_id}/alarm", jdId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(turnOffRequest)));
 
@@ -338,7 +336,7 @@ class JDControllerTest {
         Long jdId = jdToDelete.getId();
 
         // When
-        ResultActions result = mockMvc.perform(delete("/api/jds/{jd_id}", jdId));
+        ResultActions result = mockMvc.perform(delete("/jds/{jd_id}", jdId));
 
         // Then
         result.andExpect(status().isOk())
@@ -390,7 +388,7 @@ class JDControllerTest {
         );
 
         // When
-        ResultActions result = mockMvc.perform(get("/api/jds"));
+        ResultActions result = mockMvc.perform(get("/jds"));
 
         // Then
         result.andExpect(status().isOk())
@@ -424,7 +422,7 @@ class JDControllerTest {
                         null));
 
         // When (페이지 1, 사이즈 5, 제목 기준 오름차순 정렬)
-        ResultActions result = mockMvc.perform(get("/api/jds")
+        ResultActions result = mockMvc.perform(get("/jds")
                 .param("page", "1")
                 .param("size", "5")
                 .param("sort", "title,asc"));
@@ -461,7 +459,7 @@ class JDControllerTest {
 
         // When: 즐겨찾기 설정 (true)
         BookmarkRequestDto setBookmark = new BookmarkRequestDto(true);
-        ResultActions resultOn = mockMvc.perform(patch("/api/jds/{jd_id}/bookmark", jdId)
+        ResultActions resultOn = mockMvc.perform(patch("/jds/{jd_id}/bookmark", jdId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(setBookmark)));
 
@@ -477,7 +475,7 @@ class JDControllerTest {
 
         // When: 즐겨찾기 해제 (false)
         BookmarkRequestDto unsetBookmark = new BookmarkRequestDto(false);
-        ResultActions resultOff = mockMvc.perform(patch("/api/jds/{jd_id}/bookmark", jdId)
+        ResultActions resultOff = mockMvc.perform(patch("/jds/{jd_id}/bookmark", jdId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(unsetBookmark)));
 
@@ -512,7 +510,7 @@ class JDControllerTest {
         Long jdId = jd.getId();
 
         // When: 지원 완료 상태로 변경 (applyAt이 null -> 현재 시간으로 설정)
-        ResultActions resultApply = mockMvc.perform(patch("/api/jds/{jd_id}/apply", jdId));
+        ResultActions resultApply = mockMvc.perform(patch("/jds/{jd_id}/apply", jdId));
 
         // Then: 지원 완료 확인
         resultApply.andExpect(status().isOk())
@@ -525,7 +523,7 @@ class JDControllerTest {
         assertThat(jdRepository.findById(jdId).get().getApplyAt()).isNotNull();
 
         // When: 지원 완료 상태 취소 (applyAt이 현재 시간 -> null로 설정)
-        ResultActions resultCancel = mockMvc.perform(patch("/api/jds/{jd_id}/apply", jdId));
+        ResultActions resultCancel = mockMvc.perform(patch("/jds/{jd_id}/apply", jdId));
 
         // Then: 지원 완료 취소 확인
         resultCancel.andExpect(status().isOk())
@@ -559,7 +557,7 @@ class JDControllerTest {
 
         // When
         MemoRequestDto updateMemoRequest = new MemoRequestDto("수정된 새로운 메모 내용입니다.");
-        ResultActions result = mockMvc.perform(patch("/api/jds/{jd_id}/memo", jdId)
+        ResultActions result = mockMvc.perform(patch("/jds/{jd_id}/memo", jdId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateMemoRequest)));
 

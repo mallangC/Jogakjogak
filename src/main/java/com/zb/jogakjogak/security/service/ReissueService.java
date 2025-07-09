@@ -8,6 +8,7 @@ import com.zb.jogakjogak.security.jwt.JWTUtil;
 import com.zb.jogakjogak.security.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -25,18 +26,18 @@ public class ReissueService {
 
         jwtUtil.validateToken(refreshToken, Token.REFRESH_TOKEN);
 
-        String userName = jwtUtil.getUserName(refreshToken);
+        String username = jwtUtil.getUserName(refreshToken);
         String role = jwtUtil.getRole(refreshToken);
 
-        String newAccess = jwtUtil.createJwt(userName, role, ACCESS_TOKEN_EXPIRATION, Token.ACCESS_TOKEN);
-        String newRefresh = jwtUtil.createJwt(userName, role, REFRESH_TOKEN_EXPIRATION, Token.REFRESH_TOKEN);
+        String newAccess = jwtUtil.createJwt(username, role, ACCESS_TOKEN_EXPIRATION, Token.ACCESS_TOKEN);
+        String newRefresh = jwtUtil.createJwt(username, role, REFRESH_TOKEN_EXPIRATION, Token.REFRESH_TOKEN);
 
         // refresh 토큰 저장 DB에 존재하면 업데이트, 없으면 생성
-        Optional<RefreshToken> existingToken = refreshTokenRepository.findByToken(refreshToken);
+        Optional<RefreshToken> existingToken = refreshTokenRepository.findByUsername(username);
         if (existingToken.isPresent()) {
             updateExistingRefreshTokenEntity(existingToken.get(), newRefresh);
         } else {
-            saveNewRefreshTokenEntity(userName, newRefresh);
+            saveNewRefreshTokenEntity(username, newRefresh);
         }
 
         return ReissueResultDto.builder()
@@ -51,9 +52,9 @@ public class ReissueService {
         refreshTokenRepository.save(existingToken);
     }
 
-    private void saveNewRefreshTokenEntity(String userName, String newRefresh) {
+    private void saveNewRefreshTokenEntity(String username, String newRefresh) {
         RefreshToken refreshToken = RefreshToken.builder()
-                .username(userName)
+                .username(username)
                 .token(newRefresh)
                 .expiration(LocalDateTime.now().plusSeconds(REFRESH_TOKEN_EXPIRATION / 1000))
                 .build();
