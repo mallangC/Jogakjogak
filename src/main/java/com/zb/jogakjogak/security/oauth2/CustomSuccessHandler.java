@@ -1,7 +1,5 @@
 package com.zb.jogakjogak.security.oauth2;
 
-import com.zb.jogakjogak.global.exception.AuthException;
-import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.ga.service.GaMeasurementProtocolService;
 import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.MemberErrorCode;
@@ -20,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +28,6 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Optional;
 import java.util.Map;
 
 @Component
@@ -60,14 +56,13 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         addSameSiteCookieAttribute(request, response, "refresh", refreshToken);
 
-        Member member = customOAuth2User.getMember();
         String clientId = extractGaClientId(request);
         String gaUserId = member.getId().toString();
         String eventName = "user_login";
 
         Map<String, Object> eventParams = new HashMap<>();
         eventParams.put("member_id", member.getId());
-        eventParams.put("user_role", role);
+        eventParams.put("user_role", member.getRole());
         gaService.sendGaEvent(clientId, gaUserId, eventName, eventParams)
                 .subscribe();
 
