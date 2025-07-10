@@ -57,6 +57,8 @@ public class CustomLogoutFilter extends GenericFilter {
 
         clearRefreshTokenInCookie(response);
         response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("application/json");
+        response.getWriter().write("{\"message\": \"로그아웃 완료\", \"code\": 200}");
     }
 
     private boolean isLogoutRequest(HttpServletRequest request) {
