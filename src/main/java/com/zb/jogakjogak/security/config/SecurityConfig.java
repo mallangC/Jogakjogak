@@ -5,6 +5,7 @@ import com.zb.jogakjogak.security.jwt.CustomLogoutFilter;
 import com.zb.jogakjogak.security.jwt.JWTFilter;
 import com.zb.jogakjogak.security.jwt.JWTUtil;
 import com.zb.jogakjogak.security.oauth2.CustomSuccessHandler;
+import com.zb.jogakjogak.security.repository.MemberRepository;
 import com.zb.jogakjogak.security.repository.RefreshTokenRepository;
 import com.zb.jogakjogak.security.service.CustomOauth2UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,6 +32,7 @@ public class SecurityConfig {
     private final CustomOauth2UserService customOauth2UserService;
     private final CustomSuccessHandler customSuccessHandler;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final MemberRepository memberRepository;
     private final JWTUtil jwtUtil;
 
     @Bean
@@ -65,7 +67,7 @@ public class SecurityConfig {
         http.
                 httpBasic((auth) -> auth.disable());
         http.
-                addFilterAfter(new JWTFilter(jwtUtil), OAuth2LoginAuthenticationFilter.class);
+                addFilterAfter(new JWTFilter(jwtUtil, memberRepository), OAuth2LoginAuthenticationFilter.class);
         http.
                 addFilterBefore(new CustomLogoutFilter(refreshTokenRepository, jwtUtil), LogoutFilter.class);
         http.

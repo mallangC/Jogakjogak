@@ -121,3 +121,9 @@ management:
 logging:
   level:
     org.flywaydb: DEBUG
+
+
+google:
+  analytics:
+    measurementId: ${GA4_MEASUREMENT_ID}
+    apiSecret: ${GA4_API_KEY}

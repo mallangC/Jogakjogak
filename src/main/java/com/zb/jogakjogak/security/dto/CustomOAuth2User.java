@@ -14,7 +14,6 @@ import java.util.Map;
 public class CustomOAuth2User implements OAuth2User {
 
     private final Member member;
-
     @Override
     public Map<String, Object> getAttributes() {
         return Map.of();
@@ -55,5 +54,9 @@ public class CustomOAuth2User implements OAuth2User {
 
     public String getNickName(){
         return member.getNickname();
+    }
+
+    public Member getMember() {
+        return member;
     }
 }

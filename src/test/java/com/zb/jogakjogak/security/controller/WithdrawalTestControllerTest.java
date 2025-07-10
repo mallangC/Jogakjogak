@@ -1,5 +1,6 @@
 package com.zb.jogakjogak.security.controller;
 
+import com.zb.jogakjogak.ga.service.GaMeasurementProtocolService;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.service.WithdrawalService;
 import jakarta.servlet.http.Cookie;
@@ -13,6 +14,7 @@ import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Map;
@@ -34,6 +36,9 @@ class WithdrawalTestControllerTest {
 
     @MockBean
     private WithdrawalService withdrawalService;
+
+    @MockitoBean
+    private GaMeasurementProtocolService gaMeasurementProtocolService;
 
     private final Faker faker = new Faker();
 

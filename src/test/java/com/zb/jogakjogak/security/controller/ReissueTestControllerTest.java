@@ -1,5 +1,6 @@
 package com.zb.jogakjogak.security.controller;
 
+import com.zb.jogakjogak.ga.service.GaMeasurementProtocolService;
 import com.zb.jogakjogak.security.dto.ReissueResultDto;
 import com.zb.jogakjogak.security.service.ReissueService;
 import jakarta.servlet.http.Cookie;
@@ -28,6 +29,9 @@ class ReissueTestControllerTest {
 
     @MockitoBean
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;
+
+    @MockitoBean
+    private GaMeasurementProtocolService gaMeasurementProtocolService;
 
     @MockitoBean
     private ReissueService reissueService;
