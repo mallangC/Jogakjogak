@@ -1,7 +1,7 @@
 package com.zb.jogakjogak.security.jwt;
 
 import com.zb.jogakjogak.global.exception.AuthException;
-import com.zb.jogakjogak.security.Role;
+import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.security.Token;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.entity.Member;
