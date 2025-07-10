@@ -38,8 +38,8 @@ public class ReissueController {
         response.addCookie(createCookie("refresh", reissueResultDto.getNewRefreshToken()));
         return ResponseEntity.ok()
                 .body(
-                        new HttpApiResponse<>(null,
-                                "refresh token 재발급 완료",
+                        new HttpApiResponse<>(reissueResultDto.getNewAccessToken(),
+                                "access token 재발급 완료",
                                 HttpStatus.OK));
     }
 
