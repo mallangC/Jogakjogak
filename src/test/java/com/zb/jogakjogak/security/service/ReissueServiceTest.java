@@ -4,6 +4,7 @@ import com.zb.jogakjogak.security.Token;
 import com.zb.jogakjogak.security.dto.ReissueResultDto;
 import com.zb.jogakjogak.security.entity.RefreshToken;
 import com.zb.jogakjogak.security.jwt.JWTUtil;
+import com.zb.jogakjogak.security.repository.MemberRepository;
 import com.zb.jogakjogak.security.repository.RefreshTokenRepository;
 import net.datafaker.Faker;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +23,7 @@ class ReissueServiceTest {
 
     private JWTUtil jwtUtil;
     private RefreshTokenRepository refreshTokenRepository;
+    private MemberRepository memberRepository;
     private ReissueService reissueService;
     private final Faker faker = new Faker();
 
@@ -29,7 +31,7 @@ class ReissueServiceTest {
     void setUp() {
         jwtUtil = mock(JWTUtil.class);
         refreshTokenRepository = mock(RefreshTokenRepository.class);
-        reissueService = new ReissueService(jwtUtil, refreshTokenRepository);
+        reissueService = new ReissueService(jwtUtil, refreshTokenRepository, memberRepository);
     }
 
     @Test
