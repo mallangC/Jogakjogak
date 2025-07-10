@@ -53,7 +53,7 @@ class ReissueServiceTest {
 
         when(jwtUtil.getUsername(refreshToken)).thenReturn(username);
         when(jwtUtil.getRole(refreshToken)).thenReturn(role);
-        when(jwtUtil.createAccessToken(anyLong(), eq(role), provider, username, anyLong(), eq(Token.ACCESS_TOKEN))).thenReturn(newAccess);
+        when(jwtUtil.createAccessToken(anyLong(), eq(role), eq(provider), eq(username), anyLong(), eq(Token.ACCESS_TOKEN))).thenReturn(newAccess);
         when(jwtUtil.createRefreshToken(anyLong(), anyLong(), eq(Token.REFRESH_TOKEN))).thenReturn(newRefresh);
         when(refreshTokenRepository.findByToken(refreshToken)).thenReturn(Optional.ofNullable(existingToken));
 
@@ -79,7 +79,7 @@ class ReissueServiceTest {
 
         when(jwtUtil.getUsername(refreshToken)).thenReturn(username);
         when(jwtUtil.getRole(refreshToken)).thenReturn(role);
-        when(jwtUtil.createAccessToken(anyLong(), eq(role), provider, username, anyLong(), eq(Token.ACCESS_TOKEN))).thenReturn(newAccess);
+        when(jwtUtil.createAccessToken(anyLong(), eq(role), eq(provider), eq(username), anyLong(), eq(Token.ACCESS_TOKEN))).thenReturn(newAccess);
         when(jwtUtil.createRefreshToken(anyLong(), anyLong(), eq(Token.REFRESH_TOKEN))).thenReturn(newRefresh);
         when(refreshTokenRepository.findByToken(refreshToken)).thenReturn(Optional.empty());
 
