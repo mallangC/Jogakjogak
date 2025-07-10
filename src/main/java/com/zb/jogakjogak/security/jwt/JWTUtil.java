@@ -4,6 +4,7 @@ import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.security.Token;
 import com.zb.jogakjogak.security.repository.RefreshTokenRepository;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -22,8 +23,16 @@ public class JWTUtil {
         this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
     }
 
-    public String getUserName(String token) {
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("userName", String.class);
+    public String getUserId(String token){
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getSubject();
+    }
+
+    public String getProvider(String token){
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("provider", String.class);
+    }
+
+    public String getUsername(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("username", String.class);
     }
 
     public String getRole(String token) {
@@ -38,12 +47,27 @@ public class JWTUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
-    public String createJwt(String userName, String role, Long expireMs, Token token){
+    public String createAccessToken(Long userId, String provider, String username, String role, Long expireMs, Token token){
         return Jwts.builder()
-                .claim("userName", userName)
-                .claim("role", role)
-                .claim("token", token.name())
-                .issuedAt(new Date(System.currentTimeMillis()))
+                .claims()
+                    .subject(String.valueOf(userId))
+                    .add("provider", provider)
+                    .add("username", username)
+                    .add("role", role)
+                    .add("token", token.name())
+                    .and()
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expireMs))
+                .signWith(secretKey)
+                .compact();
+    }
+    public String createRefreshToken(Long userId, Long expireMs, Token token){
+        return Jwts.builder()
+                .claims()
+                    .subject(String.valueOf(userId))
+                    .add("token", token.name())
+                    .and()
+                .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expireMs))
                 .signWith(secretKey)
                 .compact();
@@ -62,5 +86,4 @@ public class JWTUtil {
             throw new AuthException(MemberErrorCode.TOKEN_TYPE_NOT_MATCH);
         }
     }
-
 }

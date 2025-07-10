@@ -1,5 +1,7 @@
 package com.zb.jogakjogak.security.oauth2;
 
+import com.zb.jogakjogak.global.exception.AuthException;
+import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.ga.service.GaMeasurementProtocolService;
 import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.MemberErrorCode;
@@ -29,6 +31,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Map;
 
 @Component
@@ -37,6 +40,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final JWTUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
     private final GaMeasurementProtocolService gaService;
+    private final MemberRepository memberRepository;
     private static final long REFRESH_TOKEN_EXPIRATION = 7 * 24 * 60 * 60 * 1000L;
     @Value("${kakao.redirect-uri}")
     private String kakaoRedirectUri;
@@ -45,9 +49,12 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
 
         CustomOAuth2User customOAuth2User = (CustomOAuth2User) authentication.getPrincipal();
+
         String username = customOAuth2User.getName();
-        String role = getRole(authentication);
-        String refreshToken = jwtUtil.createJwt(username, role, REFRESH_TOKEN_EXPIRATION, Token.REFRESH_TOKEN);
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
+        Long userId = member.getId();
+        String refreshToken = jwtUtil.createRefreshToken(userId, REFRESH_TOKEN_EXPIRATION, Token.REFRESH_TOKEN);
 
         addRefreshToken(username, refreshToken);
 
@@ -67,19 +74,19 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter writer = response.getWriter();
         writer.println("""
-                    <html>
-                      <head><meta charset='UTF-8'></head>
-                      <body>
-                        <script>
-                          window.location.href = 'https://jogakjogak.com';
-                        </script>
-                      </body>
-                    </html>
-                """);
+            <html>
+              <head><meta charset='UTF-8'></head>
+              <body>
+                <script>
+                  window.location.href = 'https://jogakjogak.com';
+                </script>
+              </body>
+            </html>
+        """);
         writer.flush();
     }
 
-    private String getRole(Authentication authentication) {
+    private String getRole(Authentication authentication){
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
@@ -92,14 +99,15 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         boolean isLocal = serverName.contains("localhost");
 
         String cookieHeader = String.format(
-                "%s=%s; Max-Age=%d; Path=/; HttpOnly; SameSite=None%s",
+                "%s=%s; Max-Age=%d; Path=/; HttpOnly%s",
                 cookieName,
                 cookieValue,
                 60 * 60 * 24 * 7,
-                isLocal ? "" : "; Secure"
+                isLocal ? "" : "; SameSite=None; Secure"
         );
         response.addHeader("Set-Cookie", cookieHeader);
     }
+
 
     private Cookie createCookie(String key, String value) {
 

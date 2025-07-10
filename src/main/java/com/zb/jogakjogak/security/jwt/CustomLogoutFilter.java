@@ -3,6 +3,7 @@ package com.zb.jogakjogak.security.jwt;
 import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.security.Token;
 import com.zb.jogakjogak.security.repository.RefreshTokenRepository;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,44 +37,28 @@ public class CustomLogoutFilter extends GenericFilter {
 
         if (refreshToken == null) {
             log.warn("[LogoutFilter] Refresh token 쿠키가 없음");
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            clearRefreshTokenInCookie(response);
+            response.setStatus(HttpServletResponse.SC_OK);
             return;
         }
 
         try {
             jwtUtil.validateToken(refreshToken, Token.REFRESH_TOKEN);
-        } catch (AuthException e) {
-            log.warn("[LogoutFilter] Refresh token 검증 실패: {}", e.getMessage());
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        } catch (AuthException | JwtException | IllegalArgumentException e) {
+            log.warn("[LogoutFilter] Refresh token 검증 실패 또는 username 추출 실패, 로그아웃 처리: {}", e.getMessage());
+            clearRefreshTokenInCookie(response);
+            response.setStatus(HttpServletResponse.SC_OK);
             return;
         }
+        // 유효한 토큰인 경우 DB에서 refresh token 삭제
+        Long userId = Long.parseLong(jwtUtil.getUserId(refreshToken));
+        refreshTokenRepository.deleteByUserId(userId);
+        log.info("[LogoutFilter] {} 사용자 로그아웃 처리 (refresh token 삭제)", userId);
 
-        String username;
-        try {
-            username = jwtUtil.getUserName(refreshToken);
-        } catch (Exception e) {
-            log.error("[LogoutFilter] Refresh token에서 username 추출 실패", e);
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
-
-        refreshTokenRepository.deleteByUsername(username);
-        log.info("[LogoutFilter] {} 사용자 로그아웃 처리 (refresh token 삭제)", username);
-
-        /*
-        Optional<RefreshToken> existingToken = refreshTokenRepository.findByToken(refreshToken);
-        if (existingToken.isEmpty()) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
-
-        //로그아웃 진행
-        refreshTokenRepository.deleteByToken(refreshToken);
-        */
-        //Cookie 값 0
-        Cookie cookie = resetRefreshTokenInCookie();
-        response.addCookie(cookie);
+        clearRefreshTokenInCookie(response);
         response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("application/json");
+        response.getWriter().write("{\"message\": \"로그아웃 완료\", \"code\": 200}");
     }
 
     private boolean isLogoutRequest(HttpServletRequest request) {
@@ -90,13 +75,12 @@ public class CustomLogoutFilter extends GenericFilter {
         return null;
     }
 
-    private Cookie resetRefreshTokenInCookie(){
+    private void clearRefreshTokenInCookie(HttpServletResponse response){
         Cookie cookie = new Cookie("refresh", null);
         cookie.setMaxAge(0);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
-        return cookie;
+        response.addCookie(cookie);
     }
-
 }
