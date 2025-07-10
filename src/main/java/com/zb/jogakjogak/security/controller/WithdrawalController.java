@@ -51,6 +51,7 @@ public class WithdrawalController {
         cookie.setMaxAge(0);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
+        cookie.setSecure(true);
         response.addCookie(cookie);
     }
 }

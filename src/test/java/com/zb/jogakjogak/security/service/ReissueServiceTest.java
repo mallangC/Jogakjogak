@@ -11,7 +11,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -38,21 +37,22 @@ class ReissueServiceTest {
     void reissue_when_exists_refresh_token_test() throws Exception{
         // given
         String refreshToken = faker.internet().uuid();
-        String userName = faker.name().username();
+        String username = faker.name().username();
+        String provider = faker.options().option("kakao", "google");
         String role = "USER";
         String newAccess = faker.internet().uuid();
         String newRefresh = faker.internet().uuid();
 
         RefreshToken existingToken = RefreshToken.builder()
-                .username(userName)
+                .username(username)
                 .token(refreshToken)
                 .expiration(LocalDateTime.now().plusDays(7))
                 .build();
 
-        when(jwtUtil.getUserName(refreshToken)).thenReturn(userName);
+        when(jwtUtil.getUsername(refreshToken)).thenReturn(username);
         when(jwtUtil.getRole(refreshToken)).thenReturn(role);
-        when(jwtUtil.createJwt(eq(userName), eq(role), anyLong(), eq(Token.ACCESS_TOKEN))).thenReturn(newAccess);
-        when(jwtUtil.createJwt(eq(userName), eq(role), anyLong(), eq(Token.REFRESH_TOKEN))).thenReturn(newRefresh);
+        when(jwtUtil.createAccessToken(anyLong(), eq(role), provider, username, anyLong(), eq(Token.ACCESS_TOKEN))).thenReturn(newAccess);
+        when(jwtUtil.createRefreshToken(anyLong(), anyLong(), eq(Token.REFRESH_TOKEN))).thenReturn(newRefresh);
         when(refreshTokenRepository.findByToken(refreshToken)).thenReturn(Optional.ofNullable(existingToken));
 
         // when
@@ -69,15 +69,16 @@ class ReissueServiceTest {
     void reissue_when_not_exists_refresh_token_test() throws Exception{
         // given
         String refreshToken = faker.internet().uuid();
-        String userName = faker.name().username();
+        String username = faker.name().username();
+        String provider = faker.options().option("kakao", "google");
         String role = "USER";
         String newAccess = faker.internet().uuid();
         String newRefresh = faker.internet().uuid();
 
-        when(jwtUtil.getUserName(refreshToken)).thenReturn(userName);
+        when(jwtUtil.getUsername(refreshToken)).thenReturn(username);
         when(jwtUtil.getRole(refreshToken)).thenReturn(role);
-        when(jwtUtil.createJwt(eq(userName), eq(role), anyLong(), eq(Token.ACCESS_TOKEN))).thenReturn(newAccess);
-        when(jwtUtil.createJwt(eq(userName), eq(role), anyLong(), eq(Token.REFRESH_TOKEN))).thenReturn(newRefresh);
+        when(jwtUtil.createAccessToken(anyLong(), eq(role), provider, username, anyLong(), eq(Token.ACCESS_TOKEN))).thenReturn(newAccess);
+        when(jwtUtil.createRefreshToken(anyLong(), anyLong(), eq(Token.REFRESH_TOKEN))).thenReturn(newRefresh);
         when(refreshTokenRepository.findByToken(refreshToken)).thenReturn(Optional.empty());
 
         // when

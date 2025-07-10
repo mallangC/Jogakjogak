@@ -48,29 +48,23 @@ public class JWTFilter extends OncePerRequestFilter {
 
         String accessToken = extractAccessToken(request);
 
-        // 2. 토큰이 없는 경우 처리: AuthException 대신 다음 필터로 넘기거나 401 반환
         if (accessToken == null) {
-            // System.out.println("No access token provided for path: " + path); // 디버깅용
-            // 일반적으로 여기서 401 Unauthorized를 반환하거나
-            // Spring Security의 기본 인증 메커니즘에 맡겨서 로그인 페이지로 리다이렉트되도록 합니다.
-            // 현재는 AuthException을 던지도록 되어있을텐데, 이를 제거합니다.
-            // response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Access Token is missing or invalid."); // 예시
             filterChain.doFilter(request, response); // 토큰이 없으면 다음 필터로 넘김 (SecurityContext에 Authentication이 없으므로 401 응답이 발생할 것)
             return;
         }
 
-        // 3. 토큰 유효성 검증
         try {
             jwtUtil.validateToken(accessToken, Token.ACCESS_TOKEN);
         } catch (AuthException e) { // jwtUtil.validateToken에서 던지는 예외를 여기서 catch
-            // System.out.println("Invalid token for path: " + path + ", Error: " + e.getMessage()); // 디버깅용
-            // 유효하지 않은 토큰일 경우 401 Unauthorized 응답
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            String json = "{\"errorCode\": \"UNAUTHORIZED\", \"message\": \"" + e.getMessage() + "\"}";
+            response.getWriter().write(json);
             return;
         }
 
         // 토큰이 유효할 경우에만 다음 로직 실행
-        String userName = jwtUtil.getUserName(accessToken);
+        String userName = jwtUtil.getUsername(accessToken);
         String role = jwtUtil.getRole(accessToken);
 
         Member member = Member.builder()

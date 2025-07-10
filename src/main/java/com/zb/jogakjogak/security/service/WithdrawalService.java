@@ -16,8 +16,8 @@ public class WithdrawalService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final KakaoService kakaoService;
 
-    public void withdrawMember(String userName) {
-        Member member = memberRepository.findByUsername(userName)
+    public void withdrawMember(String username) {
+        Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
         if(member == null){
             throw new AuthException(MemberErrorCode.NOT_FOUND_MEMBER);
@@ -25,7 +25,7 @@ public class WithdrawalService {
         String kakaoId = member.getUsername().split(" ")[1];
         kakaoService.unlinkKakaoMember(kakaoId);
 
-        refreshTokenRepository.deleteByUsername(userName);
+        refreshTokenRepository.deleteByUsername(username);
         memberRepository.delete(member);
     }
 }
