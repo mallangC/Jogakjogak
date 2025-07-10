@@ -32,9 +32,9 @@ public class WithdrawalController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()){
-            return  ResponseEntity.badRequest()
+            return  ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new HttpApiResponse<>(null,
-                            "회원탈퇴요청 실패",
+                            "회원 탈퇴 요청 실패: 인증되지 않은 사용자입니다.",
                             HttpStatus.UNAUTHORIZED));
         }
         withdrawalService.withdrawMember(customOAuth2User.getName());
@@ -51,6 +51,7 @@ public class WithdrawalController {
         cookie.setMaxAge(0);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
+        cookie.setSecure(true);
         response.addCookie(cookie);
     }
 }
