@@ -43,7 +43,6 @@ public class JWTFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        // 1. 화이트리스트 경로 처리 (토큰 검증 건너뛰기)
         if (isWhitelisted(path)) {
             filterChain.doFilter(request, response);
             return;
