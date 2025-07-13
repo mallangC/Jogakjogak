@@ -24,6 +24,8 @@ services:
       KAKAO_REDIRECT_URI: ${KAKAO_REDIRECT_URL}
       EMAIL_AES_KEY: ${EMAIL_AES_KEY}
       PHONE_AES_KEY: ${PHONE_AES_KEY}
+      GA4_MEASUREMENT_ID: ${GA4_MEASUREMENT_ID}
+      GA4_API_KEY: ${GA4_API_KEY}
     ports:
       - "8080:8080"
     volumes:
