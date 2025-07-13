@@ -20,6 +20,8 @@ public class OAuth2Info {
 
     private String providerId;
 
+    private String accessToken;
+
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
