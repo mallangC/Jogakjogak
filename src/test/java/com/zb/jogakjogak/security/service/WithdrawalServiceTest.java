@@ -25,7 +25,7 @@ class WithdrawalServiceTest {
     private RefreshTokenRepository refreshTokenRepository;
 
     @Mock
-    private KakaoService kakaoService;
+    private KakaoWithdrawalService kakaoWithdrawalService;
 
     @InjectMocks
     private WithdrawalService withdrawalService;
@@ -48,7 +48,7 @@ class WithdrawalServiceTest {
 
         // then
         verify(memberRepository, times(1)).findByUsername(userName);
-        verify(kakaoService, times(1)).unlinkKakaoMember(kakaoId);
+        verify(kakaoWithdrawalService, times(1)).unlinkKakaoMember(kakaoId);
         verify(refreshTokenRepository, times(1)).deleteByUsername(userName);
         verify(memberRepository, times(1)).delete(mockMember);
     }
@@ -68,7 +68,7 @@ class WithdrawalServiceTest {
         withdrawalService.withdrawMember(userName);
 
         // then
-        verify(kakaoService, times(1)).unlinkKakaoMember(expectedKakaoId);
+        verify(kakaoWithdrawalService, times(1)).unlinkKakaoMember(expectedKakaoId);
     }
 
     private Member createMockMember(String userName) {
