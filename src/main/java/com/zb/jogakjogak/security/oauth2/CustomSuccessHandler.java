@@ -54,7 +54,6 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String refreshToken = jwtUtil.createRefreshToken(userId, REFRESH_TOKEN_EXPIRATION, Token.REFRESH_TOKEN);
   
         addRefreshToken(username, refreshToken);
-
         addSameSiteCookieAttribute(request, response, "refresh", refreshToken);
 
         String clientId = extractGaClientId(request);
@@ -67,20 +66,6 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         gaService.sendGaEvent(clientId, gaUserId, eventName, eventParams)
                 .subscribe();
 
-        response.setContentType("text/html;charset=UTF-8");
-        PrintWriter writer = response.getWriter();
-        writer.println("""
-            <html>
-              <head><meta charset='UTF-8'></head>
-              <body>
-                <script>
-                  window.location.href = 'https://jogakjogak.com';
-                </script>
-              </body>
-            </html>
-        """);
-        writer.flush();
-  
         // 환경에 따라 리다이렉트 URL 결정
         String redirectUrl;
         if (request.getServerName().contains("localhost")) {
