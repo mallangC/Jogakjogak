@@ -42,16 +42,17 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private String kakaoRedirectUri;
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication
+    authentication) throws IOException, ServletException {
+  
         CustomOAuth2User customOAuth2User = (CustomOAuth2User) authentication.getPrincipal();
-
+  
         String username = customOAuth2User.getName();
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
         Long userId = member.getId();
         String refreshToken = jwtUtil.createRefreshToken(userId, REFRESH_TOKEN_EXPIRATION, Token.REFRESH_TOKEN);
-
+  
         addRefreshToken(username, refreshToken);
 
         addSameSiteCookieAttribute(request, response, "refresh", refreshToken);
@@ -79,6 +80,16 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             </html>
         """);
         writer.flush();
+  
+        // 환경에 따라 리다이렉트 URL 결정
+        String redirectUrl;
+        if (request.getServerName().contains("localhost")) {
+            redirectUrl = "http://localhost:3000/login/oauth2/code/kakao";
+        } else {
+            redirectUrl = "https://www.jogakjogak.com/login/oauth2/code/kakao";
+        }
+        
+        response.sendRedirect(redirectUrl);
     }
 
     private String getRole(Authentication authentication){
@@ -88,18 +99,30 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         return auth.getAuthority();
     }
 
-    private void addSameSiteCookieAttribute(HttpServletRequest request, HttpServletResponse response, String cookieName, String cookieValue) {
+    private void addSameSiteCookieAttribute(HttpServletRequest request, HttpServletResponse response, String 
+    cookieName, String cookieValue) {
         String serverName = request.getServerName();
-
         boolean isLocal = serverName.contains("localhost");
-
-        String cookieHeader = String.format(
-                "%s=%s; Max-Age=%d; Path=/; HttpOnly%s",
+  
+        String cookieHeader;
+        if (isLocal) {
+            // 로컬 환경
+            cookieHeader = String.format(
+                "%s=%s; Max-Age=%d; Path=/; HttpOnly",
                 cookieName,
                 cookieValue,
-                60 * 60 * 24 * 7,
-                isLocal ? "" : "; SameSite=None; Secure"
-        );
+                60 * 60 * 24 * 7
+            );
+        } else {
+            // 프로덕션 환경
+            cookieHeader = String.format(
+                "%s=%s; Max-Age=%d; Path=/; Domain=.jogakjogak.com; HttpOnly; SameSite=None; Secure",
+                cookieName,
+                cookieValue,
+                60 * 60 * 24 * 7
+            );
+        }
+  
         response.addHeader("Set-Cookie", cookieHeader);
     }
 
