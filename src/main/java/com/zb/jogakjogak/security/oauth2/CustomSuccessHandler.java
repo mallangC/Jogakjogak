@@ -53,19 +53,15 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         addRefreshToken(username, refreshToken);
         addSameSiteCookieAttribute(request, response, "refresh", refreshToken);
   
-        response.setContentType("text/html;charset=UTF-8");
-        PrintWriter writer = response.getWriter();
-        writer.println("""
-            <html>
-              <head><meta charset='UTF-8'></head>
-              <body>
-                <script>
-                  window.location.href = 'https://www.jogakjogak.com/login/oauth2/code/kakao';
-                </script>
-              </body>
-            </html>
-        """);
-        writer.flush();
+        // 환경에 따라 리다이렉트 URL 결정
+        String redirectUrl;
+        if (request.getServerName().contains("localhost")) {
+            redirectUrl = "http://localhost:3000/login/oauth2/code/kakao";
+        } else {
+            redirectUrl = "https://www.jogakjogak.com/login/oauth2/code/kakao";
+        }
+        
+        response.sendRedirect(redirectUrl);
     }
 
     private String getRole(Authentication authentication){
@@ -92,7 +88,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         } else {
             // 프로덕션 환경
             cookieHeader = String.format(
-                "%s=%s; Max-Age=%d; Path=/; Domain=.jogakjogak.com; HttpOnly; SameSite=Lax; Secure",
+                "%s=%s; Max-Age=%d; Path=/; Domain=.jogakjogak.com; HttpOnly; SameSite=None; Secure",
                 cookieName,
                 cookieValue,
                 60 * 60 * 24 * 7
