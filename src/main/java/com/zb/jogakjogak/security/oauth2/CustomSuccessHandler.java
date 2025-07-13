@@ -17,17 +17,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 @Component
@@ -54,7 +50,6 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String refreshToken = jwtUtil.createRefreshToken(userId, REFRESH_TOKEN_EXPIRATION, Token.REFRESH_TOKEN);
 
         addRefreshToken(username, refreshToken);
-
         addSameSiteCookieAttribute(request, response, "refresh", refreshToken);
 
         String clientId = extractGaClientId(request);
@@ -76,13 +71,6 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         }
 
         response.sendRedirect(redirectUrl);
-    }
-
-    private String getRole(Authentication authentication){
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
-        GrantedAuthority auth = iterator.next();
-        return auth.getAuthority();
     }
 
     private void addSameSiteCookieAttribute(HttpServletRequest request, HttpServletResponse response, String
@@ -110,18 +98,6 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         }
 
         response.addHeader("Set-Cookie", cookieHeader);
-    }
-
-
-    private Cookie createCookie(String key, String value) {
-
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(60 * 60 * 24 * 7);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-
-        return cookie;
     }
 
     @Transactional
