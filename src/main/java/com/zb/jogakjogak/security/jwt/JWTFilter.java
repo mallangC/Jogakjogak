@@ -1,10 +1,11 @@
 package com.zb.jogakjogak.security.jwt;
 
 import com.zb.jogakjogak.global.exception.AuthException;
-import com.zb.jogakjogak.security.Role;
+import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.security.Token;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.entity.Member;
+import com.zb.jogakjogak.security.repository.MemberRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,6 +23,8 @@ import java.util.Set;
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
+    private final MemberRepository memberRepository;
+
     private static final Set<String> WHITELIST = Set.of(
             "/actuator/health",
             "/member/reissue",
@@ -67,11 +70,8 @@ public class JWTFilter extends OncePerRequestFilter {
         String userName = jwtUtil.getUsername(accessToken);
         String role = jwtUtil.getRole(accessToken);
 
-        Member member = Member.builder()
-                .username(userName)
-                .password(null)
-                .role(Role.valueOf(role))
-                .build();
+        Member member = memberRepository.findByUsername(userName)
+                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         CustomOAuth2User customOAuth2User = new CustomOAuth2User(member);
         Authentication authToken = new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities());

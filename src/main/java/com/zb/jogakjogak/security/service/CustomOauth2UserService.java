@@ -16,6 +16,7 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
     private final MemberRepository memberRepository;
 
     @Override
+    @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
         OAuth2User oAuth2User = super.loadUser(userRequest);
@@ -65,7 +67,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
                     .providerId(oAuth2ResponseDto.getProviderId())
                     .build();
             member.getOauth2Info().add(oAuth2Info);
-            memberRepository.save(member);
+            member = memberRepository.save(member);
             return new CustomOAuth2User(member);
         } else{
             member = existMember.get();
