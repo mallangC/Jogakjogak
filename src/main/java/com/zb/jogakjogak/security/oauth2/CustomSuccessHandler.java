@@ -17,17 +17,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 @Component
@@ -44,16 +40,16 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication
     authentication) throws IOException, ServletException {
-  
+
         CustomOAuth2User customOAuth2User = (CustomOAuth2User) authentication.getPrincipal();
-  
+
         String username = customOAuth2User.getName();
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
         Long userId = member.getId();
         String refreshToken = jwtUtil.createRefreshToken(userId, REFRESH_TOKEN_EXPIRATION, Token.REFRESH_TOKEN);
-  
-        addRefreshToken(username, refreshToken);
+
+        addRefreshToken(username, userId, refreshToken);
         addSameSiteCookieAttribute(request, response, "refresh", refreshToken);
 
         String clientId = extractGaClientId(request);
@@ -73,22 +69,15 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         } else {
             redirectUrl = "https://www.jogakjogak.com/login/oauth2/code/kakao";
         }
-        
+
         response.sendRedirect(redirectUrl);
     }
 
-    private String getRole(Authentication authentication){
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
-        GrantedAuthority auth = iterator.next();
-        return auth.getAuthority();
-    }
-
-    private void addSameSiteCookieAttribute(HttpServletRequest request, HttpServletResponse response, String 
+    private void addSameSiteCookieAttribute(HttpServletRequest request, HttpServletResponse response, String
     cookieName, String cookieValue) {
         String serverName = request.getServerName();
         boolean isLocal = serverName.contains("localhost");
-  
+
         String cookieHeader;
         if (isLocal) {
             // 로컬 환경
@@ -107,29 +96,18 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 60 * 60 * 24 * 7
             );
         }
-  
+
         response.addHeader("Set-Cookie", cookieHeader);
     }
 
-
-    private Cookie createCookie(String key, String value) {
-
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(60 * 60 * 24 * 7);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-
-        return cookie;
-    }
-
     @Transactional
-    private void addRefreshToken(String userName, String refresh) {
-        refreshTokenRepository.findByUsername(userName)
+    private void addRefreshToken(String username, Long userId, String refresh) {
+        refreshTokenRepository.findByUsername(username)
                 .ifPresent(refreshTokenRepository::delete);
         RefreshToken refreshToken = RefreshToken.builder()
-                .username(userName)
+                .username(username)
                 .token(refresh)
+                .userId(userId)
                 .expiration(LocalDateTime.now().plusSeconds(REFRESH_TOKEN_EXPIRATION / 1000))
                 .build();
         refreshTokenRepository.save(refreshToken);

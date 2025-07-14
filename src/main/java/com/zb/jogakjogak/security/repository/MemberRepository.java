@@ -14,4 +14,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Query("SELECT COUNT(j) FROM JD j WHERE j.member.id = :memberId")
     long countJdByMemberId(@Param("memberId") Long memberId);
+
+    @Query("SELECT m FROM Member m LEFT JOIN FETCH m.oauth2Info WHERE m.username = :username")
+    Optional<Member> findByUsernameWithOauth2Info(@Param("username") String username);
 }

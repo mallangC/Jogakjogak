@@ -1,6 +1,7 @@
 package com.zb.jogakjogak.security.service;
 
 import com.zb.jogakjogak.security.entity.Member;
+import com.zb.jogakjogak.security.entity.OAuth2Info;
 import com.zb.jogakjogak.security.repository.MemberRepository;
 import com.zb.jogakjogak.security.repository.RefreshTokenRepository;
 import net.datafaker.Faker;
@@ -11,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
@@ -25,7 +27,7 @@ class WithdrawalServiceTest {
     private RefreshTokenRepository refreshTokenRepository;
 
     @Mock
-    private KakaoService kakaoService;
+    private KakaoWithdrawalService kakaoWithdrawalService;
 
     @InjectMocks
     private WithdrawalService withdrawalService;
@@ -48,7 +50,7 @@ class WithdrawalServiceTest {
 
         // then
         verify(memberRepository, times(1)).findByUsername(userName);
-        verify(kakaoService, times(1)).unlinkKakaoMember(kakaoId);
+        verify(kakaoWithdrawalService, times(1)).unlinkKakaoMember(kakaoId);
         verify(refreshTokenRepository, times(1)).deleteByUsername(userName);
         verify(memberRepository, times(1)).delete(mockMember);
     }
@@ -68,12 +70,15 @@ class WithdrawalServiceTest {
         withdrawalService.withdrawMember(userName);
 
         // then
-        verify(kakaoService, times(1)).unlinkKakaoMember(expectedKakaoId);
+        verify(kakaoWithdrawalService, times(1)).unlinkKakaoMember(expectedKakaoId);
     }
 
     private Member createMockMember(String userName) {
         Member member = mock(Member.class);
-        when(member.getUsername()).thenReturn(userName);
+        OAuth2Info oAuth2Info = mock(OAuth2Info.class);
+        when(oAuth2Info.getProvider()).thenReturn("kakao");
+        when(oAuth2Info.getProviderId()).thenReturn(userName.split(" ")[1]); // ex) "kakao 1234567890" → "1234567890"
+        when(member.getOauth2Info()).thenReturn(List.of(oAuth2Info));
         return member;
     }
 }

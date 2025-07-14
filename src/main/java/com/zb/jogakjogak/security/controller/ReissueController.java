@@ -33,7 +33,6 @@ public class ReissueController {
 
         String refreshToken = extractRefreshTokenFromCookie(request.getCookies());
         ReissueResultDto reissueResultDto = reissueService.reissue(refreshToken);
-
         response.setHeader("Authorization", "Bearer " + reissueResultDto.getNewAccessToken());
         response.addCookie(createCookie("refresh", reissueResultDto.getNewRefreshToken()));
         return ResponseEntity.ok()

@@ -38,7 +38,7 @@ public class WithdrawalController {
                             HttpStatus.UNAUTHORIZED));
         }
         withdrawalService.withdrawMember(customOAuth2User.getName());
-        clearRefreshTokenCookie(response);
+        clearCookie(response);
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok()
                 .body(new HttpApiResponse<>(null,
@@ -46,7 +46,7 @@ public class WithdrawalController {
                         HttpStatus.OK));
     }
 
-    private void clearRefreshTokenCookie(HttpServletResponse response) {
+    private void clearCookie(HttpServletResponse response) {
         Cookie cookie = new Cookie("refresh", null);
         cookie.setMaxAge(0);
         cookie.setPath("/");

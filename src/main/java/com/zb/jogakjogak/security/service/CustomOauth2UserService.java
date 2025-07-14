@@ -35,9 +35,9 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
 
         OAuth2User oAuth2User = super.loadUser(userRequest);
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
-        System.out.println(">>> 로그인 사용자: " + oAuth2User.getName());
+        String accessToken = userRequest.getAccessToken().getTokenValue();
 
-        OAuth2ResponseDto oAuth2ResponseDto = null;
+        OAuth2ResponseDto oAuth2ResponseDto;
         if(registrationId.equals("kakao")){
             oAuth2ResponseDto = new KakaoResponseDto(oAuth2User.getAttributes());
         }else if(registrationId.equals("google")){
@@ -46,7 +46,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
             throw new OAuth2AuthenticationException("Unsupported provider: " + registrationId);
         }
         String username = oAuth2ResponseDto.getProvider() + " " + oAuth2ResponseDto.getProviderId();
-        Optional<Member> existMember = memberRepository.findByUsername(username);
+        Optional<Member> existMember = memberRepository.findByUsernameWithOauth2Info(username);
         Member member;
         if (existMember.isEmpty()) {
             member = Member.builder()
@@ -66,12 +66,22 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
                     .provider(oAuth2ResponseDto.getProvider())
                     .providerId(oAuth2ResponseDto.getProviderId())
                     .build();
+
+            if(oAuth2ResponseDto.getProvider().equals("google")){
+                oAuth2Info.setAccessToken(accessToken);
+            }
             member.getOauth2Info().add(oAuth2Info);
             member = memberRepository.save(member);
             return new CustomOAuth2User(member);
         } else{
             member = existMember.get();
             member.updateExistingMember(oAuth2ResponseDto);
+
+            for (OAuth2Info info : member.getOauth2Info()) {
+                if (info.getProvider().equals("google")) {
+                    info.setAccessToken(accessToken);
+                }
+            }
             memberRepository.save(member);
             return new CustomOAuth2User(member);
         }

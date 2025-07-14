@@ -1,0 +1,1 @@
+ALTER TABLE oauth2_info ADD COLUMN access_token VARCHAR(2000);
