@@ -67,8 +67,6 @@ public class JWTFilter extends OncePerRequestFilter {
 
         // 토큰이 유효할 경우에만 다음 로직 실행
         String userName = jwtUtil.getUsername(accessToken);
-        String role = jwtUtil.getRole(accessToken);
-
         Member member = memberRepository.findByUsername(userName)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
