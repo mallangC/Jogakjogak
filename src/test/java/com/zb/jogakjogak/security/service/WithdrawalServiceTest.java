@@ -75,8 +75,6 @@ class WithdrawalServiceTest {
 
     private Member createMockMember(String userName) {
         Member member = mock(Member.class);
-        when(member.getUsername()).thenReturn(userName);
-
         OAuth2Info oAuth2Info = mock(OAuth2Info.class);
         when(oAuth2Info.getProvider()).thenReturn("kakao");
         when(oAuth2Info.getProviderId()).thenReturn(userName.split(" ")[1]); // ex) "kakao 1234567890" → "1234567890"
