@@ -49,7 +49,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         Long userId = member.getId();
         String refreshToken = jwtUtil.createRefreshToken(userId, REFRESH_TOKEN_EXPIRATION, Token.REFRESH_TOKEN);
 
-        addRefreshToken(username, refreshToken);
+        addRefreshToken(username, userId, refreshToken);
         addSameSiteCookieAttribute(request, response, "refresh", refreshToken);
 
         String clientId = extractGaClientId(request);
@@ -101,12 +101,13 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     }
 
     @Transactional
-    private void addRefreshToken(String userName, String refresh) {
-        refreshTokenRepository.findByUsername(userName)
+    private void addRefreshToken(String username, Long userId, String refresh) {
+        refreshTokenRepository.findByUsername(username)
                 .ifPresent(refreshTokenRepository::delete);
         RefreshToken refreshToken = RefreshToken.builder()
-                .username(userName)
+                .username(username)
                 .token(refresh)
+                .userId(userId)
                 .expiration(LocalDateTime.now().plusSeconds(REFRESH_TOKEN_EXPIRATION / 1000))
                 .build();
         refreshTokenRepository.save(refreshToken);
