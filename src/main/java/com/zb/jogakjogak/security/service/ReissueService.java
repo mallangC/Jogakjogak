@@ -3,6 +3,7 @@ package com.zb.jogakjogak.security.service;
 
 import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.MemberErrorCode;
+import com.zb.jogakjogak.security.Role;
 import com.zb.jogakjogak.security.Token;
 import com.zb.jogakjogak.security.dto.ReissueResultDto;
 import com.zb.jogakjogak.security.entity.Member;
@@ -37,9 +38,8 @@ public class ReissueService {
 
         String provider = member.getOauth2Info().get(0).getProvider();
         String username = member.getUsername();
-        String role = jwtUtil.getRole(refreshToken);
 
-        String newAccess = jwtUtil.createAccessToken(userId, provider, username, role, ACCESS_TOKEN_EXPIRATION, Token.ACCESS_TOKEN);
+        String newAccess = jwtUtil.createAccessToken(userId, provider, username, Role.USER.toString(), ACCESS_TOKEN_EXPIRATION, Token.ACCESS_TOKEN);
         String newRefresh = jwtUtil.createRefreshToken(userId, REFRESH_TOKEN_EXPIRATION, Token.REFRESH_TOKEN);
 
         // refresh 토큰 저장 DB에 존재하면 업데이트, 없으면 생성
