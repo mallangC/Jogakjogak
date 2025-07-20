@@ -15,15 +15,28 @@ public class GaMeasurementProtocolService {
 
     private final WebClient webClient;
 
-    @Value("${google.analytics.measurementId}")
+    @Value("${google.analytics.measurementId:}")
     private String measurementId;
 
-    @Value("${google.analytics.apiSecret}")
+    @Value("${google.analytics.apiSecret:}")
     private String apiSecret;
+
+    private boolean gaEnabled;
 
     public GaMeasurementProtocolService(WebClient.Builder webClientBuilder) {
         // Measurement Protocol Endpoint
         this.webClient = webClientBuilder.baseUrl("https://www.google-analytics.com/mp/collect").build();
+    }
+
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        this.gaEnabled = measurementId != null && !measurementId.trim().isEmpty() 
+                        && apiSecret != null && !apiSecret.trim().isEmpty();
+        if (!gaEnabled) {
+            System.out.println("Google Analytics is disabled: measurementId or apiSecret is empty");
+        } else {
+            System.out.println("Google Analytics is enabled with measurementId: " + measurementId);
+        }
     }
 
     /**
@@ -43,6 +56,11 @@ public class GaMeasurementProtocolService {
                                     String eventName,
                                     Map<String, Object> eventParams
     ) {
+        // GA가 비활성화된 경우 즉시 성공으로 반환
+        if (!gaEnabled) {
+            return Mono.just("GA is disabled");
+        }
+        
         if (clientId == null || clientId.isEmpty()) {
             clientId = UUID.randomUUID().toString();
             System.out.println("Warning: clientId is null or empty. Using generated UUID: " + clientId);
