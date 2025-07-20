@@ -121,6 +121,8 @@ management:
 logging:
   level:
     org.flywaydb: DEBUG
+    com.zb.jogakjogak: INFO  # 애플리케이션 기본 로그 레벨
+    com.zb.jogakjogak.global.exception: ERROR  # 예외 처리는 ERROR만 출력
 
 
 google:
