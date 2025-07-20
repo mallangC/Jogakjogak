@@ -8,12 +8,14 @@ import com.google.genai.types.*;
 import com.zb.jogakjogak.global.exception.AIServiceException;
 import com.zb.jogakjogak.global.exception.JDErrorCode;
 import com.zb.jogakjogak.global.exception.JDException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 public class LLMService {
 
@@ -170,8 +172,31 @@ public class LLMService {
             // 응답에서 텍스트 추출
             return responseText;
 
+        } catch (JDException e) {
+            // JDException은 그대로 전파
+            throw e;
         } catch (Exception e) {
-            throw new AIServiceException("LLM 서비스 알 수 없는 오류 발생", e);
+            // 에러 메시지를 더 구체적으로 개선
+            String errorMessage = "LLM 서비스 오류: ";
+            
+            if (e.getMessage() != null && e.getMessage().contains("API key")) {
+                errorMessage = "Gemini API 키가 유효하지 않습니다";
+            } else if (e.getMessage() != null && e.getMessage().contains("quota")) {
+                errorMessage = "Gemini API 사용량을 초과했습니다";
+            } else if (e.getMessage() != null && e.getMessage().contains("rate limit")) {
+                errorMessage = "Gemini API 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요";
+            } else if (e instanceof java.net.ConnectException || e instanceof java.net.UnknownHostException) {
+                errorMessage = "Gemini API 서버에 연결할 수 없습니다";
+            } else if (e instanceof com.fasterxml.jackson.core.JsonProcessingException) {
+                errorMessage = "AI 응답 파싱 중 오류가 발생했습니다";
+            } else {
+                errorMessage += e.getMessage() != null ? e.getMessage() : "알 수 없는 오류가 발생했습니다";
+            }
+            
+            // 로그에 상세 에러 출력
+            log.error("LLM Service Error: {}", e.getMessage(), e);
+            
+            throw new AIServiceException(errorMessage, e);
         }
     }
 }
