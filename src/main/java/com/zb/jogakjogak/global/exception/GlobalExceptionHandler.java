@@ -4,6 +4,7 @@ import com.zb.jogakjogak.ga.service.GaMeasurementProtocolService;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
@@ -26,6 +28,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleJDException(JDException e, HttpServletRequest request) {
         JDErrorCode jdErrorCode = e.getErrorCode();
         ErrorResponse response = new ErrorResponse(jdErrorCode.name(), jdErrorCode.getMessage());
+        
+        log.error("JDException occurred: {} - {}", jdErrorCode.name(), jdErrorCode.getMessage(), e);
 
         sendGaErrorEvent(
                 request,
@@ -94,9 +98,36 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, memberErrorCode.getHttpStatus());
     }
 
+    @ExceptionHandler(AIServiceException.class)
+    public ResponseEntity<ErrorResponse> handleAIServiceException(AIServiceException e, HttpServletRequest request) {
+        String errorMessage = e.getMessage();
+        if (e.getCause() != null) {
+            errorMessage += " - " + e.getCause().getMessage();
+        }
+        ErrorResponse response = new ErrorResponse("AI_SERVICE_ERROR", errorMessage);
+
+        // SLF4J를 사용한 에러 로깅
+        log.error("AIServiceException occurred: {}", errorMessage, e);
+
+        sendGaErrorEvent(
+                request,
+                getUserIdFromSecurityContext(),
+                "ai_service_exception",
+                "AI_SERVICE_ERROR",
+                errorMessage,
+                HttpStatus.SERVICE_UNAVAILABLE.value(),
+                e
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e, HttpServletRequest request) {
         ErrorResponse response = new ErrorResponse("INTERNAL_SERVER_ERROR", "서버 오류가 발생했습니다.");
+
+        // SLF4J를 사용한 에러 로깅
+        log.error("Unhandled Exception occurred at {}: {}", request.getRequestURI(), e.getMessage(), e);
 
         sendGaErrorEvent(
                 request,
