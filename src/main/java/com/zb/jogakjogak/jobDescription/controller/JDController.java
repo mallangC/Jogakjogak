@@ -8,6 +8,7 @@ import com.zb.jogakjogak.jobDescription.domain.requestDto.MemoRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.*;
 import com.zb.jogakjogak.jobDescription.service.JDService;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,7 @@ public class JDController {
      * @return 제목, JD의 URL, To Do List, 사용자 메모, 마감일
      */
     //TODO: 삭제?
+    @Hidden
     @PostMapping("/jd")
     public ResponseEntity<HttpApiResponse<JDResponseDto>> requestSend(
             @RequestBody JDRequestDto jdRequestDto,
