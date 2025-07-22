@@ -42,10 +42,10 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     authentication) throws IOException, ServletException {
 
         CustomOAuth2User customOAuth2User = (CustomOAuth2User) authentication.getPrincipal();
-
         String username = customOAuth2User.getName();
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
+
         Long userId = member.getId();
         String refreshToken = jwtUtil.createRefreshToken(userId, REFRESH_TOKEN_EXPIRATION, Token.REFRESH_TOKEN);
 

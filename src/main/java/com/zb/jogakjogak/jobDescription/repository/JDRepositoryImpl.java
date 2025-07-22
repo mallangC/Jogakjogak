@@ -92,6 +92,20 @@ public class JDRepositoryImpl implements JDRepositoryCustom{
 
         return new PageImpl<>(content, pageable, total != null ? total : 0);
     }
+    @Override
+    public List<JD> findNotUpdatedJdByQueryDsl(LocalDateTime now, LocalDateTime threeDaysAgo, LocalDateTime todayStart) {
+        QJD jd = QJD.jD;
+
+        return queryFactory
+                .selectFrom(jd)
+                .where(jd.updatedAt.loe(threeDaysAgo),
+                        jd.endedAt.goe(now),
+                        jd.isAlarmOn.isTrue(),
+                        jd.lastNotifiedAt.lt(todayStart)
+                                .or(jd.lastNotifiedAt.isNull()))
+                .orderBy(jd.id.asc())
+                .fetch();
+    }
 
     /**
      * Pageable의 Sort 정보를 QueryDSL의 OrderSpecifier 리스트로 변환합니다.
