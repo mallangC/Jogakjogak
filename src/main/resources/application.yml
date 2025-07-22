@@ -41,7 +41,7 @@ spring:
               - account_email
               - profile_nickname
             authorization-grant-type: authorization_code
-            redirect-uri: ${OAUTH2_REDIRECT_BASE_URL:https://api.jogakjogak.com}/login/oauth2/code/kakao
+            redirect-uri: http://localhost:8080/login/oauth2/code/kakao
             client-name: Kakao
             client-authentication-method: client_secret_post
 
