@@ -40,4 +40,6 @@ public interface JDRepositoryCustom {
      * @return 조건에 맞는 JD 목록
      */
     Page<JD> findNotUpdatedJdByQueryDsl(LocalDateTime oldDate, LocalDateTime now, Pageable pageable);
+    List<JD> findNotUpdatedJdByQueryDsl(LocalDateTime now, LocalDateTime threeDaysAgo, LocalDateTime todayStart);
+
 }

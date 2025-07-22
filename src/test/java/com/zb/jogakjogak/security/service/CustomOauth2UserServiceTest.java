@@ -60,8 +60,6 @@ class CustomOauth2UserServiceTest {
         profile.put("nickname", "테스트유저");
         kakaoAccount.put("profile", profile);
         kakaoAccount.put("email", "test@kakao.com");
-        kakaoAccount.put("name", "홍길동");
-        kakaoAccount.put("phone_number", "010-1234-5678");
 
         attributes.put("properties", properties);
         attributes.put("id", 123456789L);
@@ -120,8 +118,6 @@ class CustomOauth2UserServiceTest {
         assertThat(savedMember.getUsername()).isEqualTo("kakao 123456789");
         assertThat(savedMember.getNickname()).isEqualTo("테스트유저");
         assertThat(savedMember.getEmail()).isEqualTo("test@kakao.com");
-        assertThat(savedMember.getName()).isEqualTo("홍길동");
-        assertThat(savedMember.getPhoneNumber()).isEqualTo("010-1234-5678");
         assertThat(savedMember.getRole()).isEqualTo(Role.USER);
         assertThat(savedMember.getLastLoginAt()).isNotNull();
     }
@@ -134,8 +130,6 @@ class CustomOauth2UserServiceTest {
                 .username("kakao 123456789")
                 .nickname("기존닉네임")
                 .email("old@email.com")
-                .name("기존이름")
-                .phoneNumber("010-0000-0000")
                 .lastLoginAt(LocalDateTime.now().minusDays(1))
                 .oauth2Info(new ArrayList<>())
                 .password(null)
@@ -158,8 +152,6 @@ class CustomOauth2UserServiceTest {
         Member updatedMember = memberCaptor.getValue();
         assertThat(updatedMember.getNickname()).isEqualTo("테스트유저");
         assertThat(updatedMember.getEmail()).isEqualTo("test@kakao.com");
-        assertThat(updatedMember.getName()).isEqualTo("홍길동");
-        assertThat(updatedMember.getPhoneNumber()).isEqualTo("010-1234-5678");
     }
 
     private OAuth2User invokeProcessUser(OAuth2User oAuth2User, String registrationId) throws Exception {
@@ -176,8 +168,6 @@ class CustomOauth2UserServiceTest {
                     .username(userName)
                     .nickname(kakaoResponseDto.getNickname())
                     .email(kakaoResponseDto.getEmail())
-                    .name(kakaoResponseDto.getName())
-                    .phoneNumber(kakaoResponseDto.getPhoneNumber())
                     .role(Role.USER)
                     .lastLoginAt(LocalDateTime.now())
                     .oauth2Info(new ArrayList<>())

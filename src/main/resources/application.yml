@@ -40,17 +40,15 @@ spring:
             scope:
               - account_email
               - profile_nickname
-              - name
-              - phone_number
             authorization-grant-type: authorization_code
-            redirect-uri: https://api.jogakjogak.com/login/oauth2/code/kakao
+            redirect-uri: ${OAUTH2_REDIRECT_BASE_URL:https://api.jogakjogak.com}/login/oauth2/code/kakao
             client-name: Kakao
             client-authentication-method: client_secret_post
 
           google:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
-            redirect-uri: https://api.jogakjogak.com/login/oauth2/code/google
+            redirect-uri: ${OAUTH2_REDIRECT_BASE_URL:https://api.jogakjogak.com}/login/oauth2/code/google
             authorization-grant-type: authorization_code
             scope:
               - profile
@@ -121,6 +119,8 @@ management:
 logging:
   level:
     org.flywaydb: DEBUG
+    com.zb.jogakjogak: INFO  # 애플리케이션 기본 로그 레벨
+    com.zb.jogakjogak.global.exception: ERROR  # 예외 처리는 ERROR만 출력
 
 
 google:

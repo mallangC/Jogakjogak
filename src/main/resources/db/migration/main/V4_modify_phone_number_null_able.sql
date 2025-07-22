@@ -1,0 +1,1 @@
+ALTER TABLE member MODIFY phone_number VARCHAR(100) NULL;

@@ -1,4 +1,4 @@
-package com.zb.jogakjogak.notification.batch;
+package com.zb.jogakjogak.notification.config;
 
 
 import com.zb.jogakjogak.jobDescription.entity.JD;
@@ -60,9 +60,9 @@ public class NotificationBatchConfig {
                 .reader(jdReader())
                 .processor(jdProcessor())
                 .writer(jdWriter())
-                //.faultTolerant()
-                //.skipLimit(SKIP_SIZE)
-                //.skip(Exception.class)
+                .faultTolerant()
+                .skipLimit(SKIP_SIZE)
+                .skip(Exception.class)
                 .build();
     }
 
@@ -76,8 +76,8 @@ public class NotificationBatchConfig {
         return new RepositoryItemReaderBuilder<JD>()
                 .name("jDReader")
                 .pageSize(PAGE_SIZE)
-                .methodName("findAllJdsWithMember")
-                //.arguments(List.of(now, threeDaysAgo, todayStart))
+                .methodName("findNotUpdatedJdByQueryDsl")
+                .arguments(List.of(now, threeDaysAgo, todayStart))
                 .repository(jdRepository)
                 .sorts(Map.of("id", Sort.Direction.ASC))
                 .build();
@@ -116,7 +116,7 @@ public class NotificationBatchConfig {
                 try {
                     notificationService.sendNotificationEmail(notificationDto);
                 } catch (Exception e) {
-                    log.warn("이메일 전송에 실패했습니다." + e.getMessage());
+                    log.warn("이메일 전송에 실패했습니다. memberId={}, error={}", member.getId(), e.getMessage());
                 }
             }
         };

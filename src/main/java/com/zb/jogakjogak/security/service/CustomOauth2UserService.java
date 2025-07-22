@@ -53,8 +53,6 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
                     .username(username)
                     .nickname(oAuth2ResponseDto.getNickname())
                     .email(oAuth2ResponseDto.getEmail())
-                    .name(oAuth2ResponseDto.getName())
-                    .phoneNumber(oAuth2ResponseDto.getPhoneNumber())
                     .lastLoginAt(LocalDateTime.now())
                     .oauth2Info(new ArrayList<>())
                     .jdList(new ArrayList<>())
