@@ -47,7 +47,6 @@ public class NotificationService {
         String emailType = "notification_jd_reminder";
         String campaignName = "jd_deadline_reminder";
 
-
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper messageHelper = new MimeMessageHelper(message);

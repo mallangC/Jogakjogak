@@ -40,8 +40,6 @@ spring:
             scope:
               - account_email
               - profile_nickname
-              - name
-              - phone_number
             authorization-grant-type: authorization_code
             redirect-uri: ${OAUTH2_REDIRECT_BASE_URL:https://api.jogakjogak.com}/login/oauth2/code/kakao
             client-name: Kakao
