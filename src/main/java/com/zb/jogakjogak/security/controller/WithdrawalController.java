@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "회원 탈퇴 API", description = "사용자 회원 탈퇴 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/member/withdrawal")
+@RequestMapping("/api/member/withdrawal")
 public class WithdrawalController {
 
     private final WithdrawalService withdrawalService;
