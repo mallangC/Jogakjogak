@@ -1,6 +1,7 @@
 package com.zb.jogakjogak.jobDescription.repository;
 
 import com.zb.jogakjogak.jobDescription.entity.JD;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -39,7 +40,5 @@ public interface JDRepositoryCustom {
      * @param pageable 페이징 및 정렬 정보
      * @return 조건에 맞는 JD 목록
      */
-    Page<JD> findNotUpdatedJdByQueryDsl(LocalDateTime oldDate, LocalDateTime now, Pageable pageable);
-    List<JD> findNotUpdatedJdByQueryDsl(LocalDateTime now, LocalDateTime threeDaysAgo, LocalDateTime todayStart);
-
+    Page<JD> findNotUpdatedJdByQueryDsl(LocalDateTime oldDate, LocalDateTime now, LocalDateTime todayStart, Pageable pageable);
 }
