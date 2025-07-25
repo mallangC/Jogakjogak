@@ -10,6 +10,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -77,6 +78,7 @@ public class Member {
     public void updateExistingMember(OAuth2ResponseDto oAuth2ResponseDto) {
         this.email = oAuth2ResponseDto.getEmail();
         this.nickname = oAuth2ResponseDto.getNickname();
+        this.lastLoginAt = LocalDateTime.now();
     }
 
     public void setResume(Resume resume) {
