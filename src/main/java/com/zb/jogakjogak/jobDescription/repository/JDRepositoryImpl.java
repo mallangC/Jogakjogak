@@ -7,6 +7,7 @@ import com.zb.jogakjogak.jobDescription.entity.QJD;
 import com.zb.jogakjogak.jobDescription.entity.QToDoList;
 import com.zb.jogakjogak.security.entity.QMember;
 import jakarta.persistence.EntityManager;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -69,14 +70,18 @@ public class JDRepositoryImpl implements JDRepositoryCustom{
     }
 
     @Override
-    public Page<JD> findNotUpdatedJdByQueryDsl(LocalDateTime oldDate, LocalDateTime now, Pageable pageable) {
+    public Page<JD> findNotUpdatedJdByQueryDsl(LocalDateTime now, LocalDateTime threeDaysAgo, LocalDateTime todayStart, Pageable pageable) {
         QJD jd = QJD.jD;
 
         List<JD> content = queryFactory
                 .selectFrom(jd)
-                .where(jd.updatedAt.loe(oldDate),
+                .where(
+                        jd.updatedAt.loe(threeDaysAgo),
                         jd.endedAt.goe(now),
-                        jd.isAlarmOn.isTrue())
+                        jd.isAlarmOn.isTrue(),
+                        jd.lastNotifiedAt.isNull()
+                                .or(jd.lastNotifiedAt.lt(todayStart))
+                )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .orderBy(getOrderSpecifiers(pageable.getSort(), jd).toArray(OrderSpecifier[]::new))
@@ -85,27 +90,18 @@ public class JDRepositoryImpl implements JDRepositoryCustom{
         Long total = queryFactory
                 .select(jd.count())
                 .from(jd)
-                .where(jd.updatedAt.loe(oldDate),
+                .where(
+                        jd.updatedAt.loe(threeDaysAgo),
                         jd.endedAt.goe(now),
-                        jd.isAlarmOn.isTrue())
+                        jd.isAlarmOn.isTrue(),
+                        jd.lastNotifiedAt.isNull()
+                                .or(jd.lastNotifiedAt.lt(todayStart))
+                )
                 .fetchOne();
 
         return new PageImpl<>(content, pageable, total != null ? total : 0);
     }
-    @Override
-    public List<JD> findNotUpdatedJdByQueryDsl(LocalDateTime now, LocalDateTime threeDaysAgo, LocalDateTime todayStart) {
-        QJD jd = QJD.jD;
 
-        return queryFactory
-                .selectFrom(jd)
-                .where(jd.updatedAt.loe(threeDaysAgo),
-                        jd.endedAt.goe(now),
-                        jd.isAlarmOn.isTrue(),
-                        jd.lastNotifiedAt.lt(todayStart)
-                                .or(jd.lastNotifiedAt.isNull()))
-                .orderBy(jd.id.asc())
-                .fetch();
-    }
 
     /**
      * Pageable의 Sort 정보를 QueryDSL의 OrderSpecifier 리스트로 변환합니다.

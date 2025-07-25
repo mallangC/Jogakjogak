@@ -72,6 +72,7 @@ public class NotificationBatchConfig {
         LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(NOTIFICATION_THRESHOLD_DAYS);
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime todayStart = now.toLocalDate().atStartOfDay();
+        log.info("Reader arguments: now={}, threeDaysAgo={}, todayStart={}", now, threeDaysAgo, todayStart);
 
         return new RepositoryItemReaderBuilder<JD>()
                 .name("jDReader")

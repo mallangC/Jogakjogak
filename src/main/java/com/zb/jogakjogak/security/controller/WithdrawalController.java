@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,7 +28,7 @@ public class WithdrawalController {
     private final WithdrawalService withdrawalService;
 
     @Operation(summary = "회원 탈퇴", description = "로그인된 사용자가 회원을 탈퇴합니다")
-    @PostMapping
+    @DeleteMapping
     public ResponseEntity oauth2Withdrawal(HttpServletResponse response, @AuthenticationPrincipal CustomOAuth2User customOAuth2User){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 

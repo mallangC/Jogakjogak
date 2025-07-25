@@ -23,7 +23,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 
 @WebMvcTest(WithdrawalController.class)
 class WithdrawalTestControllerTest {
@@ -62,7 +62,7 @@ class WithdrawalTestControllerTest {
         );
 
         // when
-        MockHttpServletResponse response = mockMvc.perform(post("/member/withdrawal")
+        MockHttpServletResponse response = mockMvc.perform(delete("/member/withdrawal")
                         .with(csrf())
                         .with(authentication(authentication)))
                 .andReturn()
