@@ -29,4 +29,5 @@ public interface ToDoListRepository extends JpaRepository<ToDoList, Long>, ToDoL
     */
     Integer countByIsDoneFalseAndJd_Id(Long jdId);
 
+    Integer countByJd_Id(Long id);
 }
