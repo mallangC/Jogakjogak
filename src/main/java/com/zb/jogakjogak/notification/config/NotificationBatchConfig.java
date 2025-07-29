@@ -37,7 +37,7 @@ public class NotificationBatchConfig {
     private static final int PAGE_SIZE = 20;
     private static final int RETRY_LIMIT = 3;
     private static final int SKIP_SIZE = 10;
-    private static final int NOTIFICATION_THRESHOLD_DAYS = 3;
+    private static final int NOTIFICATION_THRESHOLD_DAYS = 1;
     private final JobRepository jobRepository;
     private final PlatformTransactionManager platformTransactionManager;
     private final JDRepository jdRepository;
