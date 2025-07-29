@@ -9,12 +9,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
@@ -122,6 +126,35 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.SERVICE_UNAVAILABLE);
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException e, HttpServletRequest request) {
+        List<String> errors = e.getBindingResult().getAllErrors().stream()
+                .map(error -> {
+                    if (error instanceof FieldError) {
+                        return ((FieldError) error).getDefaultMessage();
+                    }
+                    return error.getDefaultMessage();
+                })
+                .collect(Collectors.toList());
+
+        String errorMessage = String.join(", ", errors);
+
+        ErrorResponse response = new ErrorResponse("VALIDATION_FAILED", errorMessage);
+
+        log.error("Validation failed: {}", errorMessage, e);
+
+        sendGaErrorEvent(
+                request,
+                getUserIdFromSecurityContext(),
+                "validation_error",
+                "VALIDATION_FAILED",
+                errorMessage,
+                HttpStatus.BAD_REQUEST.value(),
+                e
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e, HttpServletRequest request) {
         ErrorResponse response = new ErrorResponse("INTERNAL_SERVER_ERROR", "서버 오류가 발생했습니다.");
