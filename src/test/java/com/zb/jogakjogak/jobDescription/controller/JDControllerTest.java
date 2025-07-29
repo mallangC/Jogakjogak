@@ -195,12 +195,18 @@ class JDControllerTest {
     @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail, role = "USER")
     void llmAnalyze_success() throws Exception {
         // Given
+        StringBuilder contentBuilder = new StringBuilder();
+        while (contentBuilder.length() < 300) {
+            contentBuilder.append(faker.lorem().paragraph(2));
+            contentBuilder.append(" "); // 단락 사이에 공백 추가
+        }
+        String validContent = contentBuilder.toString();
         JDRequestDto requestDto = new JDRequestDto(
                 "Gemini 테스트 JD",
                 "http://gemini.com/jd/1",
                 "테스트용 회사 이름",
                 "테스트용 직무 이름",
-                "채용 공고 내용",
+                validContent,
                 LocalDateTime.now().plusDays(10)
         );
 
