@@ -15,7 +15,11 @@ public enum JDErrorCode {
     NOT_FOUND_JD(HttpStatus.NOT_FOUND, "JD를 찾을 수 없습니다."),
     UNAUTHORIZED_ACCESS(HttpStatus.UNAUTHORIZED,"해당 JD에 대한 권한이 없습니다." )
     , JD_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST,"JD는 20개 이상 만들 수 없습니다." ),
-    FAILED_ANALYSIS_REQUEST_TEXT_LENGTH_EXCEED(HttpStatus.BAD_REQUEST, "분석 중 오류가 발생했습니다.(todolist 제목 글자수제한)");
+    FAILED_ANALYSIS_REQUEST_TEXT_LENGTH_EXCEED(HttpStatus.BAD_REQUEST, "분석 중 오류가 발생했습니다.(todolist 제목 글자수제한)"),
+    INVALID_RESUME_CONTENT(HttpStatus.BAD_REQUEST,"이력서 내용이 유효하지 않거나 의미 없는 반복 문자를 포함합니다."),
+    INVALID_JOB_DESCRIPTION_CONTENT(HttpStatus.BAD_REQUEST,"채용 공고 내용이 유효하지 않거나 의미 없는 반복 문자를 포함합니다."),
+    INVALID_JOB_NAME(HttpStatus.BAD_REQUEST, "직무 이름이 유효하지 않습니다."),
+    AI_ANALYSIS_UNAVAILABLE(HttpStatus.BAD_REQUEST, "유효하지 않거나 분석하기 어려운 입력 내용입니다. 정확한 이력서와 채용 공고 내용을 다시 제공해주세요." );
 
     private final HttpStatus httpStatus;
     private final String message;
