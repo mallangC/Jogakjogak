@@ -11,7 +11,6 @@ import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -59,7 +58,7 @@ public class JDController {
             description = "등록된 이력서와 요청으로 받은 JD를 함께 분석 후 Todolist 형식으로 응답합니다")
     @PostMapping("/jds")
     public ResponseEntity<HttpApiResponse<JDResponseDto>> llmAnalyze(
-            @Valid @RequestBody JDRequestDto jdRequestDto,
+            @RequestBody JDRequestDto jdRequestDto,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         String memberName = customOAuth2User.getName();
         return ResponseEntity.ok().body(
