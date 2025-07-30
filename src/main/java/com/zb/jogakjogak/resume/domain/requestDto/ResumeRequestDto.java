@@ -1,5 +1,6 @@
 package com.zb.jogakjogak.resume.domain.requestDto;
 
+import com.zb.jogakjogak.global.validation.MeaningfulText;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -54,7 +55,7 @@ public class ResumeRequestDto {
             "새로운 기술과 지식을 빠르게 습득하고 프로젝트에 적용하는 데 거부감이 없습니다." +
             "오류 발생 시 로그를 분석하고 원인을 파악하여 해결하는 능력을 갖추고 있습니다.",
             requiredMode=Schema.RequiredMode.NOT_REQUIRED)
-    @NotBlank(message = "이력서 내용은 필수 입력 사항입니다.")
-    @Size(max = 5000, message = "이력서는 5000자 이내여야 합니다.")
+    @Size(min= 300, max = 5000, message = "이력서는 300자 이상 5000자 이내여야 합니다.")
+    @MeaningfulText(message = "이력서 내용이 유효하지 않거나 의미 없는 반복 문자를 포함합니다.")
     private String content;
 }
