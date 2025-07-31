@@ -8,6 +8,7 @@ import com.google.genai.types.*;
 import com.zb.jogakjogak.global.exception.AIServiceException;
 import com.zb.jogakjogak.global.exception.JDErrorCode;
 import com.zb.jogakjogak.global.exception.JDException;
+import com.zb.jogakjogak.global.validation.MeaningfulTextValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,12 +23,29 @@ public class LLMService {
     @Value("${gemini.api.key}")
     private String API_KEY;
     private final String MODEL_NAME = "gemini-2.0-flash";
+    final String INVALID_INPUT_MESSAGE = "유효하지 않거나 분석하기 어려운 입력 내용입니다. 정확한 이력서와 채용 공고 내용을 다시 제공해주세요.";
+
+    private final MeaningfulTextValidator meaningfulTextValidator;
+
+    public LLMService(MeaningfulTextValidator meaningfulTextValidator) {
+        this.meaningfulTextValidator = meaningfulTextValidator;
+    }
 
 
     public String generateTodoListJson(String resumeContent, String jobDescriptionContent, String jobName) {
 
         if (API_KEY == null || API_KEY.isEmpty()) {
             throw new IllegalStateException("Gemini API 키가 이상합니다 확인해주세요.");
+        }
+
+        if (!meaningfulTextValidator.isValid(resumeContent, null)) {
+            throw new JDException(JDErrorCode.INVALID_RESUME_CONTENT);
+        }
+        if (!meaningfulTextValidator.isValid(jobDescriptionContent, null)) {
+            throw new JDException(JDErrorCode.INVALID_JOB_DESCRIPTION_CONTENT);
+        }
+        if (jobName == null || jobName.trim().isEmpty() || jobName.length() < 2) {
+            throw new JDException(JDErrorCode.INVALID_JOB_NAME);
         }
 
         try (Client client = Client.builder()
@@ -37,6 +55,22 @@ public class LLMService {
             String SYSTEM_INSTRUCTION_TEXT = """
                     당신은 사용자가 제공하는 이력서와 채용 공고(JD)를 분석하여, 합격률을 높이는 데 필요한 개인화된 To-Do List를 작성하는 전문 AI 어시스턴트입니다.
                     당신은 마치 지원자의 '과외 선생님'처럼, 직접적이고 명확하며 행동을 유도하는 조언을 '해요체'로 제공해야 합니다. 비전문가도 쉽게 이해할 수 있는 언어를 사용하세요.
+                    
+                    **어떤 경우에도 다음 규칙을 최우선으로 준수해야 합니다.**
+                    
+                    **규칙1 : 무의미한 입력 필터링 및 응답 금지**
+                    만약 제공된 '이력서 내용' 또는 '채용 공고 내용'이 다음 예시와 같이 의미 없는 패턴을 포함한다면:
+                    - "ㄴㄴㄴㄴㄴㄴㄴㄴㄴㄴㄴㄴㄴㄴㄴㄴ" (반복되는 자음/모음)
+                    - "asdasdsaasdasd", "asdasldkjwihn sadkasji" (무작위 알파벳/숫자 나열)
+                    - ".............." (반복되는 특수문자)
+                    - 내용이 너무 짧거나 공백만 있는 경우
+                 
+                    **절대 투두리스트를 생성하지 마십시오. 어떠한 JSON 형식도 출력하지 마십시오.**
+                    **대신, 다음 문장만 정확히 출력하십시오:**
+                    "유효하지 않거나 분석하기 어려운 입력 내용입니다. 정확한 이력서와 채용 공고 내용을 다시 제공해주세요."
+                    
+                    **규칙2 : 유효한 입력에 대한 투두리스트 생성 (정상 동작)**
+                    만약 입력 내용이 의미 있고 분석 가능하다면, 아래 지침에 따라 투두리스트를 JSON 형식으로 생성하십시오.
                     
                     **응답은 어떠한 추가 설명, 서론, 결론 없이 오직 JSON 배열 형식으로만 제공되어야 합니다.**
                     각 배열 항목은 다음 필드를 포함하는 JSON 객체여야 합니다:
@@ -155,6 +189,10 @@ public class LLMService {
             GenerateContentResponse response = client.models.generateContent(MODEL_NAME, contents, config);
 
             String responseText = response.text();
+
+            if (responseText == null || responseText.trim().equals(INVALID_INPUT_MESSAGE)) {
+                throw new JDException(JDErrorCode.AI_ANALYSIS_UNAVAILABLE);
+            }
 
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(responseText);

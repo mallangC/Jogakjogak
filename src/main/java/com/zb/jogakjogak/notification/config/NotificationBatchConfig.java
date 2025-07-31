@@ -4,6 +4,8 @@ package com.zb.jogakjogak.notification.config;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.repository.JDRepository;
 import com.zb.jogakjogak.notification.dto.NotificationDto;
+import com.zb.jogakjogak.notification.entity.Notification;
+import com.zb.jogakjogak.notification.repository.NotificationRepository;
 import com.zb.jogakjogak.notification.service.NotificationService;
 import com.zb.jogakjogak.security.entity.Member;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,7 @@ public class NotificationBatchConfig {
     private static final int RETRY_LIMIT = 3;
     private static final int SKIP_SIZE = 10;
     private static final int NOTIFICATION_THRESHOLD_DAYS = 1;
+    private final NotificationRepository notificationRepository;
     private final JobRepository jobRepository;
     private final PlatformTransactionManager platformTransactionManager;
     private final JDRepository jdRepository;
@@ -116,10 +119,19 @@ public class NotificationBatchConfig {
                         .build();
                 try {
                     notificationService.sendNotificationEmail(notificationDto);
+                    saveNotification(notificationDto);
                 } catch (Exception e) {
                     log.warn("이메일 전송에 실패했습니다. memberId={}, error={}", member.getId(), e.getMessage());
                 }
             }
         };
+    }
+    public void saveNotification(NotificationDto notificationDto){
+        Notification notification = Notification.builder()
+                .member(notificationDto.getMember())
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        notificationRepository.save(notification);
     }
 }
