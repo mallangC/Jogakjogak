@@ -1,8 +1,8 @@
 package com.zb.jogakjogak.jobDescription.domain.requestDto;
 
+import com.zb.jogakjogak.global.validation.MeaningfulText;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -57,8 +57,9 @@ public class JDRequestDto {
             "제출 서류: 자유 형식의 이력서, 경력 기술서 지원 경로: [채용 플랫폼 링크, 이메일 주소 등] 조각조각에 관심 있는 분들의 많은 지원 바랍니다. 감사합니다.",
             requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "채용 공고는 필수 항목입니다.")
+    @MeaningfulText(message = "채용공고 내용이 유효하지 않거나 의미 없는 반복 문자를 포함합니다.")
+    @Size(min = 300, message = "채용공고의 내용은 300자 이상이어야 합니다.")
     private String content;
     @Schema(description = "채용 공고의 마감일", example = "2025-06-22T10:30:00Z", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "마감일은 필수 항목입니다.")
     private LocalDateTime endedAt;
 }

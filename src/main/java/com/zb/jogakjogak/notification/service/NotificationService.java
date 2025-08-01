@@ -7,6 +7,8 @@ import com.zb.jogakjogak.jobDescription.repository.ToDoListRepository;
 import com.zb.jogakjogak.notification.dto.NotificationDto;
 import com.zb.jogakjogak.notification.dto.EmailTemplateDto;
 import com.zb.jogakjogak.notification.dto.JdEmailDto;
+import com.zb.jogakjogak.notification.entity.Notification;
+import com.zb.jogakjogak.notification.repository.NotificationRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +37,7 @@ public class NotificationService {
     private final JavaMailSender javaMailSender;
     private final SpringTemplateEngine templateEngine;
     private final ToDoListRepository toDoListRepository;
+    private final NotificationRepository notificationRepository;
     private final GaMeasurementProtocolService gaService;
 
     @Async("taskExecutor")

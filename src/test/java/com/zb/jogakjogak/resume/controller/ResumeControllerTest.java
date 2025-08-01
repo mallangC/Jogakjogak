@@ -109,16 +109,16 @@ class ResumeControllerTest {
      * 이력서 등록 테스트 유틸리티 (다른 테스트에서 재사용)
      * 이 메서드는 MockMvc를 통해 이력서를 등록하고, 등록된 이력서의 ID를 반환합니다.
      * @param title 이력서 제목
-     * @param content 이력서 내용
      * @return 등록된 이력서의 ID
      */
-    private Long registerResumeThroughApi(String title, String content) throws Exception {
-        ResumeRequestDto requestDto = new ResumeRequestDto(title, content);
+    private Long registerResumeThroughApi(String title) throws Exception {
+        String generatedContent = generateLongContent(300);
+        ResumeRequestDto requestDto = new ResumeRequestDto(title, generatedContent);
         String requestContent = objectMapper.writeValueAsString(requestDto);
 
         ResultActions registerResult = mockMvc.perform(post("/resume")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestContent)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestContent)
         );
 
         HttpApiResponse<ResumeResponseDto> response = objectMapper.readValue(registerResult.andReturn().getResponse().getContentAsString(),
@@ -141,7 +141,10 @@ class ResumeControllerTest {
     @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail)
     void registerResume_success() throws Exception {
         // Given
-        ResumeRequestDto requestDto = new ResumeRequestDto("테스트 이력서 제목", "테스트 이력서 내용입니다.");
+        String testTitle = "테스트 이력서 제목";
+        String testContent = generateLongContent(300);
+
+        ResumeRequestDto requestDto = new ResumeRequestDto(testTitle, testContent);
         String content = objectMapper.writeValueAsString(requestDto);
 
         // When
@@ -152,8 +155,8 @@ class ResumeControllerTest {
         // Then
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("이력서 등록 완료"))
-                .andExpect(jsonPath("$.data.title").value("테스트 이력서 제목"))
-                .andExpect(jsonPath("$.data.content").value("테스트 이력서 내용입니다."))
+                .andExpect(jsonPath("$.data.title").value(testTitle))
+                .andExpect(jsonPath("$.data.content").value(testContent))
                 .andExpect(jsonPath("$.data.resumeId").isNumber())
                 .andDo(print());
 
@@ -168,9 +171,12 @@ class ResumeControllerTest {
     @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail)
     void modifyResume_success() throws Exception {
         // Given
-        Long resumeId = registerResumeThroughApi("원본 이력서", "원본 내용");
+        Long resumeId = registerResumeThroughApi("원본 이력서");
 
-        ResumeRequestDto updateRequestDto = new ResumeRequestDto("수정된 이력서 제목", "수정된 내용입니다.");
+        String updatedTitle = "수정된 이력서 제목";
+        String updatedContent = generateLongContent(300);
+
+        ResumeRequestDto updateRequestDto = new ResumeRequestDto(updatedTitle, updatedContent);
         String content = objectMapper.writeValueAsString(updateRequestDto);
 
         // When
@@ -180,16 +186,16 @@ class ResumeControllerTest {
         // Then
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("이력서 수정 완료"))
-                .andExpect(jsonPath("$.data.title").value("수정된 이력서 제목"))
-                .andExpect(jsonPath("$.data.content").value("수정된 내용입니다."))
+                .andExpect(jsonPath("$.data.title").value(updatedTitle))
+                .andExpect(jsonPath("$.data.content").value(updatedContent))
                 .andDo(print());
 
 
         entityManager.clear();
         Optional<Resume> updatedResume = resumeRepository.findById(resumeId);
         assertThat(updatedResume).isPresent();
-        assertThat(updatedResume.get().getTitle()).isEqualTo("수정된 이력서 제목");
-        assertThat(updatedResume.get().getContent()).isEqualTo("수정된 내용입니다.");
+        assertThat(updatedResume.get().getTitle()).isEqualTo(updatedTitle);
+        assertThat(updatedResume.get().getContent()).isEqualTo(updatedContent);
     }
 
     @Test
@@ -197,7 +203,7 @@ class ResumeControllerTest {
     @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail)
     void getResume_success() throws Exception {
         //Given
-        Long resumeId = registerResumeThroughApi("조회할 이력서 제목", "조회할 내용");
+        Long resumeId = registerResumeThroughApi("조회할 이력서 제목");
 
         //When
         ResultActions result = mockMvc.perform(get("/resume/{resumeId}", resumeId));
@@ -206,7 +212,7 @@ class ResumeControllerTest {
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("이력서 조회 성공"))
                 .andExpect(jsonPath("$.data.title").value("조회할 이력서 제목"))
-                .andExpect(jsonPath("$.data.content").value("조회할 내용"))
+                .andExpect(jsonPath("$.data.content").isNotEmpty())
                 .andDo(print());
     }
 
@@ -217,7 +223,7 @@ class ResumeControllerTest {
     @Commit
     void deleteResume_success() throws Exception {
         //Given
-        Long resumeIdToDelete = registerResumeThroughApi("삭제할 이력서 제목", "삭제할 내용");
+        Long resumeIdToDelete = registerResumeThroughApi("삭제할 이력서 제목"); // 300자 이상 내용 자동 생성
 
         //When
         ResultActions result = mockMvc.perform(delete("/resume/{resumeId}", resumeIdToDelete));
@@ -241,4 +247,69 @@ class ResumeControllerTest {
                 .andExpect(status().isForbidden())
                 .andDo(print());
     }
+    @Test
+    @DisplayName("유효하지 않은 (무의미한) 이력서 내용 입력 시 유효성 검사 실패")
+    @WithMockCustomUser(username = "testUserLoginId", realName = "Test User", email = "test@email.com")
+    void registerResume_invalidContent_meaningless() throws Exception {
+        // Given
+        String testTitle = "유효한 테스트 제목";
+        String meaninglessContent = faker.lorem().characters(350, true, false);
+
+        ResumeRequestDto requestDto = new ResumeRequestDto(testTitle, meaninglessContent);
+        String requestBody = objectMapper.writeValueAsString(requestDto);
+
+        // When
+        ResultActions result = mockMvc.perform(post("/resume")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // Then
+        result.andExpect(status().isBadRequest()) // 400 Bad Request
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_FAILED"))
+                .andExpect(jsonPath("$.message").value("이력서 내용이 유효하지 않거나 의미 없는 반복 문자를 포함합니다."))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("유효하지 않은 (한글 무작위) 이력서 내용 입력 시 유효성 검사 실패")
+    @WithMockCustomUser(username = "testUserLoginId", realName = "Test User", email = "test@email.com")
+    void registerResume_invalidContent_koreanGibberish() throws Exception {
+        // Given
+        String testTitle = "유효한 제목";
+        StringBuilder koreanGibberishBuilder = new StringBuilder();
+        String pattern = "ㅁㄴㅇㄹㅂㅈㄱㄷㅅ";
+        while(koreanGibberishBuilder.length() < 300) {
+            koreanGibberishBuilder.append(pattern);
+        }
+        String meaninglessKoreanContent = koreanGibberishBuilder.toString().substring(0, 300);
+
+        ResumeRequestDto requestDto = new ResumeRequestDto(testTitle, meaninglessKoreanContent);
+        String requestBody = objectMapper.writeValueAsString(requestDto);
+
+        // When
+        ResultActions result = mockMvc.perform(post("/resume")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
+
+        // Then
+        result.andExpect(status().isBadRequest()) // 400 Bad Request
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_FAILED"))
+                .andExpect(jsonPath("$.message").value("이력서 내용이 유효하지 않거나 의미 없는 반복 문자를 포함합니다."))
+                .andDo(print());
+    }
+
+    /**
+     * Faker를 사용하여 지정된 길이 이상의 랜덤 텍스트를 생성하는 헬퍼 메서드
+     * @param minLength 최소 길이
+     * @return 생성된 랜덤 텍스트
+     */
+    private String generateLongContent(int minLength) {
+        StringBuilder contentBuilder = new StringBuilder();
+        while (contentBuilder.length() < minLength) {
+            contentBuilder.append(faker.lorem().paragraph(2));
+            contentBuilder.append(" ");
+        }
+        return contentBuilder.toString();
+    }
+
 }
