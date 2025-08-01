@@ -3,7 +3,6 @@ package com.zb.jogakjogak.jobDescription.domain.requestDto;
 import com.zb.jogakjogak.global.validation.MeaningfulText;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -62,6 +61,5 @@ public class JDRequestDto {
     @Size(min = 300, message = "채용공고의 내용은 300자 이상이어야 합니다.")
     private String content;
     @Schema(description = "채용 공고의 마감일", example = "2025-06-22T10:30:00Z", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "마감일은 필수 항목입니다.")
     private LocalDateTime endedAt;
 }
