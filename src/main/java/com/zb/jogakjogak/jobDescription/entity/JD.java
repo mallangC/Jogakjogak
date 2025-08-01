@@ -57,7 +57,7 @@ public class JD extends BaseEntity {
     @Column
     private LocalDateTime lastNotifiedAt;
 
-    @Column(nullable = false, columnDefinition = "DATE")
+    @Column(columnDefinition = "DATE")
     private LocalDateTime endedAt;
 
     @Builder.Default
