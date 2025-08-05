@@ -15,6 +15,7 @@ public class AllGetJDResponseDto {
     private Long jd_id;
     private String title;
     private boolean isBookmark;
+    private boolean isAlarmOn;
     private String companyName;
     private Long total_pieces;
     private Long completed_pieces;
