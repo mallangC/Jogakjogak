@@ -220,6 +220,7 @@ public class JDService {
                 .jd_id(jd.getId())
                 .title(jd.getTitle())
                 .isBookmark(jd.isBookmark())
+                .isAlarmOn(jd.isAlarmOn())
                 .companyName(jd.getCompanyName())
                 .completed_pieces(completedPieces)
                 .total_pieces(totalPieces)
