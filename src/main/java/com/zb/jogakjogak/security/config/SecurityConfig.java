@@ -45,7 +45,7 @@ public class SecurityConfig {
                         corsConfiguration.setAllowedOrigins(Arrays.asList(
                                 "http://localhost:3000",
                                 "https://jogakjogak.com",
-                                "https://jogakjogak-web.vercel.app",
+                                "https://jogakjogak-front.vercel.app",
                                 "https://www.jogakjogak.com",
                                 "https://api.jogakjogak.com"
                                 ));
@@ -90,7 +90,6 @@ public class SecurityConfig {
                         .anyRequest().authenticated());
         http.
                 sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
         return http.build();
     }
 }
