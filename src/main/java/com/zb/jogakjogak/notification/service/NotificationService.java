@@ -4,10 +4,9 @@ import com.zb.jogakjogak.ga.service.GaMeasurementProtocolService;
 import com.zb.jogakjogak.global.util.HashingUtil;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.repository.ToDoListRepository;
-import com.zb.jogakjogak.notification.dto.NotificationDto;
 import com.zb.jogakjogak.notification.dto.EmailTemplateDto;
 import com.zb.jogakjogak.notification.dto.JdEmailDto;
-import com.zb.jogakjogak.notification.entity.Notification;
+import com.zb.jogakjogak.notification.dto.NotificationDto;
 import com.zb.jogakjogak.notification.repository.NotificationRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -21,11 +20,7 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -37,7 +32,6 @@ public class NotificationService {
     private final JavaMailSender javaMailSender;
     private final SpringTemplateEngine templateEngine;
     private final ToDoListRepository toDoListRepository;
-    private final NotificationRepository notificationRepository;
     private final GaMeasurementProtocolService gaService;
 
     @Async("taskExecutor")
@@ -126,11 +120,12 @@ public class NotificationService {
      */
     private String getDailyMotivationMessage() {
         String[] messages = {
-                "오늘도 한 조각씩, 꾸준히 나아가는 당신을 응원합니다.",
-                "작은 조각들이 모여 큰 성취를 만들어갑니다.",
-                "멈춰있던 시간도 괜찮아요. 지금 다시 시작하면 됩니다.",
-                "취업 준비는 마라톤이에요. 오늘 할 수 있는 것부터 차근차근 해봐요.",
-                "완벽하지 않아도 괜찮습니다. 진전이 있다면 그것으로 충분해요."
+                "시간이 부족했을 수도 있고, 딱히 손이 안 갔을 수도 있어요. 그럴 땐 ‘내가 왜 멈췄을까’를 잠깐 들여다보는 것도 방법이에요. 조각조각이 막힌 이유에 맞게 도움을 드릴게요. 오늘 할 수 있는 것부터 천천히 시작해 봐요. ",
+                "잠시 쉬고 있었다면 지금이 다시 시작하기 좋은 순간이에요. 할 일을 전부 한 번에 끝낼 필요는 없어요. 조각조각에서 오늘 할 수 있는 가장 쉬운 할 일부터 시작해 봐요.",
+                "막막했던 건 다음에 무엇을 해야 할지 보이지 않아서인지도 몰라요. 목표가 선명해지면 발걸음은 훨씬 가벼워집니다. 오늘은 조각조각에서 할 일 하나를 선택해 바로 시작해 보세요.",
+                "하루가 지날수록 준비는 미뤄지고, 마음은 무거워질 수 있어요. 그 무게를 줄이는 가장 간단한 방법은 시작하는 거예요. 지금 조각조각에서 할 일 하나를 완료해 보세요.",
+                "멈춰 있는 사이, 기회는 계속 흘러가고 있어요. 오늘 한 번에 다 하지 않아도 돼요. 조각조각에서 남은 할 일 중 하나만 끝내 보세요.",
+                "멈춘 이유가 무엇이든 괜찮아요. 지금 조각조각에서 이력서 한 줄이라도 업데이트해 보세요. 그 한 줄이 다음 지원서 제출을 훨씬 빨리 만들어 줄 거예요."
         };
 
         int randomIndex = (int) (Math.random() * messages.length);
