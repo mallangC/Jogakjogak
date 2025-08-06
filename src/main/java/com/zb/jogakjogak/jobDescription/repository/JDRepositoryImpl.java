@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,15 +71,18 @@ public class JDRepositoryImpl implements JDRepositoryCustom{
     }
 
     @Override
-    public Page<JD> findNotUpdatedJdByQueryDsl(LocalDateTime now, LocalDateTime threeDaysAgo, LocalDateTime todayStart, Pageable pageable) {
+    public Page<JD> findNotUpdatedJdByQueryDsl(LocalDateTime now, LocalDateTime todayStart, Pageable pageable) {
         QJD jd = QJD.jD;
+
+        LocalDateTime threeDaysAgoDate = LocalDate.now().atStartOfDay();
 
         List<JD> content = queryFactory
                 .selectFrom(jd)
                 .where(
-                        jd.updatedAt.loe(threeDaysAgo),
+                        jd.updatedAt.loe(threeDaysAgoDate),
                         jd.endedAt.goe(now),
                         jd.isAlarmOn.isTrue(),
+                        jd.notificationCount.lt(3),
                         jd.lastNotifiedAt.isNull()
                                 .or(jd.lastNotifiedAt.lt(todayStart))
                 )
@@ -91,9 +95,10 @@ public class JDRepositoryImpl implements JDRepositoryCustom{
                 .select(jd.count())
                 .from(jd)
                 .where(
-                        jd.updatedAt.loe(threeDaysAgo),
+                        jd.updatedAt.loe(threeDaysAgoDate),
                         jd.endedAt.goe(now),
                         jd.isAlarmOn.isTrue(),
+                        jd.notificationCount.lt(3),
                         jd.lastNotifiedAt.isNull()
                                 .or(jd.lastNotifiedAt.lt(todayStart))
                 )

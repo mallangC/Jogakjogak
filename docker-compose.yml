@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   jogak_backend_app:
     image: mallangc/jogakjogak-backend:1.0.0
@@ -30,3 +28,8 @@ services:
       - "8080:8080"
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - ../jogakjogak-logs:/var/log/jogakjogak
+    deploy:
+      resources:
+        limits:
+          memory: 1536m
