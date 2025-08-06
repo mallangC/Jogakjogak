@@ -2,6 +2,7 @@ services:
   jogak_backend_app:
     image: mallangc/jogakjogak-backend:1.0.0
     container_name: jogak-backend
+    restart: always
     environment:
       TZ: Asia/Seoul
       DB_URL: ${DB_URL}
@@ -28,7 +29,11 @@ services:
       - "8080:8080"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /var/log/jogak-backend:/var/log/jogakjogak
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200m"
+        max-file: "1"
     deploy:
       resources:
         limits:
