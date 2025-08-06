@@ -79,6 +79,7 @@ public class JDRepositoryImpl implements JDRepositoryCustom{
                         jd.updatedAt.loe(threeDaysAgo),
                         jd.endedAt.goe(now),
                         jd.isAlarmOn.isTrue(),
+                        jd.notificationCount.lt(3),
                         jd.lastNotifiedAt.isNull()
                                 .or(jd.lastNotifiedAt.lt(todayStart))
                 )
@@ -94,6 +95,7 @@ public class JDRepositoryImpl implements JDRepositoryCustom{
                         jd.updatedAt.loe(threeDaysAgo),
                         jd.endedAt.goe(now),
                         jd.isAlarmOn.isTrue(),
+                        jd.notificationCount.lt(3),
                         jd.lastNotifiedAt.isNull()
                                 .or(jd.lastNotifiedAt.lt(todayStart))
                 )

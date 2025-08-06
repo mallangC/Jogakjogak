@@ -51,6 +51,7 @@ public class ToDoListService {
     public ToDoListResponseDto createToDoList(Long jdId, CreateToDoListRequestDto toDoListDto, String memberName) {
 
         JD jd = getAuthorizedJd(jdId, memberName);
+        jd.setNotificationCount(0);
         ToDoListType newCategory = toDoListDto.getCategory();
 
         validateAllowedCategory(newCategory);
@@ -80,6 +81,7 @@ public class ToDoListService {
     public ToDoListResponseDto updateToDoList(Long jdId, Long toDoListId, UpdateToDoListRequestDto toDoListDto, String memberName) {
 
         JD jd = getAuthorizedJd(jdId, memberName);
+        jd.setNotificationCount(0);
         ToDoList toDoList = toDoListRepository.findToDoListWithJdByIdAndJdId(toDoListId, jd.getId())
                 .orElseThrow(() -> new ToDoListException(ToDoListErrorCode.UNAUTHORIZED_ACCESS));
         toDoList.updateFromDto(toDoListDto);
@@ -114,6 +116,7 @@ public class ToDoListService {
     public void deleteToDoList(Long jdId, Long toDoListId, String memberName) {
 
         JD jd = getAuthorizedJd(jdId, memberName);
+        jd.setNotificationCount(0);
         ToDoList toDoList = toDoListRepository.findToDoListWithJdByIdAndJdId(toDoListId, jd.getId())
                 .orElseThrow(() -> new ToDoListException(ToDoListErrorCode.UNAUTHORIZED_ACCESS));
 
@@ -141,7 +144,7 @@ public class ToDoListService {
     @Transactional
     public void bulkUpdateToDoLists(Long jdId, BulkToDoListUpdateRequestDto dto, String memberName) {
         JD jd = getAuthorizedJd(jdId, memberName);
-
+        jd.setNotificationCount(0);
         ToDoListType targetCategory = dto.getCategory();
         if (targetCategory == null) {
             throw new ToDoListException(ToDoListErrorCode.CATEGORY_REQUIRED);
@@ -194,6 +197,7 @@ public class ToDoListService {
      * @param dtoList        생성 또는 수정될 ToDoList DTO 목록
      */
     private void processUpdatedOrCreateToDoLists(JD jd, ToDoListType targetCategory, List<ToDoListUpdateRequestDto> dtoList) {
+        jd.setNotificationCount(0);
         for (ToDoListUpdateRequestDto dto : dtoList) {
 
             if (dto.getId() != null) {
@@ -228,7 +232,7 @@ public class ToDoListService {
      */
     private void processDeletedToDoLists(JD jd, ToDoListType targetCategory, List<Long> idsToDelete) {
         List<ToDoList> actualToDoListsToDelete = toDoListRepository.findAllByIdsWithJd(idsToDelete);
-
+        jd.setNotificationCount(0);
         List<Long> verifiedIdsToDelete = actualToDoListsToDelete.stream()
                 .filter(tl -> tl.getJd().getId().equals(jd.getId()) && tl.getCategory().equals(targetCategory))
                 .map(ToDoList::getId)
