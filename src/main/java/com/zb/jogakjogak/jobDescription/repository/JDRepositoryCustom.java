@@ -36,9 +36,8 @@ public interface JDRepositoryCustom {
      * 특정 날짜 이전에 업데이트되지 않았고, 마감일이 현재 시간 이후이며, 알림이 켜져 있는 JD 목록을 페이징하여 조회합니다.
      *
      * @param oldDate  업데이트 기준 날짜
-     * @param now      현재 시간 (마감일 비교 기준)
      * @param pageable 페이징 및 정렬 정보
      * @return 조건에 맞는 JD 목록
      */
-    Page<JD> findNotUpdatedJdByQueryDsl(LocalDateTime oldDate, LocalDateTime now, LocalDateTime todayStart, Pageable pageable);
+    Page<JD> findNotUpdatedJdByQueryDsl(LocalDateTime oldDate, LocalDateTime todayStart, Pageable pageable);
 }

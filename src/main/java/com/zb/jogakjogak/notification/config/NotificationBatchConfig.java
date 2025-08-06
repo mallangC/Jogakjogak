@@ -81,7 +81,7 @@ public class NotificationBatchConfig {
                 .name("jDReader")
                 .pageSize(PAGE_SIZE)
                 .methodName("findNotUpdatedJdByQueryDsl")
-                .arguments(List.of(now, threeDaysAgo, todayStart))
+                .arguments(List.of(now, todayStart))
                 .repository(jdRepository)
                 .sorts(Map.of("id", Sort.Direction.ASC))
                 .build();
