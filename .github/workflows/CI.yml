@@ -71,7 +71,6 @@ jobs:
           PHONE_AES_KEY: ${{ secrets.PHONE_AES_KEY }}
           GA4_MEASUREMENT_ID: ${{secrets.GA4_MEASUREMENT_ID}}
           GA4_API_KEY: ${{secrets.GA4_API_KEY}}
-          JAVA_TOOL_OPTIONS: -Dlogback.configurationFile=classpath:logback-spring-test.xml
 
         run: ./gradlew test --info
 
