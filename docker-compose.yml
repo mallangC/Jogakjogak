@@ -28,7 +28,7 @@ services:
       - "8080:8080"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /var/log/jogak-backend:/var/log/jogakjogak
+      - ../jogakjogak-logs:/var/log/jogakjogak
     deploy:
       resources:
         limits:
