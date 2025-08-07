@@ -73,11 +73,13 @@ public class JDRepositoryImpl implements JDRepositoryCustom{
     @Override
     public Page<JD> findNotUpdatedJdByQueryDsl(LocalDateTime now, LocalDateTime todayStart, Pageable pageable) {
         QJD jd = QJD.jD;
+        QMember member = QMember.member;
 
-        LocalDateTime threeDaysAgoDate = LocalDate.now().atStartOfDay();
+        LocalDateTime threeDaysAgoDate = LocalDate.now().plusDays(1).atStartOfDay();
 
         List<JD> content = queryFactory
                 .selectFrom(jd)
+                .join(jd.member, member).fetchJoin()
                 .where(
                         jd.updatedAt.loe(threeDaysAgoDate),
                         jd.endedAt.goe(now),

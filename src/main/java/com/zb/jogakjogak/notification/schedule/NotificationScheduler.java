@@ -19,7 +19,7 @@ public class NotificationScheduler {
     private final JobLauncher jobLauncher;
     private final JobRegistry jobRegistry;
 
-    @Scheduled(cron = " 0 0 11 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 0 13 * * *", zone = "Asia/Seoul")
     public void runFirstJob() throws Exception{
         JobParameters jobParameter = new JobParametersBuilder()
                 .addString("timestamp", String.valueOf(new Date().getTime()))
