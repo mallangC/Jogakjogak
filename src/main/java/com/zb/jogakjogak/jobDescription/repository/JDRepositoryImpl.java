@@ -75,19 +75,18 @@ public class JDRepositoryImpl implements JDRepositoryCustom{
         QJD jd = QJD.jD;
         QMember member = QMember.member;
 
-        LocalDateTime threeDaysAgoDate = LocalDate.now().plusDays(1).atStartOfDay();
+        LocalDateTime threeDaysAgoDate = LocalDate.now().atStartOfDay();
 
         List<JD> content = queryFactory
                 .selectFrom(jd)
                 .join(jd.member, member).fetchJoin()
                 .where(
                         jd.updatedAt.loe(threeDaysAgoDate),
-                        jd.endedAt.goe(now),
                         jd.isAlarmOn.isTrue(),
                         jd.notificationCount.lt(3),
-                        jd.lastNotifiedAt.isNull()
-                                .or(jd.lastNotifiedAt.lt(todayStart))
-                )
+                        jd.lastNotifiedAt.isNull().or(jd.lastNotifiedAt.lt(todayStart)),
+                        jd.endedAt.isNull().or(jd.endedAt.goe(now))
+                        )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .orderBy(getOrderSpecifiers(pageable.getSort(), jd).toArray(OrderSpecifier[]::new))
@@ -98,11 +97,10 @@ public class JDRepositoryImpl implements JDRepositoryCustom{
                 .from(jd)
                 .where(
                         jd.updatedAt.loe(threeDaysAgoDate),
-                        jd.endedAt.goe(now),
                         jd.isAlarmOn.isTrue(),
                         jd.notificationCount.lt(3),
-                        jd.lastNotifiedAt.isNull()
-                                .or(jd.lastNotifiedAt.lt(todayStart))
+                        jd.lastNotifiedAt.isNull().or(jd.lastNotifiedAt.lt(todayStart)),
+                        jd.endedAt.isNull().or(jd.endedAt.goe(now))
                 )
                 .fetchOne();
 
