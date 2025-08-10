@@ -75,7 +75,7 @@ public class JDRepositoryImpl implements JDRepositoryCustom{
         QJD jd = QJD.jD;
         QMember member = QMember.member;
 
-        LocalDateTime threeDaysAgoDate = LocalDate.now().atStartOfDay();
+        LocalDateTime threeDaysAgoDate = LocalDate.now().atStartOfDay().minusDays(3);
 
         List<JD> content = queryFactory
                 .selectFrom(jd)
