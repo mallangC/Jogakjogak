@@ -15,7 +15,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,11 +28,11 @@ public class WithdrawalController {
 
     @Operation(summary = "회원 탈퇴", description = "로그인된 사용자가 회원을 탈퇴합니다")
     @DeleteMapping
-    public ResponseEntity oauth2Withdrawal(HttpServletResponse response, @AuthenticationPrincipal CustomOAuth2User customOAuth2User){
+    public ResponseEntity oauth2Withdrawal(HttpServletResponse response, @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()){
-            return  ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new HttpApiResponse<>(null,
                             "회원 탈퇴 요청 실패: 인증되지 않은 사용자입니다.",
                             HttpStatus.UNAUTHORIZED));
