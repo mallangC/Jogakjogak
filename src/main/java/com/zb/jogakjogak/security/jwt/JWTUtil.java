@@ -5,6 +5,7 @@ import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.security.Token;
 import com.zb.jogakjogak.security.repository.RefreshTokenRepository;
 import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -77,13 +78,16 @@ public class JWTUtil {
         if (token == null) {
             throw new AuthException(MemberErrorCode.NOT_FOUND_TOKEN);
         }
+        try {
+            if (isExpired(token)) {
+                throw new AuthException(MemberErrorCode.TOKEN_EXPIRED);
+            }
 
-        if (isExpired(token)) {
-            throw new AuthException(MemberErrorCode.TOKEN_EXPIRED);
-        }
-
-        if (!getToken(token).equals(tokenType.name())) {
-            throw new AuthException(MemberErrorCode.TOKEN_TYPE_NOT_MATCH);
+            if (!getToken(token).equals(tokenType.name())) {
+                throw new AuthException(MemberErrorCode.TOKEN_TYPE_NOT_MATCH);
+            }
+        } catch (JwtException | IllegalArgumentException e){
+            throw new AuthException(MemberErrorCode.INVALID_ACCESS_TOKEN);
         }
     }
 }
