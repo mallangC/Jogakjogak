@@ -5,9 +5,9 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.QJD;
 import com.zb.jogakjogak.jobDescription.entity.QToDoList;
+import com.zb.jogakjogak.resume.entity.QResume;
 import com.zb.jogakjogak.security.entity.QMember;
 import jakarta.persistence.EntityManager;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -32,11 +32,13 @@ public class JDRepositoryImpl implements JDRepositoryCustom{
         QJD jd = QJD.jD;
         QMember member = QMember.member;
         QToDoList toDoList = QToDoList.toDoList;
+        QResume resume = QResume.resume;
 
         JD foundJd = queryFactory
                 .selectFrom(jd)
                 .join(jd.member, member).fetchJoin()
                 .leftJoin(jd.toDoLists, toDoList).fetchJoin()
+                .join(member.resume, resume).fetchJoin()
                 .where(jd.id.eq(jdId)
                         .and(member.id.eq(memberId)))
                 .fetchOne();
