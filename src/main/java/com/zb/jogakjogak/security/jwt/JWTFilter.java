@@ -52,7 +52,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
         if (accessToken == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
+            response.setContentType("application/json; charset=UTF-8");
             String json = "{\"AuthException\": \"NOT_FOUND_TOKEN\", \"message\": \"토큰이 없습니다.\"}";
             response.getWriter().write(json);
             return;
