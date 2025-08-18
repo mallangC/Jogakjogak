@@ -62,7 +62,7 @@ public class JWTFilter extends OncePerRequestFilter {
             jwtUtil.validateToken(accessToken, Token.ACCESS_TOKEN);
         } catch (AuthException e) { // jwtUtil.validateToken에서 던지는 예외를 여기서 catch
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
+            response.setContentType("application/json; charset=UTF-8");
             String json = "{\"errorCode\": \"UNAUTHORIZED\", \"message\": \"" + e.getMessage() + "\"}";
             response.getWriter().write(json);
             return;
