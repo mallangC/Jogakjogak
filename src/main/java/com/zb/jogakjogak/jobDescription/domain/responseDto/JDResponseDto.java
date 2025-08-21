@@ -1,6 +1,7 @@
 package com.zb.jogakjogak.jobDescription.domain.responseDto;
 
 import com.zb.jogakjogak.jobDescription.entity.JD;
+import com.zb.jogakjogak.security.entity.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -70,7 +71,7 @@ public class JDResponseDto {
     @Schema(description = "전체 todolist 리스트")
     private List<ToDoListResponseDto> toDoLists;
 
-    public static JDResponseDto fromEntity(JD jd) {
+    public static JDResponseDto fromEntity(JD jd, Member member) {
         List<ToDoListResponseDto> mappedToDoLists = null;
         if (jd.getToDoLists() != null) {
             mappedToDoLists = jd.getToDoLists().stream()
@@ -93,7 +94,7 @@ public class JDResponseDto {
                 .createdAt(jd.getCreatedAt())
                 .updatedAt(jd.getUpdatedAt())
                 .toDoLists(mappedToDoLists)
-                .memberId(jd.getMember().getId())
+                .memberId(member.getId())
                 .build();
     }
 }
