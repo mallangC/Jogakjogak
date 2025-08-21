@@ -221,6 +221,13 @@ public class JDService {
                 .build();
     }
 
+    @Transactional
+    public JDResponseDto updateJd(Long jdId, JDUpdateRequestDto jdUpdateRequestDto, Member member){
+        JD jd = getAuthorizedJd(jdId, member);
+        jd.updateJd(jdUpdateRequestDto);
+        return JDResponseDto.fromEntity(jd, member);
+    }
+
     /**
      * Helper method to retrieve a JD and ensure the member has access.
      * JD를 검색하고 회원이 접근 권한이 있는지 확인하는 헬퍼 메서드.
