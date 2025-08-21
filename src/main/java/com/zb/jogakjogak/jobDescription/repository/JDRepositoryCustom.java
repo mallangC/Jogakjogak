@@ -21,7 +21,7 @@ public interface JDRepositoryCustom {
      * 각 JD와 연관된 ToDoList를 즉시 로딩하여 N+1 문제를 방지합니다.
      *
      */
-    Page<JD> findAllJdsByMemberIdWithToDoLists(Long memberId, Pageable pageable);
+    Page<JD> findAllJdsByMemberIdWithToDoLists(Long memberId, Pageable pageable, String showOnly);
 
     /**
      * 특정 날짜 이전에 업데이트되지 않았고, 마감일이 현재 시간 이후이며, 알림이 켜져 있는 JD 목록을 페이징하여 조회합니다.
