@@ -106,11 +106,15 @@ public class JDController {
                     size = 11,
                     sort = "createdAt",
                     direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(defaultValue = "normal") String showOnly,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User
     ) {
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
-                        jdService.getAllJds(customOAuth2User.getMember(), pageable),
+                        jdService.getAllJds(
+                                customOAuth2User.getMember(),
+                                pageable,
+                                showOnly),
                         "나의 분석 내용 전체 조회 성공",
                         HttpStatus.OK
                 )
@@ -121,9 +125,9 @@ public class JDController {
     @Operation(summary = "특정 분석 즐겨찾기 설정", description = "jd_id를 통해 분석을 즐겨찾기로 설정/미설정합니다")
     @PatchMapping("/jds/{jd_id}/bookmark")
     public ResponseEntity<HttpApiResponse<BookmarkResponseDto>> toggleBookmark
-    (@PathVariable("jd_id") Long jdId,
-     @RequestBody BookmarkRequestDto dto,
-     @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+            (@PathVariable("jd_id") Long jdId,
+             @RequestBody BookmarkRequestDto dto,
+             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
                         jdService.updateBookmarkStatus(jdId, dto, customOAuth2User.getMember()),
