@@ -148,8 +148,10 @@ public class JDService {
      */
 
     @Transactional(readOnly = true)
-    public PagedJdResponseDto getAllJds(Member member, Pageable pageable) {
-        Page<JD> jdEntitiesPage = jdRepository.findAllJdsByMemberIdWithToDoLists(member.getId(), pageable);
+    public PagedJdResponseDto getAllJds(Member member,
+                                        Pageable pageable,
+                                        String showOnly) {
+        Page<JD> jdEntitiesPage = jdRepository.findAllJdsByMemberIdWithToDoLists(member.getId(), pageable, showOnly);
 
         List<AllGetJDResponseDto> dtos = jdEntitiesPage.getContent().stream()
                 .map(this::convertToDto)
