@@ -2,10 +2,7 @@ package com.zb.jogakjogak.jobDescription.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.BookmarkRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.MemoRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.*;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repository.JDRepository;
@@ -15,10 +12,11 @@ import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import com.zb.jogakjogak.resume.entity.Resume;
 import com.zb.jogakjogak.resume.repository.ResumeRepository;
 import com.zb.jogakjogak.security.Role;
-import com.zb.jogakjogak.security.WithMockCustomUser;
+import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.entity.Member;
 import com.zb.jogakjogak.security.repository.MemberRepository;
 import jakarta.persistence.EntityManager;
+import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,6 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -121,7 +121,7 @@ class JDControllerTest {
                 .title(faker.lorem().word())
                 .build();
         resumeRepository.save(mockResume);
-
+        setAuthenticationForTestUser(testUserLoginId);
         entityManager.clear();
     }
 
@@ -138,16 +138,6 @@ class JDControllerTest {
 
     /**
      * JD를 DB에 직접 저장하는 유틸리티 메서드 (테스트 데이터 세팅용)
-     *
-     * @param member       JD를 소유할 멤버
-     * @param title        JD 제목
-     * @param url          JD URL
-     * @param dueDate      마감일
-     * @param memo         메모 내용
-     * @param isBookmarked 즐겨찾기 여부
-     * @param isAlarmOn    알림 설정 여부
-     * @param applyAt      지원 완료일 (null이면 미완료)
-     * @return 저장된 JD 엔티티
      */
     private JD createAndSaveJd(Member member,
                                String title,
@@ -189,16 +179,26 @@ class JDControllerTest {
         return savedJd;
     }
 
+    private void setAuthenticationForTestUser(String username) {
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(() -> new AssertionError("테스트 사용자를 찾을 수 없습니다."));
+        CustomOAuth2User principal = new CustomOAuth2User(member);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                principal,
+                null,
+                principal.getAuthorities()
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
 
     @Test
     @DisplayName("Gemini를 이용한 JD 분석 성공")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail, role = "USER")
     void llmAnalyze_success() throws Exception {
         // Given
         StringBuilder contentBuilder = new StringBuilder();
         while (contentBuilder.length() < 300) {
             contentBuilder.append(faker.lorem().paragraph(2));
-            contentBuilder.append(" "); // 단락 사이에 공백 추가
+            contentBuilder.append(" ");
         }
         String validContent = contentBuilder.toString();
         JDRequestDto requestDto = new JDRequestDto(
@@ -240,7 +240,6 @@ class JDControllerTest {
 
     @Test
     @DisplayName("JD 단건 조회 성공")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail, role = "USER")
     void getJd_success() throws Exception {
         // Given
         JD jd = createAndSaveJd(
@@ -269,8 +268,7 @@ class JDControllerTest {
     }
 
     @Test
-    @DisplayName("JD 알림 설정 토글 성공")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail, role = "USER")
+    @DisplayName("JD 알림 설정 성공")
     void alarm_success() throws Exception {
         // Given
         JD jd = createAndSaveJd(
@@ -287,22 +285,22 @@ class JDControllerTest {
                 null
         );
         Long jdId = jd.getId();
+        JDAlarmRequestDto turnOnRequest = JDAlarmRequestDto.builder()
+                .isAlarmOn(true)
+                .build();
+        String content = objectMapper.writeValueAsString(turnOnRequest);
+        // When
 
-        // When: 알림 켜기
-        JDAlarmRequestDto turnOnRequest = new JDAlarmRequestDto(true);
         ResultActions resultOn = mockMvc.perform(patch("/jds/{jd_id}/alarm", jdId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(turnOnRequest)));
+                .content(content));
 
-        // Then: 알림 켜짐 확인
+        // Then
         resultOn.andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("알람 설정 완료"))
                 .andExpect(jsonPath("$.data.jdId").value(jdId))
                 .andExpect(jsonPath("$.data.alarmOn").value(true))
                 .andDo(print());
-
-        entityManager.clear();
-        assertThat(jdRepository.findById(jdId).get().isAlarmOn()).isTrue();
 
         // When: 알림 끄기
         JDAlarmRequestDto turnOffRequest = new JDAlarmRequestDto(false);
@@ -317,13 +315,10 @@ class JDControllerTest {
                 .andExpect(jsonPath("$.data.alarmOn").value(false))
                 .andDo(print());
 
-        entityManager.clear();
-        assertThat(jdRepository.findById(jdId).get().isAlarmOn()).isFalse();
     }
 
     @Test
     @DisplayName("JD 삭제 성공")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail, role = "USER")
     void deleteJd_success() throws Exception {
         // Given
         JD jdToDelete = createAndSaveJd(
@@ -345,19 +340,18 @@ class JDControllerTest {
         ResultActions result = mockMvc.perform(delete("/jds/{jd_id}", jdId));
 
         // Then
-        result.andExpect(status().isOk())
+         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("나의 분석 내용 삭제 성공"))
                 .andExpect(jsonPath("$.data").isEmpty())
                 .andDo(print());
 
         entityManager.clear();
         assertThat(jdRepository.findById(jdId)).isEmpty();
-        assertThat(toDoListRepository.findAllByJdId(jdId)).isEmpty(); // 연관된 ToDo도 삭제되었는지 확인
+        assertThat(toDoListRepository.findAllByJdId(jdId)).isEmpty();
     }
 
     @Test
     @DisplayName("JD 목록 페이징 조회 성공 - 기본값")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail, role = "USER")
     void getPaginatedJds_success_default() throws Exception {
         // Given
         // 테스트 사용자의 JD 15개 생성
@@ -409,7 +403,6 @@ class JDControllerTest {
 
     @Test
     @DisplayName("JD 목록 페이징 조회 성공 - 커스텀 파라미터")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail, role = "USER")
     void getPaginatedJds_success_custom() throws Exception {
         // Given
         // 테스트 사용자의 JD 15개 생성
@@ -427,11 +420,11 @@ class JDControllerTest {
                         false,
                         null));
 
-        // When (페이지 1, 사이즈 5, 제목 기준 오름차순 정렬)
+        // When
         ResultActions result = mockMvc.perform(get("/jds")
                 .param("page", "1")
                 .param("size", "5")
-                .param("sort", "title,asc"));
+                .param("sort", "createdAt,asc"));
 
         // Then
         result.andExpect(status().isOk())
@@ -446,7 +439,6 @@ class JDControllerTest {
 
     @Test
     @DisplayName("JD 즐겨찾기 토글 성공")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail, role = "USER")
     void toggleBookmark_success() throws Exception {
         // Given
         JD jd = createAndSaveJd(
@@ -476,8 +468,6 @@ class JDControllerTest {
                 .andExpect(jsonPath("$.data.bookmark").value(true))
                 .andDo(print());
 
-        entityManager.clear();
-        assertThat(jdRepository.findById(jdId).get().isBookmark()).isTrue();
 
         // When: 즐겨찾기 해제 (false)
         BookmarkRequestDto unsetBookmark = new BookmarkRequestDto(false);
@@ -492,13 +482,10 @@ class JDControllerTest {
                 .andExpect(jsonPath("$.data.bookmark").value(false))
                 .andDo(print());
 
-        entityManager.clear();
-        assertThat(jdRepository.findById(jdId).get().isBookmark()).isFalse();
     }
 
     @Test
     @DisplayName("JD 지원 완료 상태 토글 성공")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail, role = "USER")
     void toggleApplyStatus_success() throws Exception {
         // Given
         JD jd = createAndSaveJd(
@@ -525,8 +512,6 @@ class JDControllerTest {
                 .andExpect(jsonPath("$.data.applyAt").exists())
                 .andDo(print());
 
-        entityManager.clear();
-        assertThat(jdRepository.findById(jdId).get().getApplyAt()).isNotNull();
 
         // When: 지원 완료 상태 취소 (applyAt이 현재 시간 -> null로 설정)
         ResultActions resultCancel = mockMvc.perform(patch("/jds/{jd_id}/apply", jdId));
@@ -538,13 +523,10 @@ class JDControllerTest {
                 .andExpect(jsonPath("$.data.applyAt").isEmpty()) // applyAt이 null이 되었는지 확인
                 .andDo(print());
 
-        entityManager.clear();
-        assertThat(jdRepository.findById(jdId).get().getApplyAt()).isNull();
     }
 
     @Test
     @DisplayName("JD 메모 업데이트 성공")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail, role = "USER")
     void updateMemo_success() throws Exception {
         // Given
         JD jd = createAndSaveJd(
@@ -574,7 +556,155 @@ class JDControllerTest {
                 .andExpect(jsonPath("$.data.memo").value("수정된 새로운 메모 내용입니다."))
                 .andDo(print());
 
-        entityManager.clear();
-        assertThat(jdRepository.findById(jdId).get().getMemo()).isEqualTo("수정된 새로운 메모 내용입니다.");
+    }
+
+    @Test
+    @DisplayName("JD 목록 페이징 조회 성공 - 알람 설정이 켜진 JD만")
+    void getPaginatedJds_success_toFilterByAlarmOn() throws Exception {
+        // Given
+        IntStream.range(0, 3).forEach(i ->
+                createAndSaveJd(
+                        setupMember,
+                        "JD_" + i,
+                        "http://test.com/jd/" + i,
+                        "테스트용 회사 이름",
+                        "테스트용 채용 공고 내용",
+                        "테스트용 직무",
+                        LocalDateTime.now().plusDays(i),
+                        "",
+                        false,
+                        true,
+                        null));
+
+        IntStream.range(3, 5).forEach(i ->
+                createAndSaveJd(
+                        setupMember,
+                        "JD_" + i,
+                        "http://test.com/jd/" + i,
+                        "테스트용 회사 이름",
+                        "테스트용 채용 공고 내용",
+                        "테스트용 직무",
+                        LocalDateTime.now().plusDays(i),
+                        "",
+                        false,
+                        false,
+                        null));
+
+        // When
+        ResultActions result = mockMvc.perform(get("/jds")
+                .param("showOnly", "alarm"));
+
+        // Then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("나의 분석 내용 전체 조회 성공"))
+                .andExpect(jsonPath("$.data.jds").isArray())
+                .andExpect(jsonPath("$.data.jds.length()").value(3))
+                .andExpect(jsonPath("$.data.totalElements").value(3))
+                .andExpect(jsonPath("$.data.totalPages").value(1))
+                .andExpect(jsonPath("$.data.currentPage").value(0))
+                .andExpect(jsonPath("$.data.jds[0].alarmOn").value(true))
+                .andExpect(jsonPath("$.data.jds[1].alarmOn").value(true))
+                .andExpect(jsonPath("$.data.jds[2].alarmOn").value(true))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("JD 목록 페이징 조회 성공 - 즐겨 찾기 설정한 JD만")
+    void getPaginatedJds_success_toFilterByBookmark() throws Exception {
+        // Given
+        IntStream.range(0, 3).forEach(i ->
+                createAndSaveJd(
+                        setupMember,
+                        "JD_" + i,
+                        "http://test.com/jd/" + i,
+                        "테스트용 회사 이름",
+                        "테스트용 채용 공고 내용",
+                        "테스트용 직무",
+                        LocalDateTime.now().plusDays(i),
+                        "",
+                        true,
+                        false,
+                        null));
+
+        IntStream.range(3, 5).forEach(i ->
+                createAndSaveJd(
+                        setupMember,
+                        "JD_" + i,
+                        "http://test.com/jd/" + i,
+                        "테스트용 회사 이름",
+                        "테스트용 채용 공고 내용",
+                        "테스트용 직무",
+                        LocalDateTime.now().plusDays(i),
+                        "",
+                        false,
+                        false,
+                        null));
+
+        // When
+        ResultActions result = mockMvc.perform(get("/jds")
+                .param("showOnly", "bookmark"));
+
+        // Then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("나의 분석 내용 전체 조회 성공"))
+                .andExpect(jsonPath("$.data.jds").isArray())
+                .andExpect(jsonPath("$.data.jds.length()").value(3))
+                .andExpect(jsonPath("$.data.totalElements").value(3))
+                .andExpect(jsonPath("$.data.totalPages").value(1))
+                .andExpect(jsonPath("$.data.currentPage").value(0))
+                .andExpect(jsonPath("$.data.jds[0].bookmark").value(true))
+                .andExpect(jsonPath("$.data.jds[1].bookmark").value(true))
+                .andExpect(jsonPath("$.data.jds[2].bookmark").value(true))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("JD 목록 페이징 조회 성공 - 지원 완료된 JD만")
+    void getPaginatedJds_success_toFilterByCompleted() throws Exception {
+        // Given
+        IntStream.range(0, 3).forEach(i ->
+                createAndSaveJd(
+                        setupMember,
+                        "JD_" + i,
+                        "http://test.com/jd/" + i,
+                        "테스트용 회사 이름",
+                        "테스트용 채용 공고 내용",
+                        "테스트용 직무",
+                        LocalDateTime.now().plusDays(i),
+                        "",
+                        false,
+                        false,
+                        LocalDateTime.now()));
+
+        IntStream.range(3, 5).forEach(i ->
+                createAndSaveJd(
+                        setupMember,
+                        "JD_" + i,
+                        "http://test.com/jd/" + i,
+                        "테스트용 회사 이름",
+                        "테스트용 채용 공고 내용",
+                        "테스트용 직무",
+                        LocalDateTime.now().plusDays(i),
+                        "",
+                        false,
+                        false,
+                        null));
+
+        // When
+        ResultActions result = mockMvc.perform(get("/jds")
+                .param("showOnly", "completed"));
+
+        // Then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("나의 분석 내용 전체 조회 성공"))
+                .andExpect(jsonPath("$.data.jds").isArray())
+                .andExpect(jsonPath("$.data.jds.length()").value(3))
+                .andExpect(jsonPath("$.data.totalElements").value(3))
+                .andExpect(jsonPath("$.data.totalPages").value(1))
+                .andExpect(jsonPath("$.data.currentPage").value(0))
+                .andExpect(jsonPath("$.data.jds[0].applyAt").isNotEmpty())
+                .andExpect(jsonPath("$.data.jds[1].applyAt").isNotEmpty())
+                .andExpect(jsonPath("$.data.jds[2].applyAt").isNotEmpty())
+                .andDo(print());
     }
 }

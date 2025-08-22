@@ -1,0 +1,15 @@
+com
+net
+org
+io
+ai
+dev
+app
+kr
+co.kr
+go.kr
+jp
+us
+co
+me
+tv
