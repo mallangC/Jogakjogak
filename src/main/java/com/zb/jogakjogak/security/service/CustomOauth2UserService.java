@@ -51,7 +51,8 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         if (existMember.isEmpty()) {
             member = Member.builder()
                     .username(username)
-                    .nickname(oAuth2ResponseDto.getNickname())
+                    .name(oAuth2ResponseDto.getName())
+                    .isNotificationEnabled(false)
                     .email(oAuth2ResponseDto.getEmail())
                     .lastLoginAt(LocalDateTime.now())
                     .oauth2Info(new ArrayList<>())

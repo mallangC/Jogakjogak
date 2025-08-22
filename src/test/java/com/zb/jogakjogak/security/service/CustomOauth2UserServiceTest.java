@@ -56,7 +56,7 @@ class CustomOauth2UserServiceTest {
         Map<String, Object> profile = new HashMap<>();
         Map<String, Object> properties = new HashMap<>();
 
-        properties.put("nickname", "테스트유저");
+        properties.put("name", "기존네임");
         profile.put("nickname", "테스트유저");
         kakaoAccount.put("profile", profile);
         kakaoAccount.put("email", "test@kakao.com");
@@ -116,7 +116,6 @@ class CustomOauth2UserServiceTest {
 
         Member savedMember = memberCaptor.getValue();
         assertThat(savedMember.getUsername()).isEqualTo("kakao 123456789");
-        assertThat(savedMember.getNickname()).isEqualTo("테스트유저");
         assertThat(savedMember.getEmail()).isEqualTo("test@kakao.com");
         assertThat(savedMember.getRole()).isEqualTo(Role.USER);
         assertThat(savedMember.getLastLoginAt()).isNotNull();
@@ -128,7 +127,8 @@ class CustomOauth2UserServiceTest {
         // given
         Member existingMember = Member.builder()
                 .username("kakao 123456789")
-                .nickname("기존닉네임")
+                .name("기존네임")
+                .isNotificationEnabled(false)
                 .email("old@email.com")
                 .lastLoginAt(LocalDateTime.now().minusDays(1))
                 .oauth2Info(new ArrayList<>())
@@ -150,7 +150,7 @@ class CustomOauth2UserServiceTest {
         verify(memberRepository, times(1)).save(memberCaptor.capture());
 
         Member updatedMember = memberCaptor.getValue();
-        assertThat(updatedMember.getNickname()).isEqualTo("테스트유저");
+        assertThat(updatedMember.getName()).isEqualTo("기존네임");
         assertThat(updatedMember.getEmail()).isEqualTo("test@kakao.com");
     }
 

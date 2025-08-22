@@ -86,7 +86,8 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
-                                "/webjars/**").permitAll()
+                                "/webjars/**"
+                        ).permitAll()
                         .anyRequest().authenticated());
         http.
                 sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
