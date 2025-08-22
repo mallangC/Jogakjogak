@@ -16,6 +16,7 @@ import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.entity.Member;
 import com.zb.jogakjogak.security.repository.MemberRepository;
 import jakarta.persistence.EntityManager;
+import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -419,11 +420,11 @@ class JDControllerTest {
                         false,
                         null));
 
-        // When (페이지 1, 사이즈 5, 제목 기준 오름차순 정렬)
+        // When
         ResultActions result = mockMvc.perform(get("/jds")
                 .param("page", "1")
                 .param("size", "5")
-                .param("sort", "title,asc"));
+                .param("sort", "createdAt,asc"));
 
         // Then
         result.andExpect(status().isOk())
@@ -558,41 +559,152 @@ class JDControllerTest {
     }
 
     @Test
-    @DisplayName("JD 업데이트 성공")
-    void updateJd_success() throws Exception {
+    @DisplayName("JD 목록 페이징 조회 성공 - 알람 설정이 켜진 JD만")
+    void getPaginatedJds_success_toFilterByAlarmOn() throws Exception {
         // Given
-        JD jd = createAndSaveJd(
-                setupMember,
-                "jd 업데이트 테스트",
-                "http://update.com/jd/1",
-                "초기 회사 이름",
-                "초기 채용 공고 내용",
-                "초기 직무",
-                LocalDateTime.now(),
-                "초기 메모",
-                false,
-                false,
-                null);
-        Long jdId = jd.getId();
-        LocalDateTime nowPlusDaysOne = LocalDateTime.now().plusDays(1);
+        IntStream.range(0, 3).forEach(i ->
+                createAndSaveJd(
+                        setupMember,
+                        "JD_" + i,
+                        "http://test.com/jd/" + i,
+                        "테스트용 회사 이름",
+                        "테스트용 채용 공고 내용",
+                        "테스트용 직무",
+                        LocalDateTime.now().plusDays(i),
+                        "",
+                        false,
+                        true,
+                        null));
+
+        IntStream.range(3, 5).forEach(i ->
+                createAndSaveJd(
+                        setupMember,
+                        "JD_" + i,
+                        "http://test.com/jd/" + i,
+                        "테스트용 회사 이름",
+                        "테스트용 채용 공고 내용",
+                        "테스트용 직무",
+                        LocalDateTime.now().plusDays(i),
+                        "",
+                        false,
+                        false,
+                        null));
 
         // When
-        JDUpdateRequestDto dto = JDUpdateRequestDto.builder()
-                .title("새로운 제목")
-                .companyName("새로운 회사명")
-                .jdUrl("새로운 JD URL")
-                .endedAt(nowPlusDaysOne)
-                .job("백엔드 개발자")
-                .build();
-        ResultActions result = mockMvc.perform(patch("/jds/{jd_id}", jdId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)));
+        ResultActions result = mockMvc.perform(get("/jds")
+                .param("showOnly", "alarm"));
 
         // Then
         result.andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("JD 수정 완료"))
-                .andExpect(jsonPath("$.data.jd_id").value(jdId))
-                .andExpect(jsonPath("$.data.companyName").value("새로운 회사명"))
+                .andExpect(jsonPath("$.message").value("나의 분석 내용 전체 조회 성공"))
+                .andExpect(jsonPath("$.data.jds").isArray())
+                .andExpect(jsonPath("$.data.jds.length()").value(3))
+                .andExpect(jsonPath("$.data.totalElements").value(3))
+                .andExpect(jsonPath("$.data.totalPages").value(1))
+                .andExpect(jsonPath("$.data.currentPage").value(0))
+                .andExpect(jsonPath("$.data.jds[0].alarmOn").value(true))
+                .andExpect(jsonPath("$.data.jds[1].alarmOn").value(true))
+                .andExpect(jsonPath("$.data.jds[2].alarmOn").value(true))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("JD 목록 페이징 조회 성공 - 즐겨 찾기 설정한 JD만")
+    void getPaginatedJds_success_toFilterByBookmark() throws Exception {
+        // Given
+        IntStream.range(0, 3).forEach(i ->
+                createAndSaveJd(
+                        setupMember,
+                        "JD_" + i,
+                        "http://test.com/jd/" + i,
+                        "테스트용 회사 이름",
+                        "테스트용 채용 공고 내용",
+                        "테스트용 직무",
+                        LocalDateTime.now().plusDays(i),
+                        "",
+                        true,
+                        false,
+                        null));
+
+        IntStream.range(3, 5).forEach(i ->
+                createAndSaveJd(
+                        setupMember,
+                        "JD_" + i,
+                        "http://test.com/jd/" + i,
+                        "테스트용 회사 이름",
+                        "테스트용 채용 공고 내용",
+                        "테스트용 직무",
+                        LocalDateTime.now().plusDays(i),
+                        "",
+                        false,
+                        false,
+                        null));
+
+        // When
+        ResultActions result = mockMvc.perform(get("/jds")
+                .param("showOnly", "bookmark"));
+
+        // Then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("나의 분석 내용 전체 조회 성공"))
+                .andExpect(jsonPath("$.data.jds").isArray())
+                .andExpect(jsonPath("$.data.jds.length()").value(3))
+                .andExpect(jsonPath("$.data.totalElements").value(3))
+                .andExpect(jsonPath("$.data.totalPages").value(1))
+                .andExpect(jsonPath("$.data.currentPage").value(0))
+                .andExpect(jsonPath("$.data.jds[0].bookmark").value(true))
+                .andExpect(jsonPath("$.data.jds[1].bookmark").value(true))
+                .andExpect(jsonPath("$.data.jds[2].bookmark").value(true))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("JD 목록 페이징 조회 성공 - 지원 완료된 JD만")
+    void getPaginatedJds_success_toFilterByCompleted() throws Exception {
+        // Given
+        IntStream.range(0, 3).forEach(i ->
+                createAndSaveJd(
+                        setupMember,
+                        "JD_" + i,
+                        "http://test.com/jd/" + i,
+                        "테스트용 회사 이름",
+                        "테스트용 채용 공고 내용",
+                        "테스트용 직무",
+                        LocalDateTime.now().plusDays(i),
+                        "",
+                        false,
+                        false,
+                        LocalDateTime.now()));
+
+        IntStream.range(3, 5).forEach(i ->
+                createAndSaveJd(
+                        setupMember,
+                        "JD_" + i,
+                        "http://test.com/jd/" + i,
+                        "테스트용 회사 이름",
+                        "테스트용 채용 공고 내용",
+                        "테스트용 직무",
+                        LocalDateTime.now().plusDays(i),
+                        "",
+                        false,
+                        false,
+                        null));
+
+        // When
+        ResultActions result = mockMvc.perform(get("/jds")
+                .param("showOnly", "completed"));
+
+        // Then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("나의 분석 내용 전체 조회 성공"))
+                .andExpect(jsonPath("$.data.jds").isArray())
+                .andExpect(jsonPath("$.data.jds.length()").value(3))
+                .andExpect(jsonPath("$.data.totalElements").value(3))
+                .andExpect(jsonPath("$.data.totalPages").value(1))
+                .andExpect(jsonPath("$.data.currentPage").value(0))
+                .andExpect(jsonPath("$.data.jds[0].applyAt").isNotEmpty())
+                .andExpect(jsonPath("$.data.jds[1].applyAt").isNotEmpty())
+                .andExpect(jsonPath("$.data.jds[2].applyAt").isNotEmpty())
                 .andDo(print());
     }
 }

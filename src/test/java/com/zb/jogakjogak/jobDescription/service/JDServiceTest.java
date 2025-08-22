@@ -435,14 +435,14 @@ class JDServiceTest {
         List<JD> jds = Arrays.asList(jd1, jd2);
         Page<JD> jdPage = new PageImpl<>(jds, pageable, jds.size());
 
-        when(jdRepository.findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable)).thenReturn(jdPage);
+        when(jdRepository.findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "normal")).thenReturn(jdPage);
 
         // When
-        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember, pageable);
+        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember, pageable, "normal");
 
 
         // Then
-        verify(jdRepository, times(1)).findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable);
+        verify(jdRepository, times(1)).findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable,"normal");
 
         assertNotNull(resultPage);
         assertNotNull(resultPage.getJds());
@@ -471,14 +471,14 @@ class JDServiceTest {
     void getAllJds_NoJdsForMember_ReturnsEmptyPage() {
         // Given
         Page<JD> emptyJdPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
-        when(jdRepository.findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable)).thenReturn(emptyJdPage);
+        when(jdRepository.findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "normal")).thenReturn(emptyJdPage);
 
         // When
-        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember, pageable);
+        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember, pageable, "normal");
 
 
         // Then
-        verify(jdRepository, times(1)).findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable);
+        verify(jdRepository, times(1)).findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable,"normal");
 
         assertNotNull(resultPage);
         assertNotNull(resultPage.getJds());
@@ -702,8 +702,7 @@ class JDServiceTest {
         // Verify interactions
         verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), unauthorizedMember.getId());
     }
-
-    @Test
+    
     @DisplayName("JD 업데이트 성공")
     void updateJd_Success() {
         // Given
@@ -726,5 +725,122 @@ class JDServiceTest {
         assertEquals(dto.getJob(), result.getJob());
         assertEquals(now, result.getEndedAt());
         assertEquals(dto.getJdUrl(), result.getJdUrl());
+    }
+  
+    @Test
+    @DisplayName("알람 설정 된 JD 목록 성공적으로 조회")
+    void getAllJds_Success_toFilterByAlarmOn_ReturnsOnlyAlarmOnJds() {
+        // Given
+        JD jd1 = JD.builder()
+                .id(101L)
+                .title("백엔드 개발자")
+                .companyName("SKC")
+                .member(mockMember)
+                .isAlarmOn(true)
+                .build();
+
+        JD jd2 = JD.builder()
+                .id(102L)
+                .title("UX 디렉터")
+                .companyName("메리츠화재")
+                .member(mockMember)
+                .isAlarmOn(false)
+                .build();
+
+
+        List<JD> filteredJds = Collections.singletonList(jd1);
+        Page<JD> jdPage = new PageImpl<>(filteredJds, pageable, 1);
+
+        when(jdRepository.findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "alarm"))
+                .thenReturn(jdPage);
+
+        // When
+        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember, pageable, "alarm");
+
+
+        // Then
+        verify(jdRepository, times(1)).findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable,"alarm");
+
+        assertNotNull(resultPage);
+        assertNotNull(resultPage.getJds());
+        assertTrue(resultPage.getJds().stream().allMatch(AllGetJDResponseDto::isAlarmOn));
+    }
+
+    @Test
+    @DisplayName("즐겨 찾기 설정 된 JD 목록 성공적으로 조회")
+    void getAllJds_Success_toFilterByBookmark_ReturnsOnlyBookmarkedJds() {
+        // Given
+        JD jd1 = JD.builder()
+                .id(101L)
+                .title("백엔드 개발자")
+                .companyName("SKC")
+                .member(mockMember)
+                .isBookmark(true)
+                .build();
+
+        JD jd2 = JD.builder()
+                .id(102L)
+                .title("UX 디렉터")
+                .companyName("메리츠화재")
+                .member(mockMember)
+                .isBookmark(false)
+                .build();
+
+
+        List<JD> filteredJds = Collections.singletonList(jd1);
+        Page<JD> jdPage = new PageImpl<>(filteredJds, pageable, 1);
+
+        when(jdRepository.findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "bookmark"))
+                .thenReturn(jdPage);
+
+        // When
+        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember, pageable, "bookmark");
+
+
+        // Then
+        verify(jdRepository, times(1)).findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable,"bookmark");
+
+        assertNotNull(resultPage);
+        assertNotNull(resultPage.getJds());
+        assertTrue(resultPage.getJds().stream().allMatch(AllGetJDResponseDto::isBookmark));
+    }
+
+    @Test
+    @DisplayName("지원 완료된 JD 목록 성공적으로 조회")
+    void getAllJds_Success_toFilterByCompleted_ReturnsOnlyCompletedJds() {
+        // Given
+        JD jd1 = JD.builder()
+                .id(101L)
+                .title("백엔드 개발자")
+                .companyName("SKC")
+                .member(mockMember)
+                .applyAt(LocalDateTime.now())
+                .build();
+
+        JD jd2 = JD.builder()
+                .id(102L)
+                .title("UX 디렉터")
+                .companyName("메리츠화재")
+                .member(mockMember)
+                .build();
+
+
+        List<JD> filteredJds = Collections.singletonList(jd1);
+        Page<JD> jdPage = new PageImpl<>(filteredJds, pageable, 1);
+
+        when(jdRepository.findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "completed"))
+                .thenReturn(jdPage);
+
+        // When
+        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember, pageable, "completed");
+
+
+        // Then
+        verify(jdRepository, times(1)).findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable,"completed");
+
+        assertNotNull(resultPage);
+        assertNotNull(resultPage.getJds());
+        assertTrue(resultPage.getJds().stream().allMatch(jd-> jd.getApplyAt() != null));
+
     }
 }
