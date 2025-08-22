@@ -26,7 +26,8 @@ public class GoogleResponseDto implements OAuth2ResponseDto{
     }
 
     @Override
-    public String getName() { return attribute.get("name").toString();
+    public String getName() {
+        return attribute.get("name").toString();
     }
 
     @Override

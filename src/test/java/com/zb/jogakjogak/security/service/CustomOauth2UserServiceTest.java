@@ -128,7 +128,7 @@ class CustomOauth2UserServiceTest {
         Member existingMember = Member.builder()
                 .username("kakao 123456789")
                 .name("기존네임")
-                .notificationOnOff(false)
+                .isNotificationEnabled(false)
                 .email("old@email.com")
                 .lastLoginAt(LocalDateTime.now().minusDays(1))
                 .oauth2Info(new ArrayList<>())

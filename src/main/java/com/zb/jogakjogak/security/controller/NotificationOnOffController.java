@@ -22,7 +22,7 @@ public class NotificationOnOffController {
 
     private final NotificationOnOffService notificationOnOffService;
     @PostMapping
-    public ResponseEntity<HttpApiResponse<?>> switchAllJdsNotification(@AuthenticationPrincipal CustomOAuth2User customOAuth2User){
+    public ResponseEntity<HttpApiResponse<Boolean>> switchAllJdsNotification(@AuthenticationPrincipal CustomOAuth2User customOAuth2User){
 
         String username = customOAuth2User.getName();
         boolean notificationOnOff = notificationOnOffService.switchAllJdsNotification(username);

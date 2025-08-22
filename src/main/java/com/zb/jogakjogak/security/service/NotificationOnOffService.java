@@ -27,18 +27,12 @@ public class NotificationOnOffService {
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
         List<JD> jds = jdRepository.findAllByMember(member);
 
-        if(member.isNotificationOnOff()){
-            member.setNotificationOnOff(false);
-            for(JD jd : jds){
-                jd.setAlarmOn(false);
-            }
-        }else{
-            member.setNotificationOnOff(true);
-            for(JD jd : jds){
-                jd.setAlarmOn(true);
-            }
+        boolean isNotificationOn = !member.isNotificationEnabled();
+        member.setNotificationEnabled(isNotificationOn);
+        for(JD jd : jds){
+            jd.setAlarmOn(isNotificationOn);
         }
 
-        return member.isNotificationOnOff();
+        return member.isNotificationEnabled();
     }
 }

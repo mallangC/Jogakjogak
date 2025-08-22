@@ -52,7 +52,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
             member = Member.builder()
                     .username(username)
                     .name(oAuth2ResponseDto.getName())
-                    .notificationOnOff(false)
+                    .isNotificationEnabled(false)
                     .email(oAuth2ResponseDto.getEmail())
                     .lastLoginAt(LocalDateTime.now())
                     .oauth2Info(new ArrayList<>())

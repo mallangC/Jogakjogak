@@ -10,7 +10,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
-import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -41,7 +40,7 @@ public class Member {
 
     private String nickname;
 
-    private boolean notificationOnOff;
+    private boolean isNotificationEnabled;
 
     //@Convert(converter = PhoneNumberEncryptor.class)
     private String phoneNumber;

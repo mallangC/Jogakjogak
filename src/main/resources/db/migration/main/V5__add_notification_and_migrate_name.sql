@@ -1,5 +1,5 @@
 ALTER TABLE member
-ADD COLUMN notification_on_off boolean
+ADD COLUMN is_notification_enabled boolean
 NOT NULL
 DEFAULT FALSE;
 
