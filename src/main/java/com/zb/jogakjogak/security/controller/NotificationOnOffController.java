@@ -4,6 +4,7 @@ package com.zb.jogakjogak.security.controller;
 import com.zb.jogakjogak.global.HttpApiResponse;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.service.NotificationOnOffService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+
+@Tag(name = "회원의 전체 알림 on/off 기능 API", description = "회원이 모든 채용공고의 이메일 알림을 일괄적으로 변경할 수 있는 API")
 @RestController
 @RequestMapping("/member/notification/on-off")
 @RequiredArgsConstructor
