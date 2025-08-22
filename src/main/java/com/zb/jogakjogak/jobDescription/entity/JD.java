@@ -1,6 +1,7 @@
 package com.zb.jogakjogak.jobDescription.entity;
 
 import com.zb.jogakjogak.global.BaseEntity;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.JDUpdateRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.MemoRequestDto;
 import com.zb.jogakjogak.notification.entity.Notification;
 import com.zb.jogakjogak.security.entity.Member;
@@ -98,6 +99,14 @@ public class JD extends BaseEntity {
 
     public void updateMemo(MemoRequestDto dto) {
         this.memo = dto.getMemo();
+    }
+
+    public void updateJd(JDUpdateRequestDto dto){
+        this.title = dto.getTitle();
+        this.companyName = dto.getCompanyName();
+        this.job = dto.getJob();
+        this.jdUrl = dto.getJdUrl();
+        this.endedAt = dto.getEndedAt();
     }
 
     public void markAsUpdated() {

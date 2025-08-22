@@ -3,10 +3,8 @@ package com.zb.jogakjogak.jobDescription.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
-import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.JDErrorCode;
 import com.zb.jogakjogak.global.exception.JDException;
-import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.*;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.*;
 import com.zb.jogakjogak.jobDescription.entity.JD;
@@ -30,7 +28,10 @@ import org.springframework.data.domain.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -701,9 +702,33 @@ class JDServiceTest {
         // Verify interactions
         verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), unauthorizedMember.getId());
     }
+    
+    @DisplayName("JD 업데이트 성공")
+    void updateJd_Success() {
+        // Given
+        LocalDateTime now = LocalDateTime.now();
+        JDUpdateRequestDto dto = JDUpdateRequestDto.builder()
+                .title("새로운 제목")
+                .companyName("새로운 회사명")
+                .jdUrl("새로운 JD URL")
+                .endedAt(now)
+                .job("백엔드 개발자")
+                .build();
 
+        // Mock repository calls
+        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(),mockMember.getId())).thenReturn(Optional.of(testJd));
+
+        // When
+        JDResponseDto result = jdService.updateJd(testJd.getId(), dto, mockMember);
+        assertEquals(dto.getTitle(), result.getTitle());
+        assertEquals(dto.getCompanyName(), result.getCompanyName());
+        assertEquals(dto.getJob(), result.getJob());
+        assertEquals(now, result.getEndedAt());
+        assertEquals(dto.getJdUrl(), result.getJdUrl());
+    }
+  
     @Test
-    @DisplayName("알람 설정 된 JD 목록 성공적으로 조회 및")
+    @DisplayName("알람 설정 된 JD 목록 성공적으로 조회")
     void getAllJds_Success_toFilterByAlarmOn_ReturnsOnlyAlarmOnJds() {
         // Given
         JD jd1 = JD.builder()
@@ -742,7 +767,7 @@ class JDServiceTest {
     }
 
     @Test
-    @DisplayName("즐겨 찾기 설정 된 JD 목록 성공적으로 조회 및")
+    @DisplayName("즐겨 찾기 설정 된 JD 목록 성공적으로 조회")
     void getAllJds_Success_toFilterByBookmark_ReturnsOnlyBookmarkedJds() {
         // Given
         JD jd1 = JD.builder()
@@ -781,7 +806,7 @@ class JDServiceTest {
     }
 
     @Test
-    @DisplayName("지원 완료된 JD 목록 성공적으로 조회 및")
+    @DisplayName("지원 완료된 JD 목록 성공적으로 조회")
     void getAllJds_Success_toFilterByCompleted_ReturnsOnlyCompletedJds() {
         // Given
         JD jd1 = JD.builder()
@@ -816,5 +841,6 @@ class JDServiceTest {
         assertNotNull(resultPage);
         assertNotNull(resultPage.getJds());
         assertTrue(resultPage.getJds().stream().allMatch(jd-> jd.getApplyAt() != null));
+
     }
 }

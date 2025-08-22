@@ -51,8 +51,7 @@ public class JWTFilter extends OncePerRequestFilter {
         String accessToken = extractAccessToken(request);
 
         if (accessToken == null) {
-            filterChain.doFilter(request, response); // 토큰이 없으면 다음 필터로 넘김 (SecurityContext에 Authentication이 없으므로 401 응답이 발생할 것)
-            return;
+            throw new AuthException(MemberErrorCode.NOT_FOUND_TOKEN);
         }
 
         try {

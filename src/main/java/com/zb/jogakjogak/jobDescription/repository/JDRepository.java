@@ -20,7 +20,7 @@ public interface JDRepository extends JpaRepository<JD, Long>, JDRepositoryCusto
      * @param pageable
      * @return
      */
-    @Query("SELECT j FROM JD j JOIN FETCH j.member WHERE j.notificationCount <= 3")
+    @Query("SELECT j FROM JD j JOIN FETCH j.member")
     Page<JD> findAllJdsWithMember(Pageable pageable);
 
 }
