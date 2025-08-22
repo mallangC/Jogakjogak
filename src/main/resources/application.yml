@@ -23,7 +23,7 @@ spring:
     database-platform: org.hibernate.dialect.MySQL8Dialect
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
   batch:
     job:
       enabled: false
