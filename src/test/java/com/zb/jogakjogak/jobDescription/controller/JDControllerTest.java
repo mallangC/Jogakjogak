@@ -2,10 +2,7 @@ package com.zb.jogakjogak.jobDescription.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.BookmarkRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.MemoRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.*;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repository.JDRepository;
@@ -558,5 +555,44 @@ class JDControllerTest {
                 .andExpect(jsonPath("$.data.memo").value("수정된 새로운 메모 내용입니다."))
                 .andDo(print());
 
+    }
+
+    @Test
+    @DisplayName("JD 업데이트 성공")
+    void updateJd_success() throws Exception {
+        // Given
+        JD jd = createAndSaveJd(
+                setupMember,
+                "jd 업데이트 테스트",
+                "http://update.com/jd/1",
+                "초기 회사 이름",
+                "초기 채용 공고 내용",
+                "초기 직무",
+                LocalDateTime.now(),
+                "초기 메모",
+                false,
+                false,
+                null);
+        Long jdId = jd.getId();
+        LocalDateTime nowPlusDaysOne = LocalDateTime.now().plusDays(1);
+
+        // When
+        JDUpdateRequestDto dto = JDUpdateRequestDto.builder()
+                .title("새로운 제목")
+                .companyName("새로운 회사명")
+                .jdUrl("새로운 JD URL")
+                .endedAt(nowPlusDaysOne)
+                .job("백엔드 개발자")
+                .build();
+        ResultActions result = mockMvc.perform(patch("/jds/{jd_id}", jdId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)));
+
+        // Then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("JD 수정 완료"))
+                .andExpect(jsonPath("$.data.jd_id").value(jdId))
+                .andExpect(jsonPath("$.data.companyName").value("새로운 회사명"))
+                .andDo(print());
     }
 }

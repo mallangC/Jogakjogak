@@ -1,10 +1,7 @@
 package com.zb.jogakjogak.jobDescription.controller;
 
 import com.zb.jogakjogak.global.HttpApiResponse;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.BookmarkRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.MemoRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.*;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.*;
 import com.zb.jogakjogak.jobDescription.service.JDService;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
@@ -159,6 +156,21 @@ public class JDController {
                 new HttpApiResponse<>(
                         jdService.updateMemo(jdId, dto, customOAuth2User.getMember()),
                         "메모 수정 성공",
+                        HttpStatus.OK
+                )
+        );
+    }
+
+    @Operation(summary = "특정 채용공고 수정", description = "jd_id와 요청받은 Jd를 통해 Jd를 수정합니다")
+    @PatchMapping("/jds/{jd_id}")
+    public ResponseEntity<HttpApiResponse<JDResponseDto>> updateJd
+            (@PathVariable("jd_id") Long jdId,
+             @RequestBody JDUpdateRequestDto dto,
+             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        return ResponseEntity.ok().body(
+                new HttpApiResponse<>(
+                        jdService.updateJd(jdId, dto, customOAuth2User.getMember()),
+                        "JD 수정 완료",
                         HttpStatus.OK
                 )
         );
