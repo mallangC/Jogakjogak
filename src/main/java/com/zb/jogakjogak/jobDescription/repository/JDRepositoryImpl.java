@@ -1,13 +1,14 @@
 package com.zb.jogakjogak.jobDescription.repository;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.QJD;
 import com.zb.jogakjogak.jobDescription.entity.QToDoList;
+import com.zb.jogakjogak.resume.entity.QResume;
 import com.zb.jogakjogak.security.entity.QMember;
 import jakarta.persistence.EntityManager;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -32,11 +33,13 @@ public class JDRepositoryImpl implements JDRepositoryCustom{
         QJD jd = QJD.jD;
         QMember member = QMember.member;
         QToDoList toDoList = QToDoList.toDoList;
+        QResume resume = QResume.resume;
 
         JD foundJd = queryFactory
                 .selectFrom(jd)
                 .join(jd.member, member).fetchJoin()
                 .leftJoin(jd.toDoLists, toDoList).fetchJoin()
+                .join(member.resume, resume).fetchJoin()
                 .where(jd.id.eq(jdId)
                         .and(member.id.eq(memberId)))
                 .fetchOne();
@@ -45,15 +48,35 @@ public class JDRepositoryImpl implements JDRepositoryCustom{
     }
 
     @Override
-    public Page<JD> findAllJdsByMemberIdWithToDoLists(Long memberId, Pageable pageable) {
+    public Page<JD> findAllJdsByMemberIdWithToDoLists(Long memberId,
+                                                      Pageable pageable,
+                                                      String showOnly ) {
         QJD jd = QJD.jD;
         QToDoList toDoList = QToDoList.toDoList;
+
+        BooleanBuilder whereBuilder = new BooleanBuilder();
+        whereBuilder.and(jd.member.id.eq(memberId));
+
+        switch (showOnly) {
+            case "bookmark": //즐겨 찾기 된 jd
+                whereBuilder.and(jd.isBookmark.isTrue());
+                break;
+            case "completed": // 완료된 jd
+                whereBuilder.and(jd.applyAt.isNotNull());
+                break;
+            case "alarm": // 알람 on 설정된 jd
+                whereBuilder.and(jd.isAlarmOn.isTrue());
+                break;
+            // "normal"이거나 알 수 없는 값인 경우 추가 필터링 없음
+            default:
+                break;
+        }
 
         // 쿼리 결과 리스트 조회
         List<JD> content = queryFactory
                 .selectFrom(jd)
                 .leftJoin(jd.toDoLists, toDoList).fetchJoin()
-                .where(jd.member.id.eq(memberId))
+                .where(whereBuilder)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .orderBy(getOrderSpecifiers(pageable.getSort(), jd).toArray(OrderSpecifier[]::new))
@@ -63,7 +86,7 @@ public class JDRepositoryImpl implements JDRepositoryCustom{
         Long total = queryFactory
                 .select(jd.count())
                 .from(jd)
-                .where(jd.member.id.eq(memberId))
+                .where(whereBuilder)
                 .fetchOne();
 
         // Page 객체 생성 및 반환
@@ -125,11 +148,14 @@ public class JDRepositoryImpl implements JDRepositoryCustom{
                 case "endedAt": // 마감일 순
                     orderSpecifiers.add(order.isAscending() ? qjd.endedAt.asc() : qjd.endedAt.desc());
                     break;
-                case "title": // 제목 순
-                    orderSpecifiers.add(order.isAscending() ? qjd.title.asc() : qjd.title.desc());
+                case "applyAt": // 완료 순
+                    orderSpecifiers.add(order.isAscending() ? qjd.applyAt.asc() : qjd.applyAt.desc());
                     break;
                 case "isBookmark": // 즐겨찾기 순 (true가 먼저 오도록)
                     orderSpecifiers.add(order.isAscending() ? qjd.isBookmark.asc() : qjd.isBookmark.desc());
+                    break;
+                case "isAlarmOn": // 알림 순 (true가 먼저 오도록)
+                    orderSpecifiers.add(order.isAscending() ? qjd.isAlarmOn.asc() : qjd.isAlarmOn.desc());
                     break;
                 default:
                     break;
