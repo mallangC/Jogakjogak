@@ -450,6 +450,12 @@ class JDServiceTest {
         assertEquals(2, resultPage.getTotalElements());
         assertEquals(1, resultPage.getTotalPages());
 
+        assertEquals(2, resultPage.getPostedJdCount());
+        assertEquals(0, resultPage.getApplyJdCount());
+        assertEquals(2, resultPage.getCompletedPiecesCount());
+        assertEquals(3, resultPage.getTotalPiecesCount());
+        assertEquals(1, resultPage.getPerfectJdCount());
+
         assertNotNull(resultPage.getResume());
         assertEquals(mockResume.getTitle(), resultPage.getResume().getTitle());
         assertEquals(mockResume.getContent(), resultPage.getResume().getContent());
