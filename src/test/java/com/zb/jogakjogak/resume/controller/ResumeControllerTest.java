@@ -1,15 +1,12 @@
 package com.zb.jogakjogak.resume.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
-import com.zb.jogakjogak.global.HttpApiResponse;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
-import com.zb.jogakjogak.resume.domain.responseDto.ResumeResponseDto;
 import com.zb.jogakjogak.resume.entity.Resume;
 import com.zb.jogakjogak.resume.repository.ResumeRepository;
 import com.zb.jogakjogak.security.Role;
-import com.zb.jogakjogak.security.WithMockCustomUser;
+import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.entity.Member;
 import com.zb.jogakjogak.security.repository.MemberRepository;
 import jakarta.persistence.EntityManager;
@@ -21,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ActiveProfiles;
@@ -95,6 +94,7 @@ class ResumeControllerTest {
                 .build();
         memberRepository.save(otherMember);
 
+        setAuthenticationForTestUser(testUserLoginId);
     }
 
     @AfterEach
@@ -105,45 +105,40 @@ class ResumeControllerTest {
         SecurityContextHolder.clearContext();
     }
 
-    /**
-     * 이력서 등록 테스트 유틸리티 (다른 테스트에서 재사용)
-     * 이 메서드는 MockMvc를 통해 이력서를 등록하고, 등록된 이력서의 ID를 반환합니다.
-     * @param title 이력서 제목
-     * @return 등록된 이력서의 ID
-     */
-    private Long registerResumeThroughApi(String title) throws Exception {
-        String generatedContent = generateLongContent(300);
-        ResumeRequestDto requestDto = new ResumeRequestDto(title, generatedContent);
-        String requestContent = objectMapper.writeValueAsString(requestDto);
-
-        ResultActions registerResult = mockMvc.perform(post("/resume")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestContent)
+    private void setAuthenticationForTestUser(String username) {
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(() -> new AssertionError("테스트 사용자를 찾을 수 없습니다."));
+        CustomOAuth2User principal = new CustomOAuth2User(member);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                principal,
+                null,
+                principal.getAuthorities()
         );
-
-        HttpApiResponse<ResumeResponseDto> response = objectMapper.readValue(registerResult.andReturn().getResponse().getContentAsString(),
-                new TypeReference<>() {
-                });
-
-        registerResult.andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("이력서 등록 완료"));
-
-        entityManager.clear();
-        Member updatedMember = memberRepository.findByUsername(testUserLoginId).orElseThrow();
-        assertThat(updatedMember.getResume()).isNotNull();
-
-        return response.data().getResumeId();
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
+    private Long createAndSaveResume(String title) {
+        Member member = memberRepository.findByUsername(testUserLoginId)
+                .orElseThrow(() -> new AssertionError("테스트 사용자를 찾을 수 없습니다."));
+        String generatedContent = generateLongContent(300);
+        Resume newResume = Resume.builder()
+                .title(title)
+                .content(generatedContent)
+                .member(member)
+                .build();
+        resumeRepository.save(newResume);
+        member.setResume(newResume);
+        memberRepository.save(member);
+        entityManager.clear();
+        return newResume.getId();
+    }
 
     @Test
     @DisplayName("이력서 등록 성공")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail)
     void registerResume_success() throws Exception {
         // Given
         String testTitle = "테스트 이력서 제목";
         String testContent = generateLongContent(300);
-
         ResumeRequestDto requestDto = new ResumeRequestDto(testTitle, testContent);
         String content = objectMapper.writeValueAsString(requestDto);
 
@@ -168,14 +163,11 @@ class ResumeControllerTest {
 
     @Test
     @DisplayName("이력서 수정 성공")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail)
     void modifyResume_success() throws Exception {
         // Given
-        Long resumeId = registerResumeThroughApi("원본 이력서");
-
+        Long resumeId = createAndSaveResume("원본 이력서");
         String updatedTitle = "수정된 이력서 제목";
         String updatedContent = generateLongContent(300);
-
         ResumeRequestDto updateRequestDto = new ResumeRequestDto(updatedTitle, updatedContent);
         String content = objectMapper.writeValueAsString(updateRequestDto);
 
@@ -200,11 +192,9 @@ class ResumeControllerTest {
 
     @Test
     @DisplayName("이력서 조회 성공")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail)
     void getResume_success() throws Exception {
         //Given
-        Long resumeId = registerResumeThroughApi("조회할 이력서 제목");
-
+        Long resumeId = createAndSaveResume("조회할 이력서 제목");
         //When
         ResultActions result = mockMvc.perform(get("/resume/{resumeId}", resumeId));
 
@@ -218,12 +208,11 @@ class ResumeControllerTest {
 
     @Test
     @DisplayName("이력서 삭제 성공")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail)
     @Transactional
     @Commit
     void deleteResume_success() throws Exception {
         //Given
-        Long resumeIdToDelete = registerResumeThroughApi("삭제할 이력서 제목"); // 300자 이상 내용 자동 생성
+        Long resumeIdToDelete = createAndSaveResume("삭제할 이력서 제목");
 
         //When
         ResultActions result = mockMvc.perform(delete("/resume/{resumeId}", resumeIdToDelete));
@@ -249,12 +238,10 @@ class ResumeControllerTest {
     }
     @Test
     @DisplayName("유효하지 않은 (무의미한) 이력서 내용 입력 시 유효성 검사 실패")
-    @WithMockCustomUser(username = "testUserLoginId", realName = "Test User", email = "test@email.com")
     void registerResume_invalidContent_meaningless() throws Exception {
         // Given
         String testTitle = "유효한 테스트 제목";
         String meaninglessContent = faker.lorem().characters(350, true, false);
-
         ResumeRequestDto requestDto = new ResumeRequestDto(testTitle, meaninglessContent);
         String requestBody = objectMapper.writeValueAsString(requestDto);
 
@@ -272,7 +259,6 @@ class ResumeControllerTest {
 
     @Test
     @DisplayName("유효하지 않은 (한글 무작위) 이력서 내용 입력 시 유효성 검사 실패")
-    @WithMockCustomUser(username = "testUserLoginId", realName = "Test User", email = "test@email.com")
     void registerResume_invalidContent_koreanGibberish() throws Exception {
         // Given
         String testTitle = "유효한 제목";
