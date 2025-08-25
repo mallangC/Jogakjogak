@@ -40,9 +40,7 @@ public class ToDoListController {
             @PathVariable("jd_id") Long jdId,
             @RequestBody @Valid CreateToDoListRequestDto dto,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
-
-        String memberName = customUser.getName();
-        ToDoListResponseDto response = toDoListService.createToDoList(jdId, dto, memberName);
+        ToDoListResponseDto response = toDoListService.createToDoList(jdId, dto, customUser.getMember());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 new HttpApiResponse<>(
@@ -69,8 +67,7 @@ public class ToDoListController {
             @PathVariable Long toDoListId,
             @RequestBody @Valid UpdateToDoListRequestDto toDoListDto,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
-        String memberName = customUser.getName();
-        ToDoListResponseDto response = toDoListService.updateToDoList(jdId, toDoListId, toDoListDto, memberName);
+        ToDoListResponseDto response = toDoListService.updateToDoList(jdId, toDoListId, toDoListDto, customUser.getMember());
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
                         response,
@@ -82,11 +79,7 @@ public class ToDoListController {
 
     /**
      * 특정 JD에 속한 단일 ToDoList의 상세 정보를 조회합니다.
-     *
-     * @param jdId       경로 변수로 전달되는 ToDoList가 속한 JD의 고유 ID
-     * @param toDoListId 경로 변수로 전달되는 조회할 ToDoList의 고유 ID
-     * @param customUser 현재 인증된 사용자 정보
-     * @return 조회된 ToDoList의 상세 정보와 성공 메시지를 포함하는 응답
+
      */
     @Operation(summary = "특정 분석/카테고리의 Todolist 조회", description = "jd_id와 toDoList_id를 통해 todolist를 조회합니다")
     @GetMapping("/{toDoListId}")
@@ -94,10 +87,9 @@ public class ToDoListController {
             @PathVariable("jd_id") Long jdId,
             @PathVariable Long toDoListId,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
-        String memberName = customUser.getName();
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
-                        toDoListService.getToDoList(jdId, toDoListId, memberName),
+                        toDoListService.getToDoList(jdId, toDoListId, customUser.getMember()),
                         "체크리스트 조회 성공",
                         HttpStatus.OK
                 )
@@ -118,8 +110,7 @@ public class ToDoListController {
             @PathVariable("jd_id") Long jdId,
             @PathVariable Long toDoListId,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
-        String memberName = customUser.getName();
-        toDoListService.deleteToDoList(jdId, toDoListId, memberName);
+        toDoListService.deleteToDoList(jdId, toDoListId, customUser.getMember());
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
                         "",
@@ -143,10 +134,9 @@ public class ToDoListController {
             @PathVariable("jd_id")  Long jdId,
             @RequestParam(name = "category") ToDoListType category,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
-        String memberName = customUser.getName();
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
-                        toDoListService.getToDoListsByJdAndCategory(jdId, category, memberName),
+                        toDoListService.getToDoListsByJdAndCategory(jdId, category, customUser.getMember()),
                         "카테고리별 투두리스트 조회 성공",
                         HttpStatus.OK
                 )
@@ -156,11 +146,6 @@ public class ToDoListController {
     /**
      * 특정 JD에 속한 여러 ToDoList를 일괄적으로 생성, 수정, 삭제합니다.
      * 이 엔드포인트를 통해 복수 개의 ToDoList를 동시에 관리할 수 있습니다.
-     *
-     * @param jdId       경로 변수로 전달되는 ToDoList들이 속한 JD의 고유 ID
-     * @param dto        요청 본문에 포함된, 일괄 업데이트/생성/삭제할 ToDoList 정보 (카테고리, 생성/수정 목록, 삭제 ID 목록 포함)
-     * @param customUser 현재 인증된 사용자 정보
-     * @return 일괄 작업 후 해당 카테고리에 속하는 모든 ToDoList들의 목록과 성공 메시지를 포함하는 응답.
      */
     @Operation(summary = "특정 분석/카테고리의 모든 Todolist 생성/수정/삭제", description = "jd_id와 category를 통해 생성, 수정, 삭제된 todolist 정보를 리스트 형식으로 받아 업데이트합니다")
     @PutMapping("/bulk-update")
@@ -168,11 +153,10 @@ public class ToDoListController {
             @PathVariable("jd_id")  Long jdId,
             @RequestBody BulkToDoListUpdateRequestDto dto,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
-        String memberName = customUser.getName();
-        toDoListService.bulkUpdateToDoLists(jdId, dto, memberName);
+        toDoListService.bulkUpdateToDoLists(jdId, dto, customUser.getMember());
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
-                        toDoListService.getToDoListsByJdAndCategory(jdId, dto.getCategory(), memberName),
+                        toDoListService.getToDoListsByJdAndCategory(jdId, dto.getCategory(), customUser.getMember()),
                         "다중 투두리스트 수정 성공",
                         HttpStatus.OK
                 )
