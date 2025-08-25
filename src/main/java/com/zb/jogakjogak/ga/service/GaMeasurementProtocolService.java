@@ -94,7 +94,6 @@ public class GaMeasurementProtocolService {
                 .bodyValue(payload) // 요청 본문에 payload (JSON) 삽입
                 .retrieve() // 응답 수신
                 .bodyToMono(String.class) // 응답 본문을 String으로 변환
-                .doOnSuccess(response -> System.out.println("GA Event (" + eventName + ") 전송 성공"))
                 .doOnError(error -> System.err.println("GA Event (" + eventName + ") 전송 실패: " + error.getMessage()));
     }
 
