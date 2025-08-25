@@ -81,6 +81,7 @@ public class GaMeasurementProtocolService {
                 .bodyValue(payload) // 요청 본문에 payload (JSON) 삽입
                 .retrieve() // 응답 수신
                 .bodyToMono(String.class); // 응답 본문을 String으로 변환
+
     }
 
 }
