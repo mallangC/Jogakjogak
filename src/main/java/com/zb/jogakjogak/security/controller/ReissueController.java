@@ -24,7 +24,7 @@ public class ReissueController {
 
     private final ReissueService reissueService;
 
-    @Operation(summary = "Access Token 재발급 API", description = "새로운 access token을 refresh token으로 재발급 받습니다")
+    @Operation(summary = "Access Token 재발급", description = "새로운 access token을 refresh token으로 재발급 받습니다")
     @PostMapping("/member/reissue")
     public ResponseEntity<HttpApiResponse<String>> reissue(HttpServletRequest request, HttpServletResponse response) {
 
