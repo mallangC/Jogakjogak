@@ -10,11 +10,16 @@ import java.util.Optional;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
-    Optional<Member> findByUsername(String userName);
+    Optional<Member> findByUsername(String username);
 
     @Query("SELECT COUNT(j) FROM JD j WHERE j.member.id = :memberId")
     long countJdByMemberId(@Param("memberId") Long memberId);
 
     @Query("SELECT m FROM Member m LEFT JOIN FETCH m.oauth2Info WHERE m.username = :username")
     Optional<Member> findByUsernameWithOauth2Info(@Param("username") String username);
+
+    @Query("SELECT m FROM Member m LEFT JOIN FETCH m.resume WHERE m.username = :username")
+    Optional<Member> findByUsernameWithResume(@Param("username") String username);
+
+    boolean existsByNickname(String nickname);
 }

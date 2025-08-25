@@ -14,13 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class NotificationOnOffService {
 
     private final MemberRepository memberRepository;
     private final JDRepository jdRepository;
 
+    @Transactional
     public boolean switchAllJdsNotification(String username) {
 
         Member member = memberRepository.findByUsername(username)
