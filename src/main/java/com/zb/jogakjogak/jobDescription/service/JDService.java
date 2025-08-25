@@ -148,8 +148,10 @@ public class JDService {
      */
 
     @Transactional(readOnly = true)
-    public PagedJdResponseDto getAllJds(Member member, Pageable pageable) {
-        Page<JD> jdEntitiesPage = jdRepository.findAllJdsByMemberIdWithToDoLists(member.getId(), pageable);
+    public PagedJdResponseDto getAllJds(Member member,
+                                        Pageable pageable,
+                                        String showOnly) {
+        Page<JD> jdEntitiesPage = jdRepository.findAllJdsByMemberIdWithToDoLists(member.getId(), pageable, showOnly);
         int applyJdCount = 0, completedPiecesCount = 0, totalPiecesCount = 0, perfectJdCount = 0;
 
         for (JD jd : jdEntitiesPage.getContent()) {

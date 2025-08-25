@@ -51,14 +51,18 @@ public class JWTFilter extends OncePerRequestFilter {
         String accessToken = extractAccessToken(request);
 
         if (accessToken == null) {
-            throw new AuthException(MemberErrorCode.NOT_FOUND_TOKEN);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json; charset=UTF-8");
+            String json = "{\"AuthException\": \"NOT_FOUND_TOKEN\", \"message\": \"토큰이 없습니다.\"}";
+            response.getWriter().write(json);
+            return;
         }
 
         try {
             jwtUtil.validateToken(accessToken, Token.ACCESS_TOKEN);
         } catch (AuthException e) { // jwtUtil.validateToken에서 던지는 예외를 여기서 catch
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
+            response.setContentType("application/json; charset=UTF-8");
             String json = "{\"errorCode\": \"UNAUTHORIZED\", \"message\": \"" + e.getMessage() + "\"}";
             response.getWriter().write(json);
             return;
