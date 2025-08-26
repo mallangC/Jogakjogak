@@ -1,6 +1,7 @@
 package com.zb.jogakjogak.security.service;
 
 import com.zb.jogakjogak.security.Role;
+import com.zb.jogakjogak.security.config.NicknameCreator;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.dto.KakaoResponseDto;
 import com.zb.jogakjogak.security.entity.Member;
@@ -40,6 +41,7 @@ class CustomOauth2UserServiceTest {
     @Mock
     private MemberRepository memberRepository;
 
+    private NicknameCreator creator;
     private CustomOauth2UserService customOauth2UserService;
     private OAuth2UserRequest userRequest;
     private OAuth2User oAuth2User;
@@ -48,7 +50,7 @@ class CustomOauth2UserServiceTest {
     @BeforeEach
     void setUp() {
         // 서비스 인스턴스 직접 생성 (외부 의존성 제거)
-        customOauth2UserService = new CustomOauth2UserService(memberRepository);
+        customOauth2UserService = new CustomOauth2UserService(memberRepository, creator);
 
         // 카카오 OAuth2 응답 데이터 모킹
         attributes = new HashMap<>();

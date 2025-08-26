@@ -19,4 +19,5 @@ public class UpdateMemberRequestDto {
     @Email
     private String email;
     private Boolean isNotificationEnabled;
+
 }
