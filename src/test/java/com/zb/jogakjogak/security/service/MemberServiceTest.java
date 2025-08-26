@@ -25,9 +25,6 @@ class MemberServiceTest {
     @Mock
     private MemberRepository memberRepository;
 
-    @Mock
-    private NicknameCreator nicknameCreator;
-
     @InjectMocks
     private MemberService memberService;
 
@@ -46,8 +43,8 @@ class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("getMember - 정상 조회")
-    void getMember_success() {
+    @DisplayName("my-page - 정상 조회")
+    void getMember_success_test() {
         // given
         when(memberRepository.findByUsername("testUser")).thenReturn(Optional.of(testMember));
 
@@ -61,8 +58,8 @@ class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("getMember - 회원이 존재하지 않으면 예외 발생")
-    void getMember_notFound() {
+    @DisplayName("my-page - 회원이 존재하지 않으면 예외 발생")
+    void getMember_notFound_test() {
         // given
         when(memberRepository.findByUsername("unknown")).thenReturn(Optional.empty());
 
@@ -73,8 +70,8 @@ class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("updateMember - 닉네임 중복 없을 때 업데이트 성공")
-    void updateMember_success() {
+    @DisplayName("my-page - 닉네임 중복 없을 때 업데이트 성공")
+    void updateMember_success_test() {
         // given
         UpdateMemberRequestDto dto = UpdateMemberRequestDto.builder()
                 .nickname("newNickname")
@@ -93,8 +90,8 @@ class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("updateMember - 닉네임 중복일 경우 예외 발생")
-    void updateMember_duplicateNickname() {
+    @DisplayName("my-page - 닉네임 중복일 경우 예외 발생")
+    void updateMember_duplicateNickname_test() {
         // given
         UpdateMemberRequestDto dto = UpdateMemberRequestDto.builder()
                 .nickname("duplicateNickname")
