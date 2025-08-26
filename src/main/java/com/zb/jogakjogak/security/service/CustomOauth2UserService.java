@@ -52,7 +52,6 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         Member member;
         if (existMember.isEmpty()) {
             String nickname = nicknameCreator.createNickname();
-            System.out.println(nickname);
             member = Member.builder()
                     .username(username)
                     .name(oAuth2ResponseDto.getName())
