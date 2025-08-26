@@ -1,0 +1,9 @@
+spring:
+  jpa:
+    show-sql: false
+
+logging:
+  level:
+    org.flywaydb: DEBUG
+    com.zb.jogakjogak: INFO
+    com.zb.jogakjogak.global.exception: ERROR

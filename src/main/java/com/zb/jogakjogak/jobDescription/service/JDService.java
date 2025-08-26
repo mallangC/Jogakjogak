@@ -80,7 +80,7 @@ public class JDService {
             throw new ResumeException(ResumeErrorCode.RESUME_NOT_FOUND_PLEASE_REGISTER);
         }
         //TODO: 테스트 후 갯수 변경 필요
-        if(memberRepository.countJdByMemberId(member.getId()) >= 20) {
+        if (memberRepository.countJdByMemberId(member.getId()) >= 20) {
             throw new JDException(JDErrorCode.JD_LIMIT_EXCEEDED);
         }
 
@@ -141,8 +141,8 @@ public class JDService {
     /**
      * 특정 사용자의 모든 JD (Job Description) 목록을 페이징하여 조회합니다.
      *
-     * @param member 조회할 사용자.
-     * @param pageable   페이징 및 정렬 정보를 담는 객체.
+     * @param member   조회할 사용자.
+     * @param pageable 페이징 및 정렬 정보를 담는 객체.
      * @return 페이징처리된 목록을 포함하는 객체.
      * @throws AuthException 회원을 찾을 수 없을 경우 발생하는 예외.
      */
@@ -152,13 +152,34 @@ public class JDService {
                                         Pageable pageable,
                                         String showOnly) {
         Page<JD> jdEntitiesPage = jdRepository.findAllJdsByMemberIdWithToDoLists(member.getId(), pageable, showOnly);
+        int applyJdCount = 0, completedPiecesCount = 0, totalPiecesCount = 0, perfectJdCount = 0;
+
+        for (JD jd : jdEntitiesPage.getContent()) {
+            if (jd.getApplyAt() != null) {
+                applyJdCount++;
+            }
+
+            int totalCount = jd.getToDoLists().size();
+            totalPiecesCount += totalCount;
+            int completedCount = (int) jd.getToDoLists().stream()
+                    .filter(ToDoList::isDone)
+                    .count();
+            completedPiecesCount += completedCount;
+
+            if (completedCount == totalCount) {
+                perfectJdCount++;
+            }
+        }
 
         List<AllGetJDResponseDto> dtos = jdEntitiesPage.getContent().stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
+        int allJdCount = dtos.size();
+
         Page<AllGetJDResponseDto> page = new PageImpl<>(dtos, pageable, jdEntitiesPage.getTotalElements());
 
-        return new PagedJdResponseDto(page, member.getResume());
+        return new PagedJdResponseDto(page, member.getResume(), allJdCount, applyJdCount,
+                completedPiecesCount, totalPiecesCount, perfectJdCount);
     }
 
     /**
@@ -224,7 +245,7 @@ public class JDService {
     }
 
     @Transactional
-    public JDResponseDto updateJd(Long jdId, JDUpdateRequestDto jdUpdateRequestDto, Member member){
+    public JDResponseDto updateJd(Long jdId, JDUpdateRequestDto jdUpdateRequestDto, Member member) {
         JD jd = getAuthorizedJd(jdId, member);
         jd.updateJd(jdUpdateRequestDto);
         return JDResponseDto.fromEntity(jd, member);

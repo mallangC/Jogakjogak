@@ -37,8 +37,18 @@ public class PagedJdResponseDto {
     private boolean isFirst;
     @Schema(description = "현재 페이지가 마지막 페이지인지 여부", example = "false")
     private boolean isLast;
+    @Schema(description = "등록된 전체 채용공고 갯수", example = "3")
+    private int postedJdCount;
+    @Schema(description = "지원 완료된 채용공고 갯수", example = "2")
+    private int applyJdCount;
+    @Schema(description = "모든 채용공고의 완료된 조각 갯수", example = "10")
+    private int completedPiecesCount;
+    @Schema(description = "모든 채용공고의 조각 갯수", example = "100")
+    private int totalPiecesCount;
+    @Schema(description = "모든 조각을 완료한 채용공고 갯수", example = "1")
+    private int perfectJdCount;
 
-    public PagedJdResponseDto(Page<AllGetJDResponseDto> page, Resume resume) {
+    public PagedJdResponseDto(Page<AllGetJDResponseDto> page, Resume resume, int postedJdCount, int applyCount, int completedPiecesCount, int totalPiecesCount, int perfectJdCount) {
         this.jds = page.getContent();
         this.totalPages = page.getTotalPages();
         this.totalElements = page.getTotalElements();
@@ -49,5 +59,10 @@ public class PagedJdResponseDto {
         this.isFirst = page.isFirst();
         this.isLast = page.isLast();
         this.resume = (resume != null) ? new ResumeResponseDto(resume) : null;
+        this.postedJdCount = postedJdCount;
+        this.applyJdCount = applyCount;
+        this.completedPiecesCount = completedPiecesCount;
+        this.totalPiecesCount = totalPiecesCount;
+        this.perfectJdCount = perfectJdCount;
     }
 }
