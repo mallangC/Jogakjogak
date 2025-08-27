@@ -29,8 +29,10 @@ public class NotificationOnOffService {
 
         boolean isNotificationOn = !member.isNotificationEnabled();
         member.setNotificationEnabled(isNotificationOn);
-        for(JD jd : jds){
-            jd.setAlarmOn(isNotificationOn);
+        if(!member.isNotificationEnabled()){
+            for(JD jd : jds){
+                jd.setAlarmOn(isNotificationOn);
+            }
         }
 
         return member.isNotificationEnabled();
