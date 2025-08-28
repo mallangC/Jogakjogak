@@ -4,6 +4,8 @@ spring:
 
 logging:
   level:
+    org.hibernate.SQL: INFO
+    org.hibernate.type.descriptor.sql: INFO
     org.flywaydb: DEBUG
     com.zb.jogakjogak: INFO
     com.zb.jogakjogak.global.exception: ERROR
