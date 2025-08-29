@@ -8,6 +8,7 @@ import com.zb.jogakjogak.security.dto.UpdateMemberRequestDto;
 import com.zb.jogakjogak.security.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +42,7 @@ public class MemberController {
     @Operation(summary = "회원 상세정보 수정", description = "로그인된 회원의 정보를 수정합니다.")
     @PatchMapping("/my-page/update")
     public ResponseEntity<HttpApiResponse<MemberResponseDto>> updateMember(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-                                                                           @RequestBody UpdateMemberRequestDto updateMemberRequestDto){
+                                                                           @Valid @RequestBody UpdateMemberRequestDto updateMemberRequestDto){
         String username = customOAuth2User.getName();
 
         MemberResponseDto memberResponseDto = memberService.updateMember(username, updateMemberRequestDto);

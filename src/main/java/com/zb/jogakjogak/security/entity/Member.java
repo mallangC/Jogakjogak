@@ -79,7 +79,6 @@ public class Member {
 
     public void updateExistingMember(OAuth2ResponseDto oAuth2ResponseDto) {
         this.email = oAuth2ResponseDto.getEmail();
-        this.nickname = oAuth2ResponseDto.getNickname();
         this.lastLoginAt = LocalDateTime.now();
     }
 
@@ -87,9 +86,7 @@ public class Member {
         if(updateMemberRequestDto.getNickname() != null){
             this.nickname = updateMemberRequestDto.getNickname();
         }
-        if(updateMemberRequestDto.getEmail() != null){
-            this.email = updateMemberRequestDto.getEmail();
-        }
+
         if(updateMemberRequestDto.getIsNotificationEnabled() != null){
             this.isNotificationEnabled = updateMemberRequestDto.getIsNotificationEnabled();
         }
