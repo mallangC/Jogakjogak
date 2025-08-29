@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @Tag(name = "회원의 상세정보에 관한 API", description = "회원의 상세정보를 조회하고 수정할 수 있는 API")
-@RequestMapping("/member")
+@RequestMapping("/member/my-page")
 @RequiredArgsConstructor
 @RestController
 public class MemberController {
@@ -25,7 +25,7 @@ public class MemberController {
     private final MemberService memberService;
 
     @Operation(summary = "회원 상세정보 조회", description = "로그인된 회원의 정보를 조회합니다.")
-    @GetMapping("/my-page")
+    @GetMapping
     public ResponseEntity<HttpApiResponse<MemberResponseDto>> getMember(@AuthenticationPrincipal CustomOAuth2User customOAuth2User){
 
         String username = customOAuth2User.getName();
@@ -40,7 +40,7 @@ public class MemberController {
     }
 
     @Operation(summary = "회원 상세정보 수정", description = "로그인된 회원의 정보를 수정합니다.")
-    @PatchMapping("/my-page/update")
+    @PatchMapping("/update")
     public ResponseEntity<HttpApiResponse<MemberResponseDto>> updateMember(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,
                                                                            @Valid @RequestBody UpdateMemberRequestDto updateMemberRequestDto){
         String username = customOAuth2User.getName();
