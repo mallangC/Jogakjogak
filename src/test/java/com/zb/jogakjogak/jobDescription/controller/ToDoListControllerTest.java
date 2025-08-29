@@ -3,10 +3,7 @@ package com.zb.jogakjogak.jobDescription.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.javafaker.Faker;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.BulkToDoListUpdateRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.CreateToDoListRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListUpdateRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.UpdateToDoListRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.*;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repository.JDRepository;
@@ -304,6 +301,47 @@ class ToDoListControllerTest {
                 .andExpect(jsonPath("$.data.title").value("수정된 제목"))
                 .andExpect(jsonPath("$.data.content").value("수정된 내용"))
                 .andExpect(jsonPath("$.data.memo").value(""))
+                .andExpect(jsonPath("$.data.done").value(true))
+                .andDo(print());
+
+    }
+
+    /**
+     * 특정 JD에 속한 기존 ToDoList의 완료 여부를 수정합니다.
+     */
+    @Test
+    @DisplayName("ToDoList 수정 성공")
+    void toggleComplete_success() throws Exception {
+        // Given
+        JD jd = createAndSaveJd(setupMember,
+                "테스트 JD",
+                "https://test.com",
+                "회사",
+                "내용",
+                "직무",
+                LocalDateTime.now(),
+                "",
+                false,
+                false,
+                null,
+                null
+        );
+        Long jdId = jd.getId();
+        ToDoList existingToDoList = toDoListRepository.findAllByJdId(jdId).get(0);
+        Long toDoListId = existingToDoList.getId();
+
+        ToggleTodolistRequestDto dto = new ToggleTodolistRequestDto(true);
+        String content = objectMapper.writeValueAsString(dto);
+
+        // When
+        ResultActions result = mockMvc.perform(patch("/jds/{jdId}/to-do-lists/{toDoListId}/isDone", jdId, toDoListId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content));
+
+        // Then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("체크리스트 완료 여부 수정 완료"))
+                .andExpect(jsonPath("$.data.checklist_id").value(toDoListId))
                 .andExpect(jsonPath("$.data.done").value(true))
                 .andDo(print());
 
