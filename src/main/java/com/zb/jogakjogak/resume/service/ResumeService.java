@@ -64,7 +64,6 @@ public class ResumeService {
 
         Resume resume = resumeRepository.findResumeWithMemberByIdAndMemberId(resumeId, member.getId())
                 .orElseThrow(() -> new ResumeException(UNAUTHORIZED_ACCESS));
-
         return ResumeResponseDto.builder()
                 .resumeId(resume.getId())
                 .title(resume.getTitle())
