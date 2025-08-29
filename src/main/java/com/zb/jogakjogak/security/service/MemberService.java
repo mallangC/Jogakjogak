@@ -42,6 +42,7 @@ public class MemberService {
         member.updateMember(updateMemberRequestDto);
         return MemberResponseDto.builder()
                 .nickname(member.getNickname())
+                .email(member.getEmail())
                 .isNotificationEnabled(member.isNotificationEnabled())
                 .build();
     }
