@@ -32,9 +32,9 @@ services:
     logging:
       driver: "json-file"
       options:
-        max-size: "200m"
+        max-size: "50m"
         max-file: "1"
     deploy:
       resources:
         limits:
-          memory: 1536m
+          memory: 500m

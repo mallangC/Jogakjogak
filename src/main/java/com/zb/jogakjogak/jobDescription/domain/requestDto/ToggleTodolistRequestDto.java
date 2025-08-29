@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Schema(description = "투두리스트 완려 상태 요청 DTO")
+@Schema(description = "투두리스트 완료 상태 요청 DTO")
 @Getter
 @Builder
 @NoArgsConstructor

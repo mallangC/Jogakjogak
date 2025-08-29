@@ -104,12 +104,11 @@ class ResumeServiceTest {
                 .member(mockMember)
                 .build();
 
-        given(memberRepository.findByUsername(fixedUserName)).willReturn(Optional.of(mockMember));
         given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
 
 
         // When
-        ResumeResponseDto responseDto = resumeService.register(requestDto, fixedUserName);
+        ResumeResponseDto responseDto = resumeService.register(requestDto, mockMember);
 
         // Then
         assertThat(responseDto).isNotNull();
@@ -117,7 +116,6 @@ class ResumeServiceTest {
         assertThat(responseDto.getTitle()).isEqualTo(testName);
         assertThat(responseDto.getContent()).isEqualTo(testContent);
 
-        verify(memberRepository, times(1)).findByUsername(fixedUserName);
         verify(resumeRepository, times(1)).save(any(Resume.class));
     }
 
@@ -140,39 +138,15 @@ class ResumeServiceTest {
                 .resume(Resume.builder().id(300L).build())
                 .build();
 
-        given(memberRepository.findByUsername(fixedUserName)).willReturn(Optional.of(memberWithResume));
 
         // When & Then
         AuthException exception = assertThrows(AuthException.class, () -> {
-            resumeService.register(requestDto, fixedUserName);
+            resumeService.register(requestDto, memberWithResume);
         });
 
         assertThat(exception.getMemberErrorCode()).isEqualTo(MemberErrorCode.ALREADY_HAVE_RESUME);
         verify(resumeRepository, never()).save(any(Resume.class));
     }
-
-    // 회원이 존재하지 않는 경우 테스트 (추가)
-    @DisplayName("이력서 등록 실패 - 회원이 존재하지 않을 때")
-    @Test
-    void createResume_memberNotFound_throwsAuthException() {
-        // Given
-        String nonExistentUserName = "nonExistentUser";
-        ResumeRequestDto requestDto = ResumeRequestDto.builder()
-                .title("새 이력서")
-                .content("새 내용")
-                .build();
-
-        given(memberRepository.findByUsername(nonExistentUserName)).willReturn(Optional.empty());
-
-        // When & Then
-        AuthException exception = assertThrows(AuthException.class, () -> {
-            resumeService.register(requestDto, nonExistentUserName);
-        });
-
-        assertThat(exception.getMemberErrorCode()).isEqualTo(MemberErrorCode.NOT_FOUND_MEMBER);
-        verify(resumeRepository, never()).save(any(Resume.class)); // save 호출 안 됨 확인
-    }
-
 
     @Test
     @DisplayName("이력서 수정 성공 테스트 - 200 OK 예상")
@@ -186,11 +160,10 @@ class ResumeServiceTest {
                 .build();
 
         when(resumeRepository.findResumeWithMemberByIdAndMemberId(1L, mockMember.getId())).thenReturn(Optional.of(sampleResume));
-        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
         when(resumeRepository.save(any(Resume.class))).thenReturn(saveResume);
 
         //When
-        ResumeResponseDto result = resumeService.modify(1L, sampleRequestDto, mockMember.getName());
+        ResumeResponseDto result = resumeService.modify(1L, sampleRequestDto, mockMember);
 
         //Then
         verify(resumeRepository, times(1)).findResumeWithMemberByIdAndMemberId(1L, mockMember.getId());
@@ -209,12 +182,11 @@ class ResumeServiceTest {
     void modify_fail_notFoundResume() {
         //Given
         Long nonExistentResumeId = 99L;
-        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
         when(resumeRepository.findResumeWithMemberByIdAndMemberId(nonExistentResumeId, mockMember.getId())).thenReturn(Optional.empty());
 
         // When & Then
         ResumeException exception = assertThrows(ResumeException.class, () -> {
-            resumeService.modify(nonExistentResumeId, sampleRequestDto, mockMember.getName());
+            resumeService.modify(nonExistentResumeId, sampleRequestDto, mockMember);
         });
 
         // 예외 메시지 또는 에러 코드 검증
@@ -229,10 +201,9 @@ class ResumeServiceTest {
     void get_success() {
         //Given
         when(resumeRepository.findResumeWithMemberByIdAndMemberId(1L, mockMember.getId())).thenReturn(Optional.of(sampleResume));
-        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
 
         //When
-        ResumeResponseDto result = resumeService.get(1L, mockMember.getName());
+        ResumeResponseDto result = resumeService.get(1L, mockMember);
 
         //Then
         verify(resumeRepository, times(1)).findResumeWithMemberByIdAndMemberId(1L, mockMember.getId());
@@ -249,11 +220,10 @@ class ResumeServiceTest {
         //Given
         Long nonExistentResumeId = 99L;
         when(resumeRepository.findResumeWithMemberByIdAndMemberId(nonExistentResumeId, mockMember.getId())).thenReturn(Optional.empty());
-        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
 
         // When & Then
         ResumeException exception = assertThrows(ResumeException.class, () -> {
-            resumeService.get(nonExistentResumeId, mockMember.getName());
+            resumeService.get(nonExistentResumeId, mockMember);
         });
 
         // 예외 메시지 또는 에러 코드 검증
@@ -268,14 +238,12 @@ class ResumeServiceTest {
         // Given
         Long resumeIdToDelete = 1L;
         when(resumeRepository.findResumeWithMemberByIdAndMemberId(resumeIdToDelete, mockMember.getId())).thenReturn(Optional.of(sampleResume));
-        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
 
         // When
-        resumeService.delete(resumeIdToDelete, mockMember.getName());
+        resumeService.delete(resumeIdToDelete, mockMember);
 
         // Then
         verify(resumeRepository, times(1)).findResumeWithMemberByIdAndMemberId(resumeIdToDelete, mockMember.getId());
-        verify(memberRepository, times(1)).findByUsername(mockMember.getName());
         assertThat(mockMember.getResume()).isNull();
     }
 
@@ -284,12 +252,11 @@ class ResumeServiceTest {
     void deleteResume_fail_notFound() {
         // Given
         Long nonExistentResumeId = 99L;
-        when(memberRepository.findByUsername(mockMember.getName())).thenReturn(Optional.of(mockMember));
         given(resumeRepository.findResumeWithMemberByIdAndMemberId(nonExistentResumeId, mockMember.getId())).willReturn(Optional.empty());
 
         // When & Then
         ResumeException exception = assertThrows(ResumeException.class, () -> {
-            resumeService.delete(nonExistentResumeId, mockMember.getName());
+            resumeService.delete(nonExistentResumeId, mockMember);
         });
 
         assertEquals(ResumeErrorCode.UNAUTHORIZED_ACCESS, exception.getErrorCode());

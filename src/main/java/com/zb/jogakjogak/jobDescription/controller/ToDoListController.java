@@ -68,7 +68,7 @@ public class ToDoListController {
         );
     }
 
-    @Operation(summary = "특정 분석/카테고리의 Todolist 완료 여부 수정", description = "jd_id와 toDoList_id를 통해 todolist를 수정합니다")
+    @Operation(summary = "특정 분석/카테고리의 Todolist 완료 여부 수정", description = "jd_id와 toDoList_id를 통해 todolist 완료 여부를 수정합니다")
     @PatchMapping("/{toDoListId}/isDone")
     public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> toggleComplete(
             @PathVariable("jd_id") Long jdId,
