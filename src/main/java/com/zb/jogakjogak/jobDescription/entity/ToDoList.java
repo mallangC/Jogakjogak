@@ -119,4 +119,8 @@ public class ToDoList extends BaseEntity {
         this.memo = "";
         this.isDone = dto.isDone();
     }
+
+    public void updateToDoListIsDone(boolean isDone){
+        this.isDone = isDone;
+    }
 }

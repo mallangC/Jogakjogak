@@ -5,10 +5,7 @@ import com.zb.jogakjogak.global.exception.JDErrorCode;
 import com.zb.jogakjogak.global.exception.JDException;
 import com.zb.jogakjogak.global.exception.ToDoListErrorCode;
 import com.zb.jogakjogak.global.exception.ToDoListException;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.BulkToDoListUpdateRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.CreateToDoListRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListUpdateRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.UpdateToDoListRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.*;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListGetByCategoryResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
@@ -238,6 +235,47 @@ class ToDoListServiceTest {
         assertEquals(updateToDoListDto.getTitle(), result.getTitle());
         assertEquals(updateToDoListDto.getContent(), result.getContent());
         assertEquals(updateToDoListDto.isDone(), result.isDone());
+        assertEquals(jdId, result.getJdId());
+    }
+
+    @Test
+    @DisplayName("ToDoList 완료 여부 수정 성공")
+    void toggleComplete_success() {
+        // Given
+        JD testJd = JD.builder()
+                .id(jdId)
+                .title(faker.lorem().sentence())
+                .jdUrl(faker.internet().url())
+                .companyName(faker.company().name())
+                .job(faker.job().position())
+                .content(faker.lorem().paragraph())
+                .endedAt(faker.date().future(365, TimeUnit.DAYS).toInstant().atZone(ZoneId.systemDefault()).toLocalDate().atStartOfDay())
+                .applyAt(null)
+                .toDoLists(null)
+                .member(mockMember)
+                .memo(faker.lorem().sentence())
+                .build();
+
+        ToDoList originalToDoList = createTestToDoList(toDoListId, testJd, targetCategory, "Original Title");
+        testJd.addToDoList(originalToDoList);
+        ToggleTodolistRequestDto dto = ToggleTodolistRequestDto.builder()
+                .isDone(true)
+                .build();
+        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId())).thenReturn(Optional.of(testJd));
+
+
+        // When
+        ToDoListResponseDto result = toDoListService.toggleComplete(jdId, toDoListId, dto, mockMember);
+
+        // Then
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId());
+
+        assertNotNull(result);
+        assertEquals(toDoListId, result.getChecklist_id());
+        assertEquals(originalToDoList.getCategory(), result.getCategory());
+        assertEquals(originalToDoList.getTitle(), result.getTitle());
+        assertEquals(originalToDoList.getContent(), result.getContent());
+        assertEquals(dto.isDone(), result.isDone());
         assertEquals(jdId, result.getJdId());
     }
 
