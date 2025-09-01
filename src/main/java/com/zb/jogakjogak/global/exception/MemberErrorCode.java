@@ -14,7 +14,7 @@ public enum MemberErrorCode {
     TOKEN_TYPE_NOT_MATCH(HttpStatus.UNAUTHORIZED, "토큰 타입이 일치하지 않습니다." ),
 
     NOT_FOUND_MEMBER(HttpStatus.NOT_FOUND, "존재하지않는 회원입니다."),
-    ALREADY_EXISTING_NICKNAME(HttpStatus.UNAUTHORIZED, "이미 존재하는 닉네임입니다." ),
+    ALREADY_EXISTING_NICKNAME(HttpStatus.CONFLICT, "이미 존재하는 닉네임입니다." ),
 
     MEMBER_WITHDRAWAL_FAIL(HttpStatus.EXPECTATION_FAILED, "회원탈퇴를 실패했습니다." ),
     ALREADY_HAVE_RESUME(HttpStatus.CONFLICT, "이미 이력서를 가지고 있습니다." ),
