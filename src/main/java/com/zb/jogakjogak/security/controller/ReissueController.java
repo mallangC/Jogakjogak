@@ -10,6 +10,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,17 +20,13 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Access Token 관리 API", description = "새로운 access token 발급 관련 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/member")
 public class ReissueController {
 
     private final ReissueService reissueService;
 
-    /**
-     * 클라이언트로부터 refresh토큰을 받아 새로운 access토큰 + refresh토큰을 재발급하는 api
-     */
-    @Operation(summary = "Access Token 재발급 API", description = "새로운 access token을 refresh token으로 재발급 받습니다")
-    @PostMapping("/reissue")
-    public ResponseEntity reissue(HttpServletRequest request, HttpServletResponse response) {
+    @Operation(summary = "Access Token 재발급", description = "새로운 access token을 refresh token으로 재발급 받습니다")
+    @PostMapping("/member/reissue")
+    public ResponseEntity<HttpApiResponse<String>> reissue(HttpServletRequest request, HttpServletResponse response) {
 
         String refreshToken = extractRefreshTokenFromCookie(request.getCookies());
         ReissueResultDto reissueResultDto = reissueService.reissue(refreshToken);

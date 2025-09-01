@@ -14,5 +14,7 @@ public class EncryptionKeyHolder {
     }
 
     @Value("${security.encrypt.phone-key}")
-    public void setPhoneKey(String key) { phoneKey = key; }
+    public void setPhoneKey(String key) {
+        phoneKey = key;
+    }
 }

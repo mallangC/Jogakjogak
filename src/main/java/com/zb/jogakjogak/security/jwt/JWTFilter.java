@@ -60,7 +60,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
         try {
             jwtUtil.validateToken(accessToken, Token.ACCESS_TOKEN);
-        } catch (AuthException e) { // jwtUtil.validateToken에서 던지는 예외를 여기서 catch
+        } catch (AuthException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json; charset=UTF-8");
             String json = "{\"errorCode\": \"UNAUTHORIZED\", \"message\": \"" + e.getMessage() + "\"}";
@@ -68,7 +68,6 @@ public class JWTFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 토큰이 유효할 경우에만 다음 로직 실행
         String userName = jwtUtil.getUsername(accessToken);
         Member member = memberRepository.findByUsername(userName)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
