@@ -4,10 +4,7 @@ import com.zb.jogakjogak.global.exception.JDErrorCode;
 import com.zb.jogakjogak.global.exception.JDException;
 import com.zb.jogakjogak.global.exception.ToDoListErrorCode;
 import com.zb.jogakjogak.global.exception.ToDoListException;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.BulkToDoListUpdateRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.CreateToDoListRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListUpdateRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.UpdateToDoListRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.*;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListGetByCategoryResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
@@ -16,6 +13,7 @@ import com.zb.jogakjogak.jobDescription.repository.JDRepository;
 import com.zb.jogakjogak.jobDescription.repository.ToDoListRepository;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import com.zb.jogakjogak.security.entity.Member;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,6 +77,18 @@ public class ToDoListService {
         jd.setNotificationCount(0);
         ToDoList toDoList = findToDoListInJd(jd, toDoListId);
         toDoList.updateFromDto(toDoListDto);
+        return ToDoListResponseDto.fromEntity(toDoList);
+    }
+
+    /**
+     * 특정 JD에 속한 ToDoList에 대한 완료 여부를 수정하는 메서드
+     */
+    @Transactional
+    public ToDoListResponseDto toggleComplete(Long jdId, Long toDoListId, @Valid ToggleTodolistRequestDto dto, Member member) {
+        JD jd = getAuthorizedJd(jdId, member);
+        jd.setNotificationCount(0);
+        ToDoList toDoList = findToDoListInJd(jd, toDoListId);
+        toDoList.updateToDoListIsDone(dto.isDone());
         return ToDoListResponseDto.fromEntity(toDoList);
     }
 

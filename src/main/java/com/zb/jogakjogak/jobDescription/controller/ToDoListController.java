@@ -3,6 +3,7 @@ package com.zb.jogakjogak.jobDescription.controller;
 import com.zb.jogakjogak.global.HttpApiResponse;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.BulkToDoListUpdateRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.CreateToDoListRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.ToggleTodolistRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.UpdateToDoListRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListGetByCategoryResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
@@ -29,10 +30,6 @@ public class ToDoListController {
     /**
      * 특정 JD에 새로운 ToDoList를 생성합니다.
      *
-     * @param jdId       경로 변수로 전달되는 ToDoList를 추가할 JD의 고유 ID
-     * @param dto        요청 본문에 포함된, 생성할 ToDoList의 상세 정보
-     * @param customUser 현재 인증된 사용자 정보
-     * @return 생성된 ToDoList의 상세 정보와 성공 메시지를 포함하는 응답.
      */
     @Operation(summary = "특정 분석/카테고리의 Todolist 생성", description = "jd_id와 category를 통해 todolist를 생성합니다")
     @PostMapping
@@ -53,12 +50,6 @@ public class ToDoListController {
 
     /**
      * 특정 JD에 속한 기존 ToDoList의 내용을 수정합니다.
-     *
-     * @param jdId        경로 변수로 전달되는 ToDoList가 속한 JD의 고유 ID
-     * @param toDoListId  경로 변수로 전달되는 수정할 ToDoList의 고유 ID
-     * @param toDoListDto 요청 본문에 포함된, 업데이트할 ToDoList의 상세 정보 (수정할 필드만 포함 가능)
-     * @param customUser  현재 인증된 사용자 정보
-     * @return 수정된 ToDoList의 상세 정보와 성공 메시지를 포함하는 응답.
      */
     @Operation(summary = "특정 분석/카테고리의 Todolist 수정", description = "jd_id와 toDoList_id를 통해 todolist를 수정합니다")
     @PatchMapping("/{toDoListId}")
@@ -72,6 +63,23 @@ public class ToDoListController {
                 new HttpApiResponse<>(
                         response,
                         "체크리스트 수정 완료",
+                        HttpStatus.OK
+                )
+        );
+    }
+
+    @Operation(summary = "특정 분석/카테고리의 Todolist 완료 여부 수정", description = "jd_id와 toDoList_id를 통해 todolist 완료 여부를 수정합니다")
+    @PatchMapping("/{toDoListId}/isDone")
+    public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> toggleComplete(
+            @PathVariable("jd_id") Long jdId,
+            @PathVariable Long toDoListId,
+            @RequestBody @Valid ToggleTodolistRequestDto toggleTodolist,
+            @AuthenticationPrincipal CustomOAuth2User customUser) {
+        ToDoListResponseDto response = toDoListService.toggleComplete(jdId, toDoListId, toggleTodolist, customUser.getMember());
+        return ResponseEntity.ok().body(
+                new HttpApiResponse<>(
+                        response,
+                        "체크리스트 완료 여부 수정 완료",
                         HttpStatus.OK
                 )
         );
@@ -99,10 +107,6 @@ public class ToDoListController {
     /**
      * 특정 JD에 속한 단일 ToDoList를 삭제합니다.
      *
-     * @param jdId       경로 변수로 전달되는 ToDoList가 속한 JD의 고유 ID
-     * @param toDoListId 경로 변수로 전달되는 삭제할 ToDoList의 고유 ID
-     * @param customUser 현재 인증된 사용자 정보
-     * @return 빈 데이터와 성공 메시지를 포함하는 응답
      */
     @Operation(summary = "특정 분석/카테고리의 Todolist 삭제", description = "jd_id와 toDoList_id를 통해 todolist를 삭제합니다")
     @DeleteMapping("/{toDoListId}")
@@ -123,10 +127,6 @@ public class ToDoListController {
     /**
      * 특정 JD에 속한 특정 카테고리의 모든 ToDoList들을 조회합니다.
      *
-     * @param jdId       경로 변수로 전달되는 ToDoList가 속한 JD의 고유 ID
-     * @param category   쿼리 파라미터로 전달되는 조회할 ToDoList의 카테고리 (예: STRUCTURAL_COMPLEMENT_PLAN)
-     * @param customUser 현재 인증된 사용자 정보
-     * @return 조회된 ToDoList들의 목록과 성공 메시지를 포함하는 응답.
      */
     @Operation(summary = "특정 분석/카테고리의 모든 Todolist 조회", description = "jd_id와 category를 통해 해당되는 모든 todolist를 조회합니다")
     @GetMapping
