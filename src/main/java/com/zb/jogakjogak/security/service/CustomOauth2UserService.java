@@ -56,7 +56,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
                     .username(username)
                     .name(oAuth2ResponseDto.getName())
                     .nickname(nickname)
-                    .isNotificationEnabled(false)
+                    .isNotificationEnabled(true)
                     .email(oAuth2ResponseDto.getEmail())
                     .lastLoginAt(LocalDateTime.now())
                     .oauth2Info(new ArrayList<>())
@@ -79,6 +79,9 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         } else{
             member = existMember.get();
             member.updateExistingMember(oAuth2ResponseDto);
+            if (member.getNickname() == null) {
+                member.setNickname(nicknameCreator.createNickname());
+            }
 
             for (OAuth2Info info : member.getOauth2Info()) {
                 if (info.getProvider().equals("google")) {
