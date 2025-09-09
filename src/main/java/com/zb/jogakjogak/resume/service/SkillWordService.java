@@ -34,9 +34,7 @@ public class SkillWordService {
             return List.of();
         }
 
-        String fullTextQuery = query + "*";
-
-        List<String> skills = skillWordRepository.findContentsByContentMatchAgainst(fullTextQuery);
+        List<String> skills = skillWordRepository.findContentsByContentLike(query);
 
         return skills.stream()
                 .distinct()
@@ -47,7 +45,7 @@ public class SkillWordService {
     }
 
     private boolean isEnglish(String query) {
-        return query.matches("^[a-zA-Z\\s]*$");
+        return query.matches("^[a-zA-Z\\s#+]*$");
     }
 
     private boolean isKorean(String query) {
