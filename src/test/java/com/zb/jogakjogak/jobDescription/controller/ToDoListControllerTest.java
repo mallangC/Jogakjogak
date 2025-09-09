@@ -600,14 +600,17 @@ class ToDoListControllerTest {
         assertThat(finalToDoListIds).containsExactlyInAnyOrderElementsOf(initialToDoListIds);
     }
 
+    /**
+     * 여러 ToDoList의 완료여부를 일괄 수정합니다.
+     */
     @Test
-    @DisplayName("ToDoList 다중 완료 여부 수정 성공")
-    void updateIsDoneTodoLists_success() throws Exception {
+    @DisplayName("ToDoList 완료여부 일괄 수정 성공 - 여러 투두리스트를 완료 처리")
+    void updateIsDoneTodoLists_success_markAsDone() throws Exception {
         // Given
         JD jd = createAndSaveJd(
                 setupMember,
-                "다중 완료 JD",
-                "https://done.com",
+                "완료여부 일괄 수정 JD",
+                "https://bulk-done.com",
                 "회사",
                 "내용",
                 "직무",
@@ -620,39 +623,59 @@ class ToDoListControllerTest {
         );
         Long jdId = jd.getId();
 
-        // 기존 ToDoList 가져오기
-        List<ToDoList> existingToDoLists = toDoListRepository.findToDoListsByJdIdAndCategoryWithJd(
-                jdId, ToDoListType.STRUCTURAL_COMPLEMENT_PLAN);
+        // 추가 ToDoList 생성 (다양한 카테고리)
+        ToDoList additionalTodo1 = ToDoList.builder()
+                .title("추가 투두 1")
+                .content("추가 내용 1")
+                .category(ToDoListType.CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL)
+                .isDone(false)
+                .jd(jd)
+                .build();
+        ToDoList additionalTodo2 = ToDoList.builder()
+                .title("추가 투두 2")
+                .content("추가 내용 2")
+                .category(ToDoListType.SCHEDULE_MISC_ERROR)
+                .isDone(false)
+                .jd(jd)
+                .build();
+        toDoListRepository.save(additionalTodo1);
+        toDoListRepository.save(additionalTodo2);
+        entityManager.clear();
 
-        // 완료 여부를 모두 true로 변경
-        List<Long> toDoListIds = existingToDoLists.stream()
+        // 수정할 ToDoList ID 목록 가져오기
+        List<ToDoList> existingToDoLists = toDoListRepository.findAllByJdId(jdId);
+        List<Long> toDoListIdsToUpdate = existingToDoLists.stream()
+                .limit(3) // 처음 3개만 선택
                 .map(ToDoList::getId)
                 .collect(Collectors.toList());
 
-        UpdateTodoListsIsDoneRequestDto requestDto = UpdateTodoListsIsDoneRequestDto.builder()
-                .toDoListIds(toDoListIds)
+        UpdateTodoListsIsDoneRequestDto dto = UpdateTodoListsIsDoneRequestDto.builder()
+                .toDoListIds(toDoListIdsToUpdate)
                 .isDone(true)
                 .build();
-        String content = objectMapper.writeValueAsString(requestDto);
+        String content = objectMapper.writeValueAsString(dto);
 
         // When
-        ResultActions result = mockMvc.perform(put("/jds/{jd_id}/to-do-lists/update-is-done", jdId)
+        ResultActions result = mockMvc.perform(put("/jds/{jdId}/to-do-lists/update-is-done", jdId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content));
 
-        // Then: API 응답 검증
+        // Then
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("다중 투두리스트 완료여부 수정 성공"))
+                .andExpect(jsonPath("$.data.isDone").value(true))
                 .andExpect(jsonPath("$.data.toDoLists").isArray())
-                .andExpect(jsonPath("$.data.toDoLists.length()").value(existingToDoLists.size()))
-                .andExpect(jsonPath("$.data.toDoLists[*].isDone").value(Matchers.everyItem(Matchers.is(true))))
+                .andExpect(jsonPath("$.data.toDoLists.length()").value(3))
+                .andExpect(jsonPath("$.data.toDoLists[0].done").value(true))
+                .andExpect(jsonPath("$.data.toDoLists[1].done").value(true))
+                .andExpect(jsonPath("$.data.toDoLists[2].done").value(true))
                 .andDo(print());
 
-        // 실제 DB에서 변경사항 확인
-        List<ToDoList> updatedToDoLists = toDoListRepository.findToDoListsByJdIdAndCategoryWithJd(
-                jdId, ToDoListType.STRUCTURAL_COMPLEMENT_PLAN);
-
+        // DB에서 실제로 수정되었는지 확인
+        entityManager.clear();
+        List<ToDoList> updatedToDoLists = toDoListRepository.findAllById(toDoListIdsToUpdate);
         assertThat(updatedToDoLists).allMatch(ToDoList::isDone);
     }
+
 
 }
