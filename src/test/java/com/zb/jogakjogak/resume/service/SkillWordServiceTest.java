@@ -32,10 +32,9 @@ class SkillWordServiceTest {
     void autoComplete_success_withEnglishWord() {
         // Given
         String query = "java";
-        String fullTextQuery = query + "*";
 
         List<String> mockSuggestions = Arrays.asList("JPA", "java script", "Java", "JavaScript");
-        given(skillWordRepository.findContentsByContentMatchAgainst(fullTextQuery)).willReturn(mockSuggestions);
+        given(skillWordRepository.findContentsByContentLike(query)).willReturn(mockSuggestions);
 
         // When
         List<String> result = skillWordService.getAutocompleteSuggestions(query);
@@ -54,10 +53,9 @@ class SkillWordServiceTest {
     void autoComplete_success_withKoreaWord() {
         // Given
         String query = "스프링";
-        String fullTextQuery = query + "*";
 
         List<String> mockSuggestions = Arrays.asList("스프링", "스프링 부트", "스프링부트");
-        given(skillWordRepository.findContentsByContentMatchAgainst(fullTextQuery)).willReturn(mockSuggestions);
+        given(skillWordRepository.findContentsByContentLike(query)).willReturn(mockSuggestions);
 
         // When
         List<String> result = skillWordService.getAutocompleteSuggestions(query);
@@ -115,8 +113,7 @@ class SkillWordServiceTest {
     void getSuggestions_whenEnglishQueryIsException_returnsValidList() {
         // Given
         String query = "Go";
-        // Mock repository to return something, as the validation should pass
-        given(skillWordRepository.findContentsByContentMatchAgainst("Go*")).willReturn(List.of("Go"));
+        given(skillWordRepository.findContentsByContentLike("Go")).willReturn(List.of("Go"));
 
         // When
         List<String> result = skillWordService.getAutocompleteSuggestions(query);
