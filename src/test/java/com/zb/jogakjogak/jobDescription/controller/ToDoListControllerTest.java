@@ -600,9 +600,6 @@ class ToDoListControllerTest {
         assertThat(finalToDoListIds).containsExactlyInAnyOrderElementsOf(initialToDoListIds);
     }
 
-    /**
-     * 여러 ToDoList의 완료여부를 일괄 수정합니다.
-     */
     @Test
     @DisplayName("ToDoList 완료여부 일괄 수정 성공 - 여러 투두리스트를 완료 처리")
     void updateIsDoneTodoLists_success_markAsDone() throws Exception {
@@ -665,9 +662,9 @@ class ToDoListControllerTest {
                 .andExpect(jsonPath("$.message").value("다중 투두리스트 완료여부 수정 성공"))
                 .andExpect(jsonPath("$.data.toDoLists").isArray())
                 .andExpect(jsonPath("$.data.toDoLists.length()").value(3))
-                .andExpect(jsonPath("$.data.toDoLists[0].isDone").value(true))
-                .andExpect(jsonPath("$.data.toDoLists[1].isDone").value(true))
-                .andExpect(jsonPath("$.data.toDoLists[2].isDone").value(true))
+                .andExpect(jsonPath("$.data.toDoLists[0].done").value(true))
+                .andExpect(jsonPath("$.data.toDoLists[1].done").value(true))
+                .andExpect(jsonPath("$.data.toDoLists[2].done").value(true))
                 .andDo(print());
 
         // DB에서 실제로 수정되었는지 확인
@@ -675,6 +672,5 @@ class ToDoListControllerTest {
         List<ToDoList> updatedToDoLists = toDoListRepository.findAllById(toDoListIdsToUpdate);
         assertThat(updatedToDoLists).allMatch(ToDoList::isDone);
     }
-
 
 }
