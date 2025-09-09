@@ -1,6 +1,5 @@
 package com.zb.jogakjogak.resume.service;
 
-import com.zb.jogakjogak.resume.entity.SkillWord;
 import com.zb.jogakjogak.resume.repository.SkillWordRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,7 +16,7 @@ public class SkillWordService {
     private final SkillWordRepository skillWordRepository;
 
     private static final List<String> EXCEPTION_LIST = Arrays.asList(
-            "C", "R", "Go", "AI", "UX", "UI", "QA", "QC",
+            "C", "R", "GO", "AI", "UX", "UI", "QA", "QC",
             "PM", "BI", "ML", "DL", "AWS", "GCP", "CAD"
     );
 
@@ -37,10 +36,9 @@ public class SkillWordService {
 
         String fullTextQuery = query + "*";
 
-        List<SkillWord> skills = skillWordRepository.findByContentMatchAgainst(fullTextQuery);
+        List<String> skills = skillWordRepository.findContentsByContentMatchAgainst(fullTextQuery);
 
         return skills.stream()
-                .map(SkillWord::getContent)
                 .distinct()
                 .sorted(Comparator.naturalOrder())
                 .limit(8)
