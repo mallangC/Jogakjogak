@@ -598,4 +598,58 @@ class ToDoListControllerTest {
 
         assertThat(finalToDoListIds).containsExactlyInAnyOrderElementsOf(initialToDoListIds);
     }
+
+    @Test
+    @DisplayName("ToDoList 다중 완료 여부 수정 성공")
+    void updateIsDoneTodoLists_success() throws Exception {
+        // Given
+        JD jd = createAndSaveJd(
+                setupMember,
+                "다중 완료 JD",
+                "https://done.com",
+                "회사",
+                "내용",
+                "직무",
+                LocalDateTime.now(),
+                "",
+                false,
+                false,
+                null,
+                null
+        );
+        Long jdId = jd.getId();
+        entityManager.clear();
+
+        // 기존 ToDoList 가져오기
+        List<ToDoList> existingToDoLists = toDoListRepository.findToDoListsByJdIdAndCategoryWithJd(
+                jdId, ToDoListType.STRUCTURAL_COMPLEMENT_PLAN);
+
+        // 완료 여부를 모두 true로 변경
+        List<Long> toDoListIds = existingToDoLists.stream()
+                .map(ToDoList::getId)
+                .collect(Collectors.toList());
+
+        UpdateTodoListsIsDoneRequestDto requestDto = UpdateTodoListsIsDoneRequestDto.builder()
+                .toDoListIds(toDoListIds)
+                .isDone(true)
+                .build();
+        String content = objectMapper.writeValueAsString(requestDto);
+
+        // When
+        ResultActions result = mockMvc.perform(put("/jds/{jd_id}/update-is-done", jdId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content));
+
+        // Then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("다중 투두리스트 완료여부 수정 성공"))
+                .andExpect(jsonPath("$.data.toDoLists").isArray())
+                .andExpect(jsonPath("$.data.toDoLists.length()").value(existingToDoLists.size()))
+                .andDo(print());
+
+        entityManager.clear();
+        List<ToDoList> updatedToDoLists = toDoListRepository.findToDoListsByJdIdAndCategoryWithJd(
+                jdId, ToDoListType.STRUCTURAL_COMPLEMENT_PLAN);
+        assertThat(updatedToDoLists).allMatch(ToDoList::isDone);
+    }
 }

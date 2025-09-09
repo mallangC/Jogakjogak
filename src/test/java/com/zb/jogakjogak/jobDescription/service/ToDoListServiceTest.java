@@ -8,6 +8,7 @@ import com.zb.jogakjogak.global.exception.ToDoListException;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.*;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListGetByCategoryResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.UpdateIsDoneTodoListsResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repository.JDRepository;
@@ -626,6 +627,69 @@ class ToDoListServiceTest {
         assertEquals(targetCategory, result.getCategory());
         assertNotNull(result.getToDoLists());
         assertTrue(result.getToDoLists().isEmpty());
+    }
+
+    @Test
+    @DisplayName("ToDoList 여러 개 완료 여부 업데이트 성공")
+    void updateIsDoneTodoLists_success() {
+        // Given
+        JD testJd = createTestJd(jdId, mockMember, new ArrayList<>());
+
+        ToDoList todo1 = createTestToDoList(201L, testJd, targetCategory, "Todo 1");
+        ToDoList todo2 = createTestToDoList(202L, testJd, targetCategory, "Todo 2");
+        testJd.addToDoList(todo1);
+        testJd.addToDoList(todo2);
+
+        List<Long> todoIds = Arrays.asList(201L, 202L);
+        UpdateTodoListsIsDoneRequestDto requestDto = UpdateTodoListsIsDoneRequestDto.builder()
+                .toDoListIds(todoIds)
+                .isDone(true)
+                .build();
+
+        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId()))
+                .thenReturn(Optional.of(testJd));
+        when(toDoListRepository.findAllById(todoIds)).thenReturn(Arrays.asList(todo1, todo2));
+
+        // When
+        UpdateIsDoneTodoListsResponseDto result = toDoListService.updateIsDoneTodoLists(jdId, requestDto, mockMember);
+
+        // Then
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId());
+        verify(toDoListRepository, times(1)).findAllById(todoIds);
+
+        assertThat(result.getToDoLists()).hasSize(2)
+                .extracting(ToDoListResponseDto::getChecklist_id)
+                .containsExactlyInAnyOrder(201L, 202L);
+        assertThat(result.getToDoLists()).allMatch(ToDoListResponseDto::isDone);
+
+        assertTrue(result.isDone());
+    }
+
+    @Test
+    @DisplayName("ToDoList 업데이트 실패 - 존재하지 않는 ToDoList ID 포함")
+    void updateIsDoneTodoLists_fail_toDoListNotFound() {
+        // Given
+        JD testJd = createTestJd(jdId, mockMember, new ArrayList<>());
+
+        List<Long> todoIds = Arrays.asList(301L, 302L); // 301L 존재, 302L 존재하지 않음
+        UpdateTodoListsIsDoneRequestDto requestDto = UpdateTodoListsIsDoneRequestDto.builder()
+                .toDoListIds(todoIds)
+                .isDone(true)
+                .build();
+
+        ToDoList todoExist = createTestToDoList(301L, testJd, targetCategory, "Existing Todo");
+        testJd.addToDoList(todoExist);
+
+        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId()))
+                .thenReturn(Optional.of(testJd));
+        when(toDoListRepository.findAllById(todoIds)).thenReturn(Collections.singletonList(todoExist));
+
+        // When & Then
+        ToDoListException exception = assertThrows(ToDoListException.class,
+                () -> toDoListService.updateIsDoneTodoLists(jdId, requestDto, mockMember));
+
+        assertEquals(ToDoListErrorCode.TODO_LIST_NOT_BELONG_TO_JD, exception.getErrorCode());
+        verify(toDoListRepository, never()).saveAll(anyList());
     }
 
     private JD createTestJd(Long jdId, Member member, List<ToDoList> toDoLists) {
