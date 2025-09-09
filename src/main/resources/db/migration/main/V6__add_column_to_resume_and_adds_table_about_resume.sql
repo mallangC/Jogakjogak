@@ -34,5 +34,6 @@ CREATE TABLE skill
 CREATE TABLE skill_word
 (
     id        BIGINT PRIMARY KEY AUTO_INCREMENT,
-    content   VARCHAR(50) NOT NULL
+    content   VARCHAR(50) NOT NULL,
+    FULLTEXT(content)
 );
