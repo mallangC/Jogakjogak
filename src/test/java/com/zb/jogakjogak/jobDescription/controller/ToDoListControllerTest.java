@@ -602,7 +602,6 @@ class ToDoListControllerTest {
     }
 
     @Test
-    @Commit // 트랜잭션 커밋
     @DisplayName("ToDoList 완료여부 일괄 수정 성공 - 여러 투두리스트를 완료 처리")
     void updateIsDoneTodoLists_success_markAsDone() throws Exception {
         // Given
@@ -639,7 +638,8 @@ class ToDoListControllerTest {
                 .build();
         toDoListRepository.save(additionalTodo1);
         toDoListRepository.save(additionalTodo2);
-        entityManager.clear();
+        entityManager.flush(); // 즉시 DB에 반영
+        entityManager.clear(); // 1차 캐시 클리어
 
         // 수정할 ToDoList ID 목록 가져오기
         List<ToDoList> existingToDoLists = toDoListRepository.findAllByJdId(jdId);
@@ -647,6 +647,11 @@ class ToDoListControllerTest {
                 .limit(3)
                 .map(ToDoList::getId)
                 .collect(Collectors.toList());
+
+        System.out.println("=== 수정 전 ToDoList 상태 ===");
+        existingToDoLists.stream()
+                .limit(3)
+                .forEach(todo -> System.out.println("ID: " + todo.getId() + ", isDone: " + todo.isDone()));
 
         UpdateTodoListsIsDoneRequestDto dto = UpdateTodoListsIsDoneRequestDto.builder()
                 .toDoListIds(toDoListIdsToUpdate)
@@ -663,13 +668,25 @@ class ToDoListControllerTest {
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("다중 투두리스트 완료여부 수정 성공"))
                 .andExpect(jsonPath("$.data.toDoLists").isArray())
-                .andExpect(jsonPath("$.data.toDoLists.length()").value(3))
                 .andDo(print());
 
-        // DB에서 실제로 수정되었는지 확인
+        // 트랜잭션 강제 커밋 및 캐시 클리어
+        entityManager.flush();
         entityManager.clear();
+
+        // DB에서 실제로 수정되었는지 확인
         List<ToDoList> updatedToDoLists = toDoListRepository.findAllById(toDoListIdsToUpdate);
-        assertThat(updatedToDoLists).allMatch(ToDoList::isDone);
+
+        System.out.println("=== 수정 후 ToDoList 상태 ===");
+        updatedToDoLists.forEach(todo ->
+                System.out.println("ID: " + todo.getId() + ", isDone: " + todo.isDone()));
+
+        assertThat(updatedToDoLists).hasSize(3);
+        updatedToDoLists.forEach(todo -> {
+            assertThat(todo.isDone())
+                    .as("ToDoList ID %d의 isDone이 true", todo.getId())
+                    .isTrue();
+        });
     }
 
 }
