@@ -30,3 +30,10 @@ CREATE TABLE skill
     content   VARCHAR(255) NOT NULL,
     FOREIGN KEY (resume_id) REFERENCES resume (id)
 );
+
+CREATE TABLE skill_word
+(
+    id        BIGINT PRIMARY KEY AUTO_INCREMENT,
+    content   VARCHAR(50) NOT NULL,
+    FULLTEXT(content)
+);
