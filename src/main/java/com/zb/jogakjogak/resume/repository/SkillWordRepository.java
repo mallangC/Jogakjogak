@@ -9,7 +9,7 @@ import java.util.List;
 
 @Repository
 public interface SkillWordRepository extends JpaRepository<SkillWord, Long> {
-    @Query(value = "SELECT * FROM skill_word " +
-                   "WHERE MATCH(content) AGAINST(?1 IN BOOLEAN MODE)", nativeQuery = true)
-    List<SkillWord> findByContentMatchAgainst(String query);
+    @Query(value = "SELECT sw.content FROM skill_word sw " +
+                   "WHERE MATCH(sw.content) AGAINST(?1 IN BOOLEAN MODE)", nativeQuery = true)
+    List<String> findContentsByContentMatchAgainst(String query);
 }
