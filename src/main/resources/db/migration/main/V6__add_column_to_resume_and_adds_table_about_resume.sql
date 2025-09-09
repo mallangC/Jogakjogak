@@ -17,9 +17,9 @@ CREATE TABLE education
 (
     id          BIGINT PRIMARY KEY AUTO_INCREMENT,
     resume_id   BIGINT       NOT NULL,
-    level       VARCHAR(20) NOT NULL,
-    major_field DATETIME     NOT NULL,
-    status      VARCHAR(20) NOT NULL,
+    level       VARCHAR(20)  NOT NULL,
+    major_field VARCHAR(225) NOT NULL,
+    status      VARCHAR(20)  NOT NULL,
     FOREIGN KEY (resume_id) REFERENCES resume (id)
 );
 
@@ -33,6 +33,6 @@ CREATE TABLE skill
 
 CREATE TABLE skill_word
 (
-    id        BIGINT PRIMARY KEY AUTO_INCREMENT,
-    content   VARCHAR(50) NOT NULL
+    id      BIGINT PRIMARY KEY AUTO_INCREMENT,
+    content VARCHAR(50) NOT NULL
 );
