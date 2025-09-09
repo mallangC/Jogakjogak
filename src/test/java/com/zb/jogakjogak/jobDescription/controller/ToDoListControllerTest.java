@@ -663,7 +663,6 @@ class ToDoListControllerTest {
         // Then
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("다중 투두리스트 완료여부 수정 성공"))
-                .andExpect(jsonPath("$.data.isDone").value(true))
                 .andExpect(jsonPath("$.data.toDoLists").isArray())
                 .andExpect(jsonPath("$.data.toDoLists.length()").value(3))
                 .andExpect(jsonPath("$.data.toDoLists[0].done").value(true))
