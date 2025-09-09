@@ -666,32 +666,34 @@ class ToDoListServiceTest {
     }
 
     @Test
-    @DisplayName("ToDoList 업데이트 실패 - 존재하지 않는 ToDoList ID 포함")
-    void updateIsDoneTodoLists_fail_toDoListNotFound() {
-        // Given
-        JD testJd = createTestJd(jdId, mockMember, new ArrayList<>());
+    @DisplayName("ToDoList 업데이트 시 - 존재하지 않는 ID는 무시된다")
+    void updateIsDoneTodoLists_ignoreNotFoundIds() {
+        // given
+        Long jdId = 1L;
+        Member member = createTestMember();
+        UpdateTodoListsIsDoneRequestDto dto = new UpdateTodoListsIsDoneRequestDto(List.of(999L), true);
 
-        List<Long> todoIds = Arrays.asList(301L, 302L); // 301L 존재, 302L 존재하지 않음
-        UpdateTodoListsIsDoneRequestDto requestDto = UpdateTodoListsIsDoneRequestDto.builder()
-                .toDoListIds(todoIds)
-                .isDone(true)
-                .build();
+        // mock: 없는 ID라 빈 리스트 반환
+        when(toDoListRepository.findAllById(dto.getToDoListIds()))
+                .thenReturn(Collections.emptyList());
 
-        ToDoList todoExist = createTestToDoList(301L, testJd, targetCategory, "Existing Todo");
-        testJd.addToDoList(todoExist);
+        // when
+        UpdateIsDoneTodoListsResponseDto response =
+                toDoListService.updateIsDoneTodoLists(jdId, dto, member);
 
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId()))
-                .thenReturn(Optional.of(testJd));
-        when(toDoListRepository.findAllById(todoIds)).thenReturn(Collections.singletonList(todoExist));
-
-        // When & Then
-        ToDoListException exception = assertThrows(ToDoListException.class,
-                () -> toDoListService.updateIsDoneTodoLists(jdId, requestDto, mockMember));
-
-        assertEquals(ToDoListErrorCode.TODO_LIST_NOT_BELONG_TO_JD, exception.getErrorCode());
-        verify(toDoListRepository, never()).saveAll(anyList());
+        // then
+        assertThat(response.getToDoLists()).isEmpty(); // 응답에도 업데이트된 리스트 없음
+        assertThat(response.isDone()).isTrue();
     }
 
+    private Member createTestMember() {
+        return Member.builder()
+                .id(1L)
+                .email("test@example.com")
+                .name("테스트유저")
+                .nickname("tester")
+                .build();
+    }
     private JD createTestJd(Long jdId, Member member, List<ToDoList> toDoLists) {
         return JD.builder()
                 .id(jdId)

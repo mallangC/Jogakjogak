@@ -647,6 +647,7 @@ class ToDoListControllerTest {
                 .andExpect(jsonPath("$.data.toDoLists.length()").value(existingToDoLists.size()))
                 .andDo(print());
 
+        entityManager.flush();
         entityManager.clear();
         List<ToDoList> updatedToDoLists = toDoListRepository.findToDoListsByJdIdAndCategoryWithJd(
                 jdId, ToDoListType.STRUCTURAL_COMPLEMENT_PLAN);
