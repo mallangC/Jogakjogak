@@ -636,7 +636,7 @@ class ToDoListControllerTest {
         String content = objectMapper.writeValueAsString(requestDto);
 
         // When
-        ResultActions result = mockMvc.perform(put("/jds/{jd_id}/update-is-done", jdId)
+        ResultActions result = mockMvc.perform(put("/jds/{jd_id}/to-do-lists/update-is-done", jdId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content));
 
