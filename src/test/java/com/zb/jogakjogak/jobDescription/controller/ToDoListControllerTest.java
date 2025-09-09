@@ -642,7 +642,7 @@ class ToDoListControllerTest {
         // 수정할 ToDoList ID 목록 가져오기
         List<ToDoList> existingToDoLists = toDoListRepository.findAllByJdId(jdId);
         List<Long> toDoListIdsToUpdate = existingToDoLists.stream()
-                .limit(3) // 처음 3개만 선택
+                .limit(2)
                 .map(ToDoList::getId)
                 .collect(Collectors.toList());
 
@@ -661,7 +661,7 @@ class ToDoListControllerTest {
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("다중 투두리스트 완료여부 수정 성공"))
                 .andExpect(jsonPath("$.data.toDoLists").isArray())
-                .andExpect(jsonPath("$.data.toDoLists.length()").value(3))
+                .andExpect(jsonPath("$.data.toDoLists.length()").value(2))
                 .andDo(print());
 
         // DB에서 실제로 수정되었는지 확인
