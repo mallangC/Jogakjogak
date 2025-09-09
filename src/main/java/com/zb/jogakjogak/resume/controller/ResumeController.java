@@ -32,11 +32,9 @@ public class ResumeController {
     public ResponseEntity<HttpApiResponse<ResumeResponseDto>> register(
             @Valid @RequestBody ResumeRequestDto requestDto,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
-
-        String username = customOAuth2User.getName();
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
-                        resumeService.register(requestDto, username),
+                        resumeService.register(requestDto, customOAuth2User.getMember()),
                         "이력서 등록 완료",
                         HttpStatus.CREATED
                 )
@@ -54,11 +52,10 @@ public class ResumeController {
             @PathVariable("resume_id") Long resumeId,
             @Valid @RequestBody ResumeRequestDto requestDto,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
-        String username = customOAuth2User.getName();
         return ResponseEntity.ok()
                 .body(
                         new HttpApiResponse<>(
-                                resumeService.modify(resumeId, requestDto, username),
+                                resumeService.modify(resumeId, requestDto, customOAuth2User.getMember()),
                                 "이력서 수정 완료",
                                 HttpStatus.OK
                         )
@@ -74,11 +71,10 @@ public class ResumeController {
     public ResponseEntity<HttpApiResponse<ResumeResponseDto>> get(
             @PathVariable Long resumeId,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
-        String username = customOAuth2User.getName();
         return ResponseEntity.ok()
                 .body(
                         new HttpApiResponse<>(
-                                resumeService.get(resumeId, username),
+                                resumeService.get(resumeId, customOAuth2User.getMember()),
                                 "이력서 조회 성공",
                                 HttpStatus.OK
                         )
@@ -90,8 +86,7 @@ public class ResumeController {
     public ResponseEntity<HttpApiResponse<String>> delete(
             @PathVariable Long resumeId,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
-        String username = customOAuth2User.getName();
-        resumeService.delete(resumeId, username);
+        resumeService.delete(resumeId, customOAuth2User.getMember());
         return ResponseEntity.ok()
                 .body(
                         new HttpApiResponse<>(

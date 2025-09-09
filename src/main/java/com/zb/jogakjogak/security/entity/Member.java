@@ -6,6 +6,7 @@ import com.zb.jogakjogak.resume.entity.Resume;
 import com.zb.jogakjogak.security.Role;
 import com.zb.jogakjogak.security.config.EmailEncryptor;
 import com.zb.jogakjogak.security.dto.OAuth2ResponseDto;
+import com.zb.jogakjogak.security.dto.UpdateMemberRequestDto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -78,8 +79,17 @@ public class Member {
 
     public void updateExistingMember(OAuth2ResponseDto oAuth2ResponseDto) {
         this.email = oAuth2ResponseDto.getEmail();
-        this.nickname = oAuth2ResponseDto.getNickname();
         this.lastLoginAt = LocalDateTime.now();
+    }
+
+    public void updateMember(UpdateMemberRequestDto updateMemberRequestDto){
+        if(updateMemberRequestDto.getNickname() != null){
+            this.nickname = updateMemberRequestDto.getNickname();
+        }
+
+        if(updateMemberRequestDto.getIsNotificationEnabled() != null){
+            this.isNotificationEnabled = updateMemberRequestDto.getIsNotificationEnabled();
+        }
     }
 
     public void setResume(Resume resume) {
