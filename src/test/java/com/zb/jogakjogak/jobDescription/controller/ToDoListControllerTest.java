@@ -17,6 +17,7 @@ import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.entity.Member;
 import com.zb.jogakjogak.security.repository.MemberRepository;
 import jakarta.persistence.EntityManager;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -618,7 +619,6 @@ class ToDoListControllerTest {
                 null
         );
         Long jdId = jd.getId();
-        entityManager.clear();
 
         // 기존 ToDoList 가져오기
         List<ToDoList> existingToDoLists = toDoListRepository.findToDoListsByJdIdAndCategoryWithJd(
@@ -640,15 +640,20 @@ class ToDoListControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content));
 
-        // Then
+        // Then: API 응답 검증
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("다중 투두리스트 완료여부 수정 성공"))
                 .andExpect(jsonPath("$.data.toDoLists").isArray())
                 .andExpect(jsonPath("$.data.toDoLists.length()").value(existingToDoLists.size()))
+                .andExpect(jsonPath("$.data.toDoLists[*].isDone").value(Matchers.everyItem(Matchers.is(true))))
                 .andDo(print());
+        entityManager.flush();
+        entityManager.clear();
 
         List<ToDoList> updatedToDoLists = toDoListRepository.findToDoListsByJdIdAndCategoryWithJd(
                 jdId, ToDoListType.STRUCTURAL_COMPLEMENT_PLAN);
+
         assertThat(updatedToDoLists).allMatch(ToDoList::isDone);
     }
+
 }
