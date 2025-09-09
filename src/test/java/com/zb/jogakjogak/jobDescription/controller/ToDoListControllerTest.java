@@ -621,7 +621,6 @@ class ToDoListControllerTest {
         );
         Long jdId = jd.getId();
 
-        // 추가 ToDoList 생성 (다양한 카테고리)
         ToDoList additionalTodo1 = ToDoList.builder()
                 .title("추가 투두 1")
                 .content("추가 내용 1")
@@ -639,7 +638,6 @@ class ToDoListControllerTest {
         toDoListRepository.save(additionalTodo1);
         toDoListRepository.save(additionalTodo2);
 
-        // 수정할 ToDoList ID 목록 가져오기
         List<ToDoList> existingToDoLists = toDoListRepository.findAllByJdId(jdId);
         List<Long> toDoListIdsToUpdate = existingToDoLists.stream()
                 .limit(3)
