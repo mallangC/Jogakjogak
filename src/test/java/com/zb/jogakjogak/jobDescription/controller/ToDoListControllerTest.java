@@ -30,6 +30,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -601,6 +602,7 @@ class ToDoListControllerTest {
     }
 
     @Test
+    @Commit // 트랜잭션 커밋
     @DisplayName("ToDoList 완료여부 일괄 수정 성공 - 여러 투두리스트를 완료 처리")
     void updateIsDoneTodoLists_success_markAsDone() throws Exception {
         // Given
@@ -642,7 +644,7 @@ class ToDoListControllerTest {
         // 수정할 ToDoList ID 목록 가져오기
         List<ToDoList> existingToDoLists = toDoListRepository.findAllByJdId(jdId);
         List<Long> toDoListIdsToUpdate = existingToDoLists.stream()
-                .limit(2)
+                .limit(3)
                 .map(ToDoList::getId)
                 .collect(Collectors.toList());
 
@@ -661,7 +663,7 @@ class ToDoListControllerTest {
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("다중 투두리스트 완료여부 수정 성공"))
                 .andExpect(jsonPath("$.data.toDoLists").isArray())
-                .andExpect(jsonPath("$.data.toDoLists.length()").value(2))
+                .andExpect(jsonPath("$.data.toDoLists.length()").value(3))
                 .andDo(print());
 
         // DB에서 실제로 수정되었는지 확인
