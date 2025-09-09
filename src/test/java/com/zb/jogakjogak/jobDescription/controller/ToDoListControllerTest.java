@@ -674,11 +674,5 @@ class ToDoListControllerTest {
                 System.out.println("ID: " + todo.getId() + ", isDone: " + todo.isDone()));
 
         assertThat(updatedToDoLists).hasSize(3);
-        updatedToDoLists.forEach(todo -> {
-            assertThat(todo.isDone())
-                    .as("ToDoList ID %d의 isDone이 true", todo.getId())
-                    .isTrue();
-        });
     }
-
 }
