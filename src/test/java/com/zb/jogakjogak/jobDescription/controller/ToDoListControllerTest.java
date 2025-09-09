@@ -646,7 +646,6 @@ class ToDoListControllerTest {
                 .map(ToDoList::getId)
                 .collect(Collectors.toList());
 
-        System.out.println("=== 수정 전 ToDoList 상태 ===");
         existingToDoLists.stream()
                 .limit(3)
                 .forEach(todo -> System.out.println("ID: " + todo.getId() + ", isDone: " + todo.isDone()));
@@ -668,14 +667,9 @@ class ToDoListControllerTest {
                 .andExpect(jsonPath("$.data.toDoLists").isArray())
                 .andDo(print());
 
-        // 트랜잭션 강제 커밋 및 캐시 클리어
-        entityManager.flush();
-        entityManager.clear();
-
         // DB에서 실제로 수정되었는지 확인
         List<ToDoList> updatedToDoLists = toDoListRepository.findAllById(toDoListIdsToUpdate);
 
-        System.out.println("=== 수정 후 ToDoList 상태 ===");
         updatedToDoLists.forEach(todo ->
                 System.out.println("ID: " + todo.getId() + ", isDone: " + todo.isDone()));
 
