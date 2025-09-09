@@ -638,8 +638,6 @@ class ToDoListControllerTest {
                 .build();
         toDoListRepository.save(additionalTodo1);
         toDoListRepository.save(additionalTodo2);
-        entityManager.flush(); // 즉시 DB에 반영
-        entityManager.clear(); // 1차 캐시 클리어
 
         // 수정할 ToDoList ID 목록 가져오기
         List<ToDoList> existingToDoLists = toDoListRepository.findAllByJdId(jdId);
