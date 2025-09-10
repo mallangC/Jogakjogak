@@ -17,6 +17,6 @@ public class EducationDto {
     private EducationLevel level;
     @NotBlank(message = "주요 학문 분야를 입력해주세요.")
     private String majorField;
-    @NotBlank(message = "고육 상태를 입력해주세요.")
+    @NotBlank(message = "교육 상태를 입력해주세요.")
     private EducationStatus status;
 }
