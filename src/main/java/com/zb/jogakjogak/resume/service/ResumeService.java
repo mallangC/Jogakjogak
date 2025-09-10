@@ -45,7 +45,7 @@ public class ResumeService {
      * @return 이력서 id, 이력서 이름, 이력서 번호
      */
     public ResumeResponseDto register(ResumeRequestDto requestDto, String username) {
-        Member member = getMemberByUsername(username);
+        Member member = getMemberByUsernameWithResume(username);
 
         if (member.getResume() != null) {
             throw new AuthException(MemberErrorCode.ALREADY_HAVE_RESUME);
@@ -122,8 +122,7 @@ public class ResumeService {
      */
     @Transactional
     public void delete(Long resumeId, String username) {
-        Member member = memberRepository.findByUsername(username)
-                .orElseThrow(() -> new AuthException(NOT_FOUND_MEMBER));
+        Member member = getMemberByUsername(username);
         Resume resumeToDelete = resumeRepository.findResumeWithMemberByIdAndMemberId(resumeId, member.getId())
                 .orElseThrow(() -> new ResumeException(UNAUTHORIZED_ACCESS));
         resumeRepository.delete(resumeToDelete);
@@ -138,7 +137,7 @@ public class ResumeService {
      */
     public ResumeAddResponseDto registerV2(ResumeAddRequestDto requestDto, String username) {
 
-        Member member = getMemberByUsername(username);
+        Member member = getMemberByUsernameWithResume(username);
         Resume memberResume = member.getResume();
 
         if (memberResume != null) {
@@ -188,6 +187,17 @@ public class ResumeService {
      * @return 조회된 Member 엔티티
      */
     private Member getMemberByUsername(String username) {
+        return memberRepository.findByUsername(username)
+                .orElseThrow(() -> new AuthException(NOT_FOUND_MEMBER));
+    }
+
+    /**
+     * 사용자 이름을 통해 Member 엔티티를 조회하고, 존재하지 않으면 예외를 발생시킵니다.
+     *
+     * @param username 조회할 사용자의 이름
+     * @return 조회된 Member 엔티티와 연결된 Resume
+     */
+    private Member getMemberByUsernameWithResume(String username) {
         return memberRepository.findByUsernameWithResume(username)
                 .orElseThrow(() -> new AuthException(NOT_FOUND_MEMBER));
     }
