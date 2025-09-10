@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "이력서 관리 API", description = "이력서 등록, 수정, 조회, 삭제 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/resume")
+@RequestMapping
 public class ResumeController {
 
     private final ResumeService resumeService;
@@ -31,7 +31,7 @@ public class ResumeController {
      * @return data(이력서 id, 이력서 이름, 이력서 내용), 성공 여부 메세지, 상태코드
      */
     @Operation(summary = "이력서 등록", description = "분석할 사용자의 이력서를 등록합니다")
-    @PostMapping
+    @PostMapping("/resume")
     public ResponseEntity<HttpApiResponse<ResumeResponseDto>> register(
             @Valid @RequestBody ResumeRequestDto requestDto,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
@@ -54,7 +54,7 @@ public class ResumeController {
      * @return data(수정한 이력서 id, 수정된 이력서 이름, 수정된 이력서 내용), 성공 여부 메세지, 상태코드
      */
     @Operation(summary = "이력서 수정", description = "사용자가 등록한 이력서를 수정합니다")
-    @PatchMapping("/{resume_id}")
+    @PatchMapping("/resume/{resume_id}")
     public ResponseEntity<HttpApiResponse<ResumeResponseDto>> modify(
             @PathVariable("resume_id") Long resumeId,
             @Valid @RequestBody ResumeRequestDto requestDto,
@@ -77,7 +77,7 @@ public class ResumeController {
      * @return 찾으려는 이력서의 data, 성공 여부 메세지, 상태코드
      */
     @Operation(summary = "이력서 조회", description = "사용자가 등록한 이력서를 조회합니다")
-    @GetMapping("/{resumeId}")
+    @GetMapping("/resume/{resumeId}")
     public ResponseEntity<HttpApiResponse<ResumeResponseDto>> get(
             @PathVariable Long resumeId,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
@@ -93,7 +93,7 @@ public class ResumeController {
     }
 
     @Operation(summary = "이력서 삭제", description = "사용자가 등록한 이력서를 삭제합니다")
-    @DeleteMapping("/{resumeId}")
+    @DeleteMapping("/resume/{resumeId}")
     public ResponseEntity<HttpApiResponse<String>> delete(
             @PathVariable Long resumeId,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
@@ -116,7 +116,7 @@ public class ResumeController {
      * @return data(이력서 id, 이력서 내용, 신입 유무, 경력 리스트, 학력 리스트, 스킬 리스트, 생성일시, 수정일시), 성공 여부 메세지, 상태코드
      */
     @Operation(summary = "(v2) 이력서 등록", description = "분석할 사용자의 이력서를 등록합니다")
-    @PostMapping("/v2")
+    @PostMapping("/v2/resume")
     public ResponseEntity<HttpApiResponse<ResumeAddResponseDto>> registerV2(
             @Valid @RequestBody ResumeAddRequestDto requestDto,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {

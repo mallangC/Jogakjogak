@@ -339,7 +339,7 @@ class ResumeControllerTest {
         String content = objectMapper.writeValueAsString(requestDto);
 
         // When
-        ResultActions result = mockMvc.perform(post("/resume/v2")
+        ResultActions result = mockMvc.perform(post("/v2/resume")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content));
 
