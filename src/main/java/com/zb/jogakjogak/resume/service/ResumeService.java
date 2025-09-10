@@ -134,7 +134,7 @@ public class ResumeService {
      * (v2)이력서 등록을 위한 서비스 레이어 메서드
      *
      * @param requestDto 이력서 내용, 신입 유무, 경력 리스트, 학력 리스트, 스킬 리스트
-     * @return 이력서 id, 이력서 이름, 이력서 번호
+     * @return 이력서 id, 이력서 내용, 신입 유무, 경력 리스트, 학력 리스트, 스킬 리스트, 생성 일시, 수정 일시
      */
     public ResumeAddResponseDto registerV2(ResumeAddRequestDto requestDto, String username) {
 
