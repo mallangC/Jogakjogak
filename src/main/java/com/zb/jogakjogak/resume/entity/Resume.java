@@ -32,11 +32,11 @@ public class Resume extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @OneToMany(mappedBy = "career", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Career> careerList;
-    @OneToMany(mappedBy = "education", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Education> EducationList;
-    @OneToMany(mappedBy = "skill", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Skill> SkillList;
 
     /**
