@@ -2,6 +2,7 @@ package com.zb.jogakjogak.security.service;
 
 
 import com.zb.jogakjogak.security.Role;
+import com.zb.jogakjogak.security.config.NicknameCreator;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.dto.GoogleResponseDto;
 import com.zb.jogakjogak.security.dto.KakaoResponseDto;
@@ -28,6 +29,7 @@ import java.util.Optional;
 public class CustomOauth2UserService extends DefaultOAuth2UserService {
 
     private final MemberRepository memberRepository;
+    private final NicknameCreator nicknameCreator;
 
     @Override
     @Transactional
@@ -36,8 +38,8 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         OAuth2User oAuth2User = super.loadUser(userRequest);
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
         String accessToken = userRequest.getAccessToken().getTokenValue();
-
         OAuth2ResponseDto oAuth2ResponseDto;
+
         if(registrationId.equals("kakao")){
             oAuth2ResponseDto = new KakaoResponseDto(oAuth2User.getAttributes());
         }else if(registrationId.equals("google")){
@@ -49,10 +51,12 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         Optional<Member> existMember = memberRepository.findByUsernameWithOauth2Info(username);
         Member member;
         if (existMember.isEmpty()) {
+            String nickname = nicknameCreator.createNickname();
             member = Member.builder()
                     .username(username)
                     .name(oAuth2ResponseDto.getName())
-                    .isNotificationEnabled(false)
+                    .nickname(nickname)
+                    .isNotificationEnabled(true)
                     .email(oAuth2ResponseDto.getEmail())
                     .lastLoginAt(LocalDateTime.now())
                     .oauth2Info(new ArrayList<>())
@@ -75,6 +79,9 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         } else{
             member = existMember.get();
             member.updateExistingMember(oAuth2ResponseDto);
+            if (member.getNickname() == null) {
+                member.setNickname(nicknameCreator.createNickname());
+            }
 
             for (OAuth2Info info : member.getOauth2Info()) {
                 if (info.getProvider().equals("google")) {

@@ -42,14 +42,6 @@ public class GaMeasurementProtocolService {
     /**
      * GA4 Measurement Protocol을 사용하여 이벤트를 전송합니다.
      * 비동기로 처리하여 백엔드 API 성능에 영향을 주지 않도록 합니다.
-     *
-     * @param clientId    GA에서 사용자를 식별하는 ID. (필수)
-     *                    프론트엔드에서 _ga 쿠키 값 (client_id)을 HTTP 헤더 등으로 전달받는 것이 가장 좋음.
-     *                    없을 경우 UUID 등으로 임시 ID 생성.
-     * @param userId      로그인된 사용자의 고유 ID (선택 사항). GA4의 User-ID 기능에 사용됩니다.
-     * @param eventName   전송할 이벤트 이름 (예: "api_call", "backend_error", "email_sent")
-     * @param eventParams 이벤트와 함께 보낼 매개변수 (Map<String, Object> 형태)
-     * @return Mono<String> 비동기 처리 결과 (성공 시 응답 본문, 실패 시 에러)
      */
     public Mono<String> sendGaEvent(String clientId,
                                     String userId,
@@ -79,11 +71,6 @@ public class GaMeasurementProtocolService {
                 )
         ));
 
-        System.out.println("Sending GA Event: " + eventName
-                + " for client: " + clientId
-                + (userId != null ? ", user: " + userId : "")
-                + ", params: " + eventParams);
-
         // 비동기 HTTP POST 요청 전송
         return webClient.post()
                 .uri(uriBuilder -> {
@@ -93,8 +80,8 @@ public class GaMeasurementProtocolService {
                 })
                 .bodyValue(payload) // 요청 본문에 payload (JSON) 삽입
                 .retrieve() // 응답 수신
-                .bodyToMono(String.class) // 응답 본문을 String으로 변환
-                .doOnError(error -> System.err.println("GA Event (" + eventName + ") 전송 실패: " + error.getMessage()));
+                .bodyToMono(String.class); // 응답 본문을 String으로 변환
+
     }
 
 }

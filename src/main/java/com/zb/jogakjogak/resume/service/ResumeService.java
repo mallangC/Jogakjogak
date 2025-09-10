@@ -16,7 +16,6 @@ import com.zb.jogakjogak.resume.repository.EducationRepository;
 import com.zb.jogakjogak.resume.repository.ResumeRepository;
 import com.zb.jogakjogak.resume.repository.SkillRepository;
 import com.zb.jogakjogak.security.entity.Member;
-import com.zb.jogakjogak.security.repository.MemberRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,6 +32,7 @@ import static com.zb.jogakjogak.global.exception.ResumeErrorCode.UNAUTHORIZED_AC
 public class ResumeService {
 
     private final ResumeRepository resumeRepository;
+
     private final MemberRepository memberRepository;
     private final CareerRepository careerRepository;
     private final EducationRepository educationRepository;
@@ -44,8 +44,8 @@ public class ResumeService {
      * @param requestDto 이력서 이름, 이력서 내용
      * @return 이력서 id, 이력서 이름, 이력서 번호
      */
-    public ResumeResponseDto register(ResumeRequestDto requestDto, String username) {
-        Member member = getMemberByUsernameWithResume(username);
+
+    public ResumeResponseDto register(ResumeRequestDto requestDto, Member member) {
 
         if (member.getResume() != null) {
             throw new AuthException(MemberErrorCode.ALREADY_HAVE_RESUME);
@@ -67,17 +67,8 @@ public class ResumeService {
                 .build();
     }
 
-    /**
-     * 사용자가 이력서를 수정할 떄 찾으려는 서비스 메서드
-     *
-     * @param resumeId   수정하려는 이력서의 id
-     * @param requestDto 수정할 이력서의 내용, 수정할 이력서의 이름
-     * @return 수정된 이력서의 id, 수정된 이력서의 이름, 수정된 이력서의 내용
-     */
     @Transactional
-    public ResumeResponseDto modify(Long resumeId, @Valid ResumeRequestDto requestDto, String username) {
-
-        Member member = getMemberByUsername(username);
+    public ResumeResponseDto modify(Long resumeId, @Valid ResumeRequestDto requestDto, Member member) {
 
         Resume resume = resumeRepository.findResumeWithMemberByIdAndMemberId(resumeId, member.getId())
                 .orElseThrow(() -> new ResumeException(UNAUTHORIZED_ACCESS));
@@ -93,19 +84,10 @@ public class ResumeService {
                 .build();
     }
 
-    /**
-     * 사용자가 이력서를 조회할 떄 사용하는 서비스 메서드
-     *
-     * @param resumeId 찾으려는 이력서의 id
-     * @return 사용자가 찾으려는 이력서의 정보
-     */
-    public ResumeResponseDto get(Long resumeId, String username) {
-
-        Member member = getMemberByUsername(username);
+    public ResumeResponseDto get(Long resumeId, Member member) {
 
         Resume resume = resumeRepository.findResumeWithMemberByIdAndMemberId(resumeId, member.getId())
                 .orElseThrow(() -> new ResumeException(UNAUTHORIZED_ACCESS));
-
         return ResumeResponseDto.builder()
                 .resumeId(resume.getId())
                 .title(resume.getTitle())
@@ -115,14 +97,8 @@ public class ResumeService {
                 .build();
     }
 
-    /**
-     * 사용자가 이력서를 삭제할 떄 사용하는 서비스 메서드
-     *
-     * @param resumeId 삭제하려는 이력서의 id
-     */
     @Transactional
-    public void delete(Long resumeId, String username) {
-        Member member = getMemberByUsername(username);
+    public void delete(Long resumeId, Member member) {
         Resume resumeToDelete = resumeRepository.findResumeWithMemberByIdAndMemberId(resumeId, member.getId())
                 .orElseThrow(() -> new ResumeException(UNAUTHORIZED_ACCESS));
         resumeRepository.delete(resumeToDelete);
@@ -201,4 +177,5 @@ public class ResumeService {
         return memberRepository.findByUsernameWithResume(username)
                 .orElseThrow(() -> new AuthException(NOT_FOUND_MEMBER));
     }
+
 }

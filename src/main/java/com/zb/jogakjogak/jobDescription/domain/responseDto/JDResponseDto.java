@@ -1,6 +1,7 @@
 package com.zb.jogakjogak.jobDescription.domain.responseDto;
 
 import com.zb.jogakjogak.jobDescription.entity.JD;
+import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.security.entity.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -67,16 +68,27 @@ public class JDResponseDto {
     private LocalDateTime createdAt;
     @Schema(description = "수정 일시", example = "2025-06-22T10:30:00Z")
     private LocalDateTime updatedAt;
+    @Schema(description = "채용공고의 완료된 조각 갯수", example = "10")
+    private int completedPiecesCount;
+    @Schema(description = "채용공고의 조각 갯수", example = "10")
+    private int totalPiecesCount;
 
     @Schema(description = "전체 todolist 리스트")
     private List<ToDoListResponseDto> toDoLists;
 
     public static JDResponseDto fromEntity(JD jd, Member member) {
-        List<ToDoListResponseDto> mappedToDoLists = null;
+        List<ToDoListResponseDto> mappedToDoLists = List.of();
+        int completedPiecesCount = 0;
+        int totalPiecesCount = 0;
         if (jd.getToDoLists() != null) {
-            mappedToDoLists = jd.getToDoLists().stream()
+            List<ToDoList> toDoLists = jd.getToDoLists();
+            mappedToDoLists = toDoLists.stream()
                     .map(ToDoListResponseDto::fromEntity)
                     .collect(Collectors.toList());
+            completedPiecesCount = (int) toDoLists.stream()
+                    .filter(ToDoList::isDone)
+                    .count();
+            totalPiecesCount = toDoLists.size();
         }
 
         return JDResponseDto.builder()
@@ -94,6 +106,8 @@ public class JDResponseDto {
                 .createdAt(jd.getCreatedAt())
                 .updatedAt(jd.getUpdatedAt())
                 .toDoLists(mappedToDoLists)
+                .completedPiecesCount(completedPiecesCount)
+                .totalPiecesCount(totalPiecesCount)
                 .memberId(member.getId())
                 .build();
     }

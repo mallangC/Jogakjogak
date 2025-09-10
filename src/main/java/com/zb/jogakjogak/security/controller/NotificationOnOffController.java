@@ -4,6 +4,7 @@ package com.zb.jogakjogak.security.controller;
 import com.zb.jogakjogak.global.HttpApiResponse;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.service.NotificationOnOffService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class NotificationOnOffController {
 
     private final NotificationOnOffService notificationOnOffService;
+
+    @Operation(summary = "이메일 전체 알림 수정", description = "회원의 모든 채용공고 알림을 일괄적으로 변경할 수 있습니다.")
     @PostMapping
     public ResponseEntity<HttpApiResponse<Boolean>> switchAllJdsNotification(@AuthenticationPrincipal CustomOAuth2User customOAuth2User){
 

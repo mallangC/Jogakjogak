@@ -24,10 +24,9 @@ public class WebConfig implements WebMvcConfigurer {
         // GA가 활성화된 경우에만 인터셉터 등록
         if (measurementId != null && !measurementId.trim().isEmpty() 
             && apiSecret != null && !apiSecret.trim().isEmpty()) {
-            // '/jds/'로 시작하는 모든 요청에 인터셉터 적용
             registry.addInterceptor(gaApiCallInterceptor).addPathPatterns("/jds/**");
-            // '/member/'로 시작하는 모든 요청에 인터셉터 적용
             registry.addInterceptor(gaApiCallInterceptor).addPathPatterns("/member/**");
+            registry.addInterceptor(gaApiCallInterceptor).addPathPatterns("/resume/**");
         }
     }
 }

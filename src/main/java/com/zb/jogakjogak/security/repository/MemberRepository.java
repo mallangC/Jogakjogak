@@ -6,11 +6,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
-    Optional<Member> findByUsername(String userName);
+    Optional<Member> findByUsername(String username);
 
     @Query("SELECT COUNT(j) FROM JD j WHERE j.member.id = :memberId")
     long countJdByMemberId(@Param("memberId") Long memberId);
@@ -20,4 +21,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Query("SELECT m FROM Member m LEFT JOIN FETCH m.resume WHERE m.username = :username")
     Optional<Member> findByUsernameWithResume(@Param("username") String username);
+
+    boolean existsByNickname(String nickname);
+
+    List<Member> findByNicknameIsNull();
+
 }
