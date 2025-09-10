@@ -17,4 +17,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Query("SELECT m FROM Member m LEFT JOIN FETCH m.oauth2Info WHERE m.username = :username")
     Optional<Member> findByUsernameWithOauth2Info(@Param("username") String username);
+
+    @Query("SELECT m FROM Member m LEFT JOIN FETCH m.resume WHERE m.username = :username")
+    Optional<Member> findByUsernameWithResume(@Param("username") String username);
 }
