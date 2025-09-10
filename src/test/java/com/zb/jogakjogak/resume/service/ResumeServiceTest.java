@@ -18,7 +18,6 @@ import com.zb.jogakjogak.resume.type.EducationLevel;
 import com.zb.jogakjogak.resume.type.EducationStatus;
 import com.zb.jogakjogak.security.Role;
 import com.zb.jogakjogak.security.entity.Member;
-import com.zb.jogakjogak.security.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -53,9 +52,6 @@ class ResumeServiceTest {
 
     @Mock
     private SkillRepository skillRepository;
-
-    @Mock
-    private MemberRepository memberRepository;
 
     @InjectMocks
     private ResumeService resumeService;
@@ -122,8 +118,6 @@ class ResumeServiceTest {
                 .member(mockMember)
                 .build();
 
-
-        given(memberRepository.findByUsernameWithResume(fixedUserName)).willReturn(Optional.of(mockMember));
         given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
 
         // When
@@ -135,7 +129,6 @@ class ResumeServiceTest {
         assertThat(responseDto.getTitle()).isEqualTo(testName);
         assertThat(responseDto.getContent()).isEqualTo(testContent);
 
-        verify(memberRepository, times(1)).findByUsernameWithResume(fixedUserName);
         verify(resumeRepository, times(1)).save(any(Resume.class));
     }
 
@@ -312,19 +305,16 @@ class ResumeServiceTest {
                 .isNewcomer(isNewcomer)
                 .build();
 
-        given(memberRepository.findByUsernameWithResume(fixedUserName)).willReturn(Optional.of(mockMember));
         given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
 
-
         // When
-        ResumeAddResponseDto responseDto = resumeService.registerV2(requestDto, fixedUserName);
+        ResumeAddResponseDto responseDto = resumeService.registerV2(requestDto, mockMember);
 
         // Then
         assertThat(responseDto).isNotNull();
         assertThat(responseDto.getResumeId()).isEqualTo(1L);
         assertThat(responseDto.getContent()).isEqualTo(testContent);
 
-        verify(memberRepository, times(1)).findByUsernameWithResume(fixedUserName);
         verify(resumeRepository, times(1)).save(any(Resume.class));
     }
 
@@ -376,19 +366,16 @@ class ResumeServiceTest {
                 .isNewcomer(isNewcomer)
                 .build();
 
-        given(memberRepository.findByUsernameWithResume(fixedUserName)).willReturn(Optional.of(mockMember));
         given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
 
-
         // When
-        ResumeAddResponseDto responseDto = resumeService.registerV2(requestDto, fixedUserName);
+        ResumeAddResponseDto responseDto = resumeService.registerV2(requestDto, mockMember);
 
         // Then
         assertThat(responseDto).isNotNull();
         assertThat(responseDto.getResumeId()).isEqualTo(1L);
         assertThat(responseDto.getContent()).isEqualTo(testContent);
 
-        verify(memberRepository, times(1)).findByUsernameWithResume(fixedUserName);
         verify(resumeRepository, times(1)).save(any(Resume.class));
     }
 
@@ -448,19 +435,16 @@ class ResumeServiceTest {
                 .isNewcomer(isNewcomer)
                 .build();
 
-        given(memberRepository.findByUsernameWithResume(fixedUserName)).willReturn(Optional.of(mockMember));
         given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
 
-
         // When
-        ResumeAddResponseDto responseDto = resumeService.registerV2(requestDto, fixedUserName);
+        ResumeAddResponseDto responseDto = resumeService.registerV2(requestDto, mockMember);
 
         // Then
         assertThat(responseDto).isNotNull();
         assertThat(responseDto.getResumeId()).isEqualTo(1L);
         assertThat(responseDto.getContent()).isEqualTo(testContent);
 
-        verify(memberRepository, times(1)).findByUsernameWithResume(fixedUserName);
         verify(resumeRepository, times(1)).save(any(Resume.class));
     }
 
@@ -485,15 +469,12 @@ class ResumeServiceTest {
                 .isNewcomer(isNewcomer)
                 .build();
 
-        given(memberRepository.findByUsernameWithResume(fixedUserName)).willReturn(Optional.of(mockMember));
-
         ResumeException exception = assertThrows(ResumeException.class, () -> {
-            resumeService.registerV2(requestDto, fixedUserName);
+            resumeService.registerV2(requestDto, mockMember);
         });
 
         // Then
         assertThat(exception.getErrorCode()).isEqualTo(ResumeErrorCode.NOT_ENTERED_CAREER);
-        verify(memberRepository, times(1)).findByUsernameWithResume(fixedUserName);
         verify(resumeRepository, times(0)).save(any(Resume.class));
     }
 

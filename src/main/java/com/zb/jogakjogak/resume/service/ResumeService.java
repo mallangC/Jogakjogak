@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.zb.jogakjogak.global.exception.MemberErrorCode.NOT_FOUND_MEMBER;
 import static com.zb.jogakjogak.global.exception.ResumeErrorCode.NOT_ENTERED_CAREER;
 import static com.zb.jogakjogak.global.exception.ResumeErrorCode.UNAUTHORIZED_ACCESS;
 
@@ -32,8 +31,6 @@ import static com.zb.jogakjogak.global.exception.ResumeErrorCode.UNAUTHORIZED_AC
 public class ResumeService {
 
     private final ResumeRepository resumeRepository;
-
-    private final MemberRepository memberRepository;
     private final CareerRepository careerRepository;
     private final EducationRepository educationRepository;
     private final SkillRepository skillRepository;
@@ -88,6 +85,7 @@ public class ResumeService {
 
         Resume resume = resumeRepository.findResumeWithMemberByIdAndMemberId(resumeId, member.getId())
                 .orElseThrow(() -> new ResumeException(UNAUTHORIZED_ACCESS));
+
         return ResumeResponseDto.builder()
                 .resumeId(resume.getId())
                 .title(resume.getTitle())
@@ -111,9 +109,8 @@ public class ResumeService {
      * @param requestDto 이력서 내용, 신입 유무, 경력 리스트, 학력 리스트, 스킬 리스트
      * @return 이력서 id, 이력서 내용, 신입 유무, 경력 리스트, 학력 리스트, 스킬 리스트, 생성 일시, 수정 일시
      */
-    public ResumeAddResponseDto registerV2(ResumeAddRequestDto requestDto, String username) {
+    public ResumeAddResponseDto registerV2(ResumeAddRequestDto requestDto,Member member) {
 
-        Member member = getMemberByUsernameWithResume(username);
         Resume memberResume = member.getResume();
 
         if (memberResume != null) {
@@ -155,27 +152,4 @@ public class ResumeService {
 
         return ResumeAddResponseDto.of(resume, requestDto);
     }
-
-    /**
-     * 사용자 이름을 통해 Member 엔티티를 조회하고, 존재하지 않으면 예외를 발생시킵니다.
-     *
-     * @param username 조회할 사용자의 이름
-     * @return 조회된 Member 엔티티
-     */
-    private Member getMemberByUsername(String username) {
-        return memberRepository.findByUsername(username)
-                .orElseThrow(() -> new AuthException(NOT_FOUND_MEMBER));
-    }
-
-    /**
-     * 사용자 이름을 통해 Member 엔티티를 조회하고, 존재하지 않으면 예외를 발생시킵니다.
-     *
-     * @param username 조회할 사용자의 이름
-     * @return 조회된 Member 엔티티와 연결된 Resume
-     */
-    private Member getMemberByUsernameWithResume(String username) {
-        return memberRepository.findByUsernameWithResume(username)
-                .orElseThrow(() -> new AuthException(NOT_FOUND_MEMBER));
-    }
-
 }

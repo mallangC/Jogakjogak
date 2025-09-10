@@ -116,10 +116,9 @@ public class ResumeController {
             @Valid @RequestBody ResumeAddRequestDto requestDto,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
 
-        String username = customOAuth2User.getName();
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
-                        resumeService.registerV2(requestDto, username),
+                        resumeService.registerV2(requestDto, customOAuth2User.getMember()),
                         "이력서 등록 완료",
                         HttpStatus.CREATED
                 )
