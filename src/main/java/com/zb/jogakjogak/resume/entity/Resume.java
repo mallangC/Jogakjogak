@@ -25,6 +25,8 @@ public class Resume extends BaseEntity {
     private String title;
     @Column(nullable = false, length = 5000)
     private String content;
+    @Column(nullable = false)
+    private boolean isNewcomer = true;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
@@ -39,6 +41,7 @@ public class Resume extends BaseEntity {
 
     /**
      * 사용자가 이력서를 수정할 때 사용하는 메서드
+     *
      * @param requestDto 수정할 이력서 이름, 수정할 이력서 내용.
      */
     public void modify(ResumeRequestDto requestDto) {

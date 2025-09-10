@@ -1,5 +1,6 @@
 package com.zb.jogakjogak.resume.entity;
 
+import com.zb.jogakjogak.resume.domain.requestDto.SkillDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,9 +17,16 @@ public class Skill {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
-    private String name;
+    private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "resume_id", nullable = false)
     private Resume resume;
+
+    public static Skill of(SkillDto dto, Resume resume){
+        return Skill.builder()
+                .content(dto.getContent())
+                .resume(resume)
+                .build();
+    }
 }
