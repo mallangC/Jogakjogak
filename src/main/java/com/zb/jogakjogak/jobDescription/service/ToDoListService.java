@@ -7,6 +7,7 @@ import com.zb.jogakjogak.global.exception.ToDoListException;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.*;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListGetByCategoryResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.UpdateIsDoneTodoListsResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repository.JDRepository;
@@ -155,7 +156,31 @@ public class ToDoListService {
         if (dto.getUpdatedOrCreateToDoLists() != null && !dto.getUpdatedOrCreateToDoLists().isEmpty()) {
             processUpdatedOrCreateToDoLists(jd, targetCategory, dto.getUpdatedOrCreateToDoLists());
         }
+    }
 
+    /**
+     * 특정 JD에 속한 특정 카테고리의 TodoList들의 완료여부를 수정하는 메서드
+     */
+    @Transactional
+    public UpdateIsDoneTodoListsResponseDto updateIsDoneTodoLists(Long jdId, UpdateTodoListsIsDoneRequestDto dto, Member member) {
+        getAuthorizedJd(jdId, member);
+
+        List<ToDoList> updatedLists = new ArrayList<>();
+        List<ToDoList> toDoLists = toDoListRepository.findAllById(dto.getToDoListIds());
+
+        for (ToDoList toDoList : toDoLists) {
+            toDoList.updateToDoListIsDone(dto.isDone());
+            updatedLists.add(toDoList);
+        }
+
+        List<ToDoListResponseDto> responseDtoList = updatedLists.stream()
+                .map(ToDoListResponseDto::fromEntity)
+                .collect(Collectors.toList());
+
+        return UpdateIsDoneTodoListsResponseDto.builder()
+                .toDoLists(responseDtoList)
+                .isDone(dto.isDone())
+                .build();
     }
 
     /**
@@ -265,5 +290,4 @@ public class ToDoListService {
             throw new ToDoListException(ToDoListErrorCode.TODO_LIST_LIMIT_EXCEEDED_FOR_CATEGORY);
         }
     }
-
 }

@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BulkToDoListUpdateRequestDto {
-    @Schema(description = "todolist 카태고라", example = "STRUCTURAL_COMPLEMENT_PLAN", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "todolist 카테고리", example = "STRUCTURAL_COMPLEMENT_PLAN", requiredMode = Schema.RequiredMode.REQUIRED)
     private ToDoListType category;
     @Schema(description = "생성/수정할 todolist")
     private List<ToDoListUpdateRequestDto> updatedOrCreateToDoLists;

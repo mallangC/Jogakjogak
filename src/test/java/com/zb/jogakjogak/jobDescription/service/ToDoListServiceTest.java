@@ -8,6 +8,7 @@ import com.zb.jogakjogak.global.exception.ToDoListException;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.*;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListGetByCategoryResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.UpdateIsDoneTodoListsResponseDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repository.JDRepository;
@@ -626,6 +627,41 @@ class ToDoListServiceTest {
         assertNotNull(result.getToDoLists());
         assertTrue(result.getToDoLists().isEmpty());
     }
+
+    @Test
+    @DisplayName("여러 ToDoList 완료여부 일괄 수정 성공")
+    void updateIsDoneTodoLists_success() {
+        // Given
+        JD mockJd = createTestJd(jdId, mockMember, new ArrayList<>());
+
+        ToDoList todo1 = createTestToDoList(101L, mockJd, targetCategory, "할 일 1");
+        ToDoList todo2 = createTestToDoList(102L, mockJd, targetCategory, "할 일 2");
+        mockJd.addToDoList(todo1);
+        mockJd.addToDoList(todo2);
+
+        UpdateTodoListsIsDoneRequestDto dto = UpdateTodoListsIsDoneRequestDto.builder()
+                .toDoListIds(List.of(101L, 102L))
+                .isDone(true)
+                .build();
+
+        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId()))
+                .thenReturn(Optional.of(mockJd));
+        when(toDoListRepository.findAllById(dto.getToDoListIds()))
+                .thenReturn(List.of(todo1, todo2));
+
+        // When
+        UpdateIsDoneTodoListsResponseDto result =
+                toDoListService.updateIsDoneTodoLists(jdId, dto, mockMember);
+
+        // Then
+        verify(toDoListRepository, times(1)).findAllById(dto.getToDoListIds());
+
+        assertNotNull(result);
+        assertEquals(2, result.getToDoLists().size());
+        assertTrue(result.isDone());
+        assertTrue(result.getToDoLists().stream().allMatch(ToDoListResponseDto::isDone));
+    }
+
 
     private JD createTestJd(Long jdId, Member member, List<ToDoList> toDoLists) {
         return JD.builder()
