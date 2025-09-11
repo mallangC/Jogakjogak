@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Builder
 @Getter
@@ -23,13 +25,23 @@ public class Resume extends BaseEntity {
     private String title;
     @Column(nullable = false, length = 5000)
     private String content;
+    @Column(nullable = false)
+    private boolean isNewcomer = true;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Career> careerList;
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Education> EducationList;
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Skill> SkillList;
+
     /**
      * 사용자가 이력서를 수정할 때 사용하는 메서드
+     *
      * @param requestDto 수정할 이력서 이름, 수정할 이력서 내용.
      */
     public void modify(ResumeRequestDto requestDto) {

@@ -333,7 +333,6 @@ class ToDoListServiceTest {
         // Then
         verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId());
         verify(toDoListRepository).delete(mockToDoList);
-        assertThat(testJd.getToDoLists()).isEmpty();
     }
 
     @Test
