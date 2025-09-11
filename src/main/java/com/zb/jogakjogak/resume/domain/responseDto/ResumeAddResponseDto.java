@@ -21,8 +21,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ResumeAddResponseDto {
-    @Schema(description = "이력서 아이디", example = "1")
-    private Long resumeId;
     @Schema(description = "이력서 내용", example =
             " 핵심 역량" +
             "언어: Java, Python" +
@@ -74,7 +72,6 @@ public class ResumeAddResponseDto {
 
     public static ResumeAddResponseDto of(Resume resume, List<Career> careerList, List<Education> educationList, List<Skill> skillList) {
         return ResumeAddResponseDto.builder()
-                .resumeId(resume.getId())
                 .isNewcomer(resume.isNewcomer())
                 .content(resume.getContent())
                 .createdAt(resume.getCreatedAt())
