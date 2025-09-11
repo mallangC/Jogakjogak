@@ -9,7 +9,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @Builder
@@ -33,11 +34,11 @@ public class Resume extends BaseEntity {
     private Member member;
 
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Career> careerList;
+    private Set<Career> careerList;
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Education> educationList;
+    private Set<Education> educationList;
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Skill> skillList;
+    private Set<Skill> skillList;
 
     /**
      * 사용자가 이력서를 수정할 때 사용하는 메서드
