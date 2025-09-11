@@ -111,8 +111,6 @@ public class ToDoListService {
         JD jd = getAuthorizedJd(jdId, member);
         jd.setNotificationCount(0);
         ToDoList toDoList = findToDoListInJd(jd, toDoListId);
-
-        jd.getToDoLists().remove(toDoList);
         toDoListRepository.delete(toDoList);
     }
 
