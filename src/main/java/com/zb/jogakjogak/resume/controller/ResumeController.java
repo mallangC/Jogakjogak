@@ -4,6 +4,7 @@ import com.zb.jogakjogak.global.HttpApiResponse;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeAddRequestDto;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeAddResponseDto;
+import com.zb.jogakjogak.resume.domain.responseDto.ResumeGetResponseDto;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeResponseDto;
 import com.zb.jogakjogak.resume.service.ResumeService;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
@@ -123,5 +124,24 @@ public class ResumeController {
                         HttpStatus.CREATED
                 )
         );
+    }
+
+    /**
+     * 사용자가 작성한 이력서를 조회하는 컨트롤러 메서드
+     *
+     * @return 찾으려는 이력서의 data, 성공 여부 메세지, 상태코드
+     */
+    @Operation(summary = "(v2)이력서 조회", description = "사용자가 등록한 이력서를 조회합니다")
+    @GetMapping("/v2/resume")
+    public ResponseEntity<HttpApiResponse<ResumeGetResponseDto>> getResumeV2(
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        return ResponseEntity.ok()
+                .body(
+                        new HttpApiResponse<>(
+                                resumeService.getResumeV2(customOAuth2User.getMember()),
+                                "이력서 조회 성공",
+                                HttpStatus.OK
+                        )
+                );
     }
 }
