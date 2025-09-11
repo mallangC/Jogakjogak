@@ -1,14 +1,15 @@
 ALTER TABLE resume
     ADD COLUMN is_newcomer BIT NOT NULL DEFAULT TRUE;
 
-ALTER TABLE resume MODIFY COLUMN title VARCHAR(30) NULL;
+ALTER TABLE resume
+    MODIFY COLUMN title VARCHAR(30) NULL;
 
 CREATE TABLE career
 (
     id               BIGINT PRIMARY KEY AUTO_INCREMENT,
     resume_id        BIGINT        NOT NULL,
     joined_at        DATE          NOT NULL,
-    quit_at          DATE          NOT NULL,
+    quit_at          DATE          NULL,
     is_working       BIT           NOT NULL,
     company_name     VARCHAR(100)  NOT NULL,
     work_performance VARCHAR(2000) NOT NULL,
@@ -37,5 +38,5 @@ CREATE TABLE skill_word
 (
     id      BIGINT PRIMARY KEY AUTO_INCREMENT,
     content VARCHAR(50) NOT NULL,
-    FULLTEXT(content)
+    FULLTEXT (content)
 );
