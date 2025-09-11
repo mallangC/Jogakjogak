@@ -6,13 +6,18 @@ import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.global.exception.ResumeErrorCode;
 import com.zb.jogakjogak.global.exception.ResumeException;
-import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
+import com.zb.jogakjogak.resume.domain.requestDto.*;
+import com.zb.jogakjogak.resume.domain.responseDto.ResumeAddResponseDto;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeResponseDto;
 import com.zb.jogakjogak.resume.entity.Resume;
+import com.zb.jogakjogak.resume.repository.CareerRepository;
+import com.zb.jogakjogak.resume.repository.EducationRepository;
 import com.zb.jogakjogak.resume.repository.ResumeRepository;
+import com.zb.jogakjogak.resume.repository.SkillRepository;
+import com.zb.jogakjogak.resume.type.EducationLevel;
+import com.zb.jogakjogak.resume.type.EducationStatus;
 import com.zb.jogakjogak.security.Role;
 import com.zb.jogakjogak.security.entity.Member;
-import com.zb.jogakjogak.security.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +26,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,7 +45,13 @@ class ResumeServiceTest {
     private ResumeRepository resumeRepository;
 
     @Mock
-    private MemberRepository memberRepository;
+    private CareerRepository careerRepository;
+
+    @Mock
+    private EducationRepository educationRepository;
+
+    @Mock
+    private SkillRepository skillRepository;
 
     @InjectMocks
     private ResumeService resumeService;
@@ -106,7 +120,6 @@ class ResumeServiceTest {
 
         given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
 
-
         // When
         ResumeResponseDto responseDto = resumeService.register(requestDto, mockMember);
 
@@ -137,7 +150,6 @@ class ResumeServiceTest {
                 .role(Role.USER)
                 .resume(Resume.builder().id(300L).build())
                 .build();
-
 
         // When & Then
         AuthException exception = assertThrows(AuthException.class, () -> {
@@ -263,6 +275,207 @@ class ResumeServiceTest {
 
         verify(resumeRepository, times(1)).findResumeWithMemberByIdAndMemberId(nonExistentResumeId, mockMember.getId());
         verify(resumeRepository, times(0)).delete(any(Resume.class));
+    }
+
+    @Test
+    @DisplayName("(v2) 이력서 추가 성공 - 신입")
+    void registerV2_success_newcomer() {
+        String fixedUserName = "testUser123";
+        String testContent = faker.lorem().sentence(3);
+        boolean isNewcomer = true;
+
+        Member mockMember = Member.builder()
+                .id(1L)
+                .username(fixedUserName)
+                .email("test@example.com")
+                .password("password123")
+                .role(Role.USER)
+                .resume(null)
+                .build();
+
+        ResumeAddRequestDto requestDto = ResumeAddRequestDto.builder()
+                .content(testContent)
+                .isNewcomer(isNewcomer)
+                .build();
+
+        Resume mockResume = Resume.builder()
+                .id(1L)
+                .content(testContent)
+                .member(mockMember)
+                .isNewcomer(isNewcomer)
+                .build();
+
+        given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
+
+        // When
+        ResumeAddResponseDto responseDto = resumeService.registerV2(requestDto, mockMember);
+
+        // Then
+        assertThat(responseDto).isNotNull();
+        assertThat(responseDto.getResumeId()).isEqualTo(1L);
+        assertThat(responseDto.getContent()).isEqualTo(testContent);
+
+        verify(resumeRepository, times(1)).save(any(Resume.class));
+    }
+
+    @Test
+    @DisplayName("(v2) 이력서 추가 성공 - 신입 - 학력,스킬 추가")
+    void registerV2_success_newcomer_plus_education_and_skill() {
+        String fixedUserName = "testUser123";
+        String testContent = faker.lorem().sentence(3);
+        boolean isNewcomer = true;
+
+        Member mockMember = Member.builder()
+                .id(1L)
+                .username(fixedUserName)
+                .email("test@example.com")
+                .password("password123")
+                .role(Role.USER)
+                .resume(null)
+                .build();
+
+        ResumeAddRequestDto requestDto = ResumeAddRequestDto.builder()
+                .content(testContent)
+                .isNewcomer(isNewcomer)
+                .educationList(new ArrayList<>(List.of(
+                        EducationDto.builder()
+                                .level(EducationLevel.HIGH_SCHOOL)
+                                .majorField("조각고등학교")
+                                .status(EducationStatus.GRADUATED)
+                                .build(),
+                        EducationDto.builder()
+                                .level(EducationLevel.BACHELOR)
+                                .majorField("조각대학교 조각학과")
+                                .status(EducationStatus.GRADUATED)
+                                .build()
+                )))
+                .skillList(new ArrayList<>(List.of(
+                        SkillDto.builder()
+                                .content("조각")
+                                .build(),
+                        SkillDto.builder()
+                                .content("조가악")
+                                .build()
+                )))
+                .build();
+
+        Resume mockResume = Resume.builder()
+                .id(1L)
+                .content(testContent)
+                .member(mockMember)
+                .isNewcomer(isNewcomer)
+                .build();
+
+        given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
+
+        // When
+        ResumeAddResponseDto responseDto = resumeService.registerV2(requestDto, mockMember);
+
+        // Then
+        assertThat(responseDto).isNotNull();
+        assertThat(responseDto.getResumeId()).isEqualTo(1L);
+        assertThat(responseDto.getContent()).isEqualTo(testContent);
+
+        verify(resumeRepository, times(1)).save(any(Resume.class));
+    }
+
+    @Test
+    @DisplayName("(v2) 이력서 추가 성공 - 경력 - 경력,학력,스킬 추가")
+    void registerV2_success_plus_career_education_and_skill() {
+        String fixedUserName = "testUser123";
+        String testContent = faker.lorem().sentence(3);
+        boolean isNewcomer = false;
+
+        Member mockMember = Member.builder()
+                .id(1L)
+                .username(fixedUserName)
+                .email("test@example.com")
+                .password("password123")
+                .role(Role.USER)
+                .resume(null)
+                .build();
+
+        ResumeAddRequestDto requestDto = ResumeAddRequestDto.builder()
+                .content(testContent)
+                .isNewcomer(isNewcomer)
+                .careerList(new ArrayList<>(List.of(
+                        CareerDto.builder()
+                                .companyName("조각조각")
+                                .isWorking(true)
+                                .joinedAt(LocalDate.of(2020, 1, 1))
+                                .workPerformance(faker.lorem().paragraph(2))
+                                .build()
+                )))
+                .educationList(new ArrayList<>(List.of(
+                        EducationDto.builder()
+                                .level(EducationLevel.HIGH_SCHOOL)
+                                .majorField("조각고등학교")
+                                .status(EducationStatus.GRADUATED)
+                                .build(),
+                        EducationDto.builder()
+                                .level(EducationLevel.BACHELOR)
+                                .majorField("조각대학교 조각학과")
+                                .status(EducationStatus.GRADUATED)
+                                .build()
+                )))
+                .skillList(new ArrayList<>(List.of(
+                        SkillDto.builder()
+                                .content("조각")
+                                .build(),
+                        SkillDto.builder()
+                                .content("조가악")
+                                .build()
+                )))
+                .build();
+
+        Resume mockResume = Resume.builder()
+                .id(1L)
+                .content(testContent)
+                .member(mockMember)
+                .isNewcomer(isNewcomer)
+                .build();
+
+        given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
+
+        // When
+        ResumeAddResponseDto responseDto = resumeService.registerV2(requestDto, mockMember);
+
+        // Then
+        assertThat(responseDto).isNotNull();
+        assertThat(responseDto.getResumeId()).isEqualTo(1L);
+        assertThat(responseDto.getContent()).isEqualTo(testContent);
+
+        verify(resumeRepository, times(1)).save(any(Resume.class));
+    }
+
+    @Test
+    @DisplayName("(v2) 이력서 추가 실패 - 경력인데 경력에 아무것도 없을 때")
+    void registerV2_fail_not_entered_career() {
+        String fixedUserName = "testUser123";
+        String testContent = faker.lorem().sentence(3);
+        boolean isNewcomer = false;
+
+        Member mockMember = Member.builder()
+                .id(1L)
+                .username(fixedUserName)
+                .email("test@example.com")
+                .password("password123")
+                .role(Role.USER)
+                .resume(null)
+                .build();
+
+        ResumeAddRequestDto requestDto = ResumeAddRequestDto.builder()
+                .content(testContent)
+                .isNewcomer(isNewcomer)
+                .build();
+
+        ResumeException exception = assertThrows(ResumeException.class, () -> {
+            resumeService.registerV2(requestDto, mockMember);
+        });
+
+        // Then
+        assertThat(exception.getErrorCode()).isEqualTo(ResumeErrorCode.NOT_ENTERED_CAREER);
+        verify(resumeRepository, times(0)).save(any(Resume.class));
     }
 
 }
