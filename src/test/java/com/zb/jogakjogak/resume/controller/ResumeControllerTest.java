@@ -2,10 +2,16 @@ package com.zb.jogakjogak.resume.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
+import com.zb.jogakjogak.resume.domain.requestDto.EducationDto;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeAddRequestDto;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
+import com.zb.jogakjogak.resume.domain.requestDto.SkillDto;
 import com.zb.jogakjogak.resume.entity.Resume;
 import com.zb.jogakjogak.resume.repository.ResumeRepository;
+import com.zb.jogakjogak.resume.type.EducationLevel;
+import com.zb.jogakjogak.resume.type.EducationStatus;
 import com.zb.jogakjogak.security.Role;
+import com.zb.jogakjogak.security.WithMockCustomUser;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.entity.Member;
 import com.zb.jogakjogak.security.repository.MemberRepository;
@@ -28,6 +34,8 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -283,6 +291,62 @@ class ResumeControllerTest {
                 .andExpect(jsonPath("$.message").value("이력서 내용이 유효하지 않거나 의미 없는 반복 문자를 포함합니다."))
                 .andDo(print());
     }
+
+    @Test
+    @DisplayName("(v2)이력서 등록 성공")
+    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail)
+    void registerResumeV2_success() throws Exception {
+        // Given
+        String testContent = generateLongContent(300);
+
+        ResumeAddRequestDto requestDto = ResumeAddRequestDto.builder()
+                .content(testContent)
+                .isNewcomer(true)
+                .educationList(new ArrayList<>(List.of(
+                        EducationDto.builder()
+                                .level(EducationLevel.HIGH_SCHOOL)
+                                .majorField("조각고등학교")
+                                .status(EducationStatus.GRADUATED)
+                                .build(),
+                        EducationDto.builder()
+                                .level(EducationLevel.BACHELOR)
+                                .majorField("조각대학교 조각학과")
+                                .status(EducationStatus.GRADUATED)
+                                .build()
+                )))
+                .skillList(new ArrayList<>(List.of(
+                        SkillDto.builder()
+                                .content("조각")
+                                .build(),
+                        SkillDto.builder()
+                                .content("조가악")
+                                .build()
+                )))
+                .build();
+        String content = objectMapper.writeValueAsString(requestDto);
+
+        // When
+        ResultActions result = mockMvc.perform(post("/v2/resume")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content));
+
+        // Then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("이력서 등록 완료"))
+                .andExpect(jsonPath("$.data.content").value(testContent))
+                .andExpect(jsonPath("$.data.resumeId").isNumber())
+                .andExpect(jsonPath("$.data.skillDtoList[0].content").value("조각"))
+                .andExpect(jsonPath("$.data.skillDtoList[1].content").value("조가악"))
+                .andExpect(jsonPath("$.data.educationDtoList[0].majorField").value("조각고등학교"))
+                .andExpect(jsonPath("$.data.newcomer").value("true"))
+                .andDo(print());
+
+        entityManager.clear();
+        Member memberAfterRegister = memberRepository.findByUsernameWithResume(testUserLoginId).orElseThrow();
+        assertThat(memberAfterRegister.getResume()).isNotNull();
+        assertThat(resumeRepository.findById(memberAfterRegister.getResume().getId())).isPresent();
+    }
+
 
     /**
      * Faker를 사용하여 지정된 길이 이상의 랜덤 텍스트를 생성하는 헬퍼 메서드

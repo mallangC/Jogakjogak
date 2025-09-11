@@ -3,16 +3,27 @@ package com.zb.jogakjogak.resume.service;
 import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.global.exception.ResumeException;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeAddRequestDto;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
+import com.zb.jogakjogak.resume.domain.responseDto.ResumeAddResponseDto;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeResponseDto;
+import com.zb.jogakjogak.resume.entity.Career;
+import com.zb.jogakjogak.resume.entity.Education;
 import com.zb.jogakjogak.resume.entity.Resume;
+import com.zb.jogakjogak.resume.entity.Skill;
+import com.zb.jogakjogak.resume.repository.CareerRepository;
+import com.zb.jogakjogak.resume.repository.EducationRepository;
 import com.zb.jogakjogak.resume.repository.ResumeRepository;
+import com.zb.jogakjogak.resume.repository.SkillRepository;
 import com.zb.jogakjogak.security.entity.Member;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
+import static com.zb.jogakjogak.global.exception.ResumeErrorCode.NOT_ENTERED_CAREER;
 import static com.zb.jogakjogak.global.exception.ResumeErrorCode.UNAUTHORIZED_ACCESS;
 
 @Service
@@ -20,6 +31,16 @@ import static com.zb.jogakjogak.global.exception.ResumeErrorCode.UNAUTHORIZED_AC
 public class ResumeService {
 
     private final ResumeRepository resumeRepository;
+    private final CareerRepository careerRepository;
+    private final EducationRepository educationRepository;
+    private final SkillRepository skillRepository;
+
+    /**
+     * 이력서 등록을 위한 서비스 레이어 메서드
+     *
+     * @param requestDto 이력서 이름, 이력서 내용
+     * @return 이력서 id, 이력서 이름, 이력서 번호
+     */
 
     public ResumeResponseDto register(ResumeRequestDto requestDto, Member member) {
 
@@ -64,6 +85,7 @@ public class ResumeService {
 
         Resume resume = resumeRepository.findResumeWithMemberByIdAndMemberId(resumeId, member.getId())
                 .orElseThrow(() -> new ResumeException(UNAUTHORIZED_ACCESS));
+
         return ResumeResponseDto.builder()
                 .resumeId(resume.getId())
                 .title(resume.getTitle())
@@ -78,5 +100,56 @@ public class ResumeService {
         Resume resumeToDelete = resumeRepository.findResumeWithMemberByIdAndMemberId(resumeId, member.getId())
                 .orElseThrow(() -> new ResumeException(UNAUTHORIZED_ACCESS));
         resumeRepository.delete(resumeToDelete);
+    }
+
+
+    /**
+     * (v2)이력서 등록을 위한 서비스 레이어 메서드
+     *
+     * @param requestDto 이력서 내용, 신입 유무, 경력 리스트, 학력 리스트, 스킬 리스트
+     * @return 이력서 id, 이력서 내용, 신입 유무, 경력 리스트, 학력 리스트, 스킬 리스트, 생성 일시, 수정 일시
+     */
+    public ResumeAddResponseDto registerV2(ResumeAddRequestDto requestDto,Member member) {
+
+        Resume memberResume = member.getResume();
+
+        if (memberResume != null) {
+            throw new AuthException(MemberErrorCode.ALREADY_HAVE_RESUME);
+        }
+
+        if (!requestDto.getIsNewcomer() && requestDto.getCareerList() == null) {
+            throw new ResumeException(NOT_ENTERED_CAREER);
+        }
+
+        Resume newResume = Resume.builder()
+                .content(requestDto.getContent())
+                .member(member)
+                .isNewcomer(requestDto.getIsNewcomer())
+                .build();
+
+        Resume resume = resumeRepository.save(newResume);
+
+        if (requestDto.getCareerList() != null) {
+            List<Career> careerList = requestDto.getCareerList().stream()
+                    .map(dto -> Career.of(dto, newResume))
+                    .toList();
+            careerRepository.saveAll(careerList);
+        }
+
+        if (requestDto.getEducationList() != null) {
+            List<Education> educationList = requestDto.getEducationList().stream()
+                    .map(dto -> Education.of(dto, newResume))
+                    .toList();
+            educationRepository.saveAll(educationList);
+        }
+
+        if (requestDto.getSkillList() != null) {
+            List<Skill> skillList = requestDto.getSkillList().stream()
+                    .map(dto -> Skill.of(dto, newResume))
+                    .toList();
+            skillRepository.saveAll(skillList);
+        }
+
+        return ResumeAddResponseDto.of(resume, requestDto);
     }
 }
