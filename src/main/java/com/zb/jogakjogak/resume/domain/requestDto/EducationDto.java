@@ -1,5 +1,6 @@
 package com.zb.jogakjogak.resume.domain.requestDto;
 
+import com.zb.jogakjogak.resume.entity.Education;
 import com.zb.jogakjogak.resume.type.EducationLevel;
 import com.zb.jogakjogak.resume.type.EducationStatus;
 import jakarta.validation.constraints.NotBlank;
@@ -19,4 +20,12 @@ public class EducationDto {
     private String majorField;
     @NotBlank(message = "교육 상태를 입력해주세요.")
     private EducationStatus status;
+
+    public static EducationDto of(Education education){
+        return EducationDto.builder()
+                .level(education.getLevel())
+                .majorField(education.getMajorField())
+                .status(education.getStatus())
+                .build();
+    }
 }

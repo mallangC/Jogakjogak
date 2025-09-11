@@ -35,9 +35,9 @@ public class Resume extends BaseEntity {
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Career> careerList;
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Education> EducationList;
+    private List<Education> educationList;
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Skill> SkillList;
+    private List<Skill> skillList;
 
     /**
      * 사용자가 이력서를 수정할 때 사용하는 메서드

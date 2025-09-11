@@ -2,9 +2,10 @@ package com.zb.jogakjogak.resume.domain.responseDto;
 
 import com.zb.jogakjogak.resume.domain.requestDto.CareerDto;
 import com.zb.jogakjogak.resume.domain.requestDto.EducationDto;
-import com.zb.jogakjogak.resume.domain.requestDto.ResumeAddRequestDto;
-import com.zb.jogakjogak.resume.domain.requestDto.SkillDto;
+import com.zb.jogakjogak.resume.entity.Career;
+import com.zb.jogakjogak.resume.entity.Education;
 import com.zb.jogakjogak.resume.entity.Resume;
+import com.zb.jogakjogak.resume.entity.Skill;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +15,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Schema(description = "이력서 응답 DTO")
+@Schema(description = "이력서 등록 응답 DTO")
 @Getter
 @Builder
 @AllArgsConstructor
@@ -69,21 +70,18 @@ public class ResumeAddResponseDto {
     @Schema(description = "학력 리스트")
     private List<EducationDto> educationDtoList;
     @Schema(description = "스킬 리스트")
-    private List<SkillDto> skillDtoList;
+    private List<String> skillList;
 
-    public static ResumeAddResponseDto of(
-            Resume resume,
-            ResumeAddRequestDto dto
-    ) {
+    public static ResumeAddResponseDto of(Resume resume, List<Career> careerList, List<Education> educationList, List<Skill> skillList) {
         return ResumeAddResponseDto.builder()
                 .resumeId(resume.getId())
                 .isNewcomer(resume.isNewcomer())
                 .content(resume.getContent())
                 .createdAt(resume.getCreatedAt())
                 .updatedAt(resume.getUpdatedAt())
-                .careerDtoList(dto.getCareerList())
-                .educationDtoList(dto.getEducationList())
-                .skillDtoList(dto.getSkillList())
+                .careerDtoList(careerList.stream().map(CareerDto::of).toList())
+                .educationDtoList(educationList.stream().map(EducationDto::of).toList())
+                .skillList(skillList.stream().map(Skill::getContent).toList())
                 .build();
     }
 }

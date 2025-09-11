@@ -350,12 +350,7 @@ class ResumeServiceTest {
                                 .build()
                 )))
                 .skillList(new ArrayList<>(List.of(
-                        SkillDto.builder()
-                                .content("조각")
-                                .build(),
-                        SkillDto.builder()
-                                .content("조가악")
-                                .build()
+                        "조각", "조가악"
                 )))
                 .build();
 
@@ -419,12 +414,7 @@ class ResumeServiceTest {
                                 .build()
                 )))
                 .skillList(new ArrayList<>(List.of(
-                        SkillDto.builder()
-                                .content("조각")
-                                .build(),
-                        SkillDto.builder()
-                                .content("조가악")
-                                .build()
+                        "조각", "조가악"
                 )))
                 .build();
 

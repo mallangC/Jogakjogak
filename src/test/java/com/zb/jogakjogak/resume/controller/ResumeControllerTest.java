@@ -5,7 +5,6 @@ import com.github.javafaker.Faker;
 import com.zb.jogakjogak.resume.domain.requestDto.EducationDto;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeAddRequestDto;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
-import com.zb.jogakjogak.resume.domain.requestDto.SkillDto;
 import com.zb.jogakjogak.resume.entity.Resume;
 import com.zb.jogakjogak.resume.repository.ResumeRepository;
 import com.zb.jogakjogak.resume.type.EducationLevel;
@@ -315,12 +314,7 @@ class ResumeControllerTest {
                                 .build()
                 )))
                 .skillList(new ArrayList<>(List.of(
-                        SkillDto.builder()
-                                .content("조각")
-                                .build(),
-                        SkillDto.builder()
-                                .content("조가악")
-                                .build()
+                        "조각", "조가악"
                 )))
                 .build();
         String content = objectMapper.writeValueAsString(requestDto);
@@ -335,8 +329,8 @@ class ResumeControllerTest {
                 .andExpect(jsonPath("$.message").value("이력서 등록 완료"))
                 .andExpect(jsonPath("$.data.content").value(testContent))
                 .andExpect(jsonPath("$.data.resumeId").isNumber())
-                .andExpect(jsonPath("$.data.skillDtoList[0].content").value("조각"))
-                .andExpect(jsonPath("$.data.skillDtoList[1].content").value("조가악"))
+                .andExpect(jsonPath("$.data.skillList[0]").value("조각"))
+                .andExpect(jsonPath("$.data.skillList[1]").value("조가악"))
                 .andExpect(jsonPath("$.data.educationDtoList[0].majorField").value("조각고등학교"))
                 .andExpect(jsonPath("$.data.newcomer").value("true"))
                 .andDo(print());

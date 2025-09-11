@@ -1,5 +1,6 @@
 package com.zb.jogakjogak.resume.domain.requestDto;
 
+import com.zb.jogakjogak.resume.entity.Career;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,4 +23,14 @@ public class CareerDto {
     private String companyName;
     @NotBlank(message = "담당 업무와 주요 성과를 입력해주세요.")
     private String workPerformance;
+
+    public static CareerDto of(Career career) {
+        return CareerDto.builder()
+                .joinedAt(career.getJoinedAt())
+                .quitAt(career.getQuitAt())
+                .isWorking(career.isWorking())
+                .companyName(career.getCompanyName())
+                .workPerformance(career.getWorkPerformance())
+                .build();
+    }
 }

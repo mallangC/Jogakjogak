@@ -61,6 +61,6 @@ public class ResumeAddRequestDto {
     private Boolean isNewcomer;
     private List<CareerDto> careerList;
     private List<EducationDto> educationList;
-    private List<SkillDto> skillList;
+    private List<String> skillList;
 
 }
