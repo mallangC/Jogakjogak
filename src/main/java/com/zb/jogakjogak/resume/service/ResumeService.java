@@ -6,6 +6,7 @@ import com.zb.jogakjogak.global.exception.ResumeException;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeAddRequestDto;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeAddResponseDto;
+import com.zb.jogakjogak.resume.domain.responseDto.ResumeGetResponseDto;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeResponseDto;
 import com.zb.jogakjogak.resume.entity.Career;
 import com.zb.jogakjogak.resume.entity.Education;
@@ -24,8 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.zb.jogakjogak.global.exception.ResumeErrorCode.NOT_ENTERED_CAREER;
-import static com.zb.jogakjogak.global.exception.ResumeErrorCode.UNAUTHORIZED_ACCESS;
+import static com.zb.jogakjogak.global.exception.ResumeErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -156,5 +156,12 @@ public class ResumeService {
         }
 
         return ResumeAddResponseDto.of(saveResume, careerList, educationList, skillList);
+    }
+
+    public ResumeGetResponseDto getResumeV2(Member member) {
+        Resume resume = resumeRepository.findResumeWithCareerAndEducationAndSkill(member.getId())
+                .orElseThrow(() -> new ResumeException(NOT_FOUND_RESUME));
+
+        return ResumeGetResponseDto.of(resume);
     }
 }
