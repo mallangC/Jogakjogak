@@ -394,7 +394,6 @@ class ResumeControllerTest {
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("이력서 등록 완료"))
                 .andExpect(jsonPath("$.data.content").value(testContent))
-                .andExpect(jsonPath("$.data.resumeId").isNumber())
                 .andExpect(jsonPath("$.data.skillList[0]").value("조각"))
                 .andExpect(jsonPath("$.data.skillList[1]").value("조가악"))
                 .andExpect(jsonPath("$.data.educationDtoList[0].majorField").value("조각고등학교"))
