@@ -3,7 +3,6 @@ package com.zb.jogakjogak.resume.controller;
 import com.zb.jogakjogak.global.HttpApiResponse;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeAddRequestDto;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
-import com.zb.jogakjogak.resume.domain.responseDto.ResumeAddResponseDto;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeGetResponseDto;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeResponseDto;
 import com.zb.jogakjogak.resume.service.ResumeService;
