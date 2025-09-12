@@ -154,7 +154,7 @@ public class ResumeService {
                 .orElseThrow(() -> new ResumeException(NOT_FOUND_RESUME));
         resume.update(requestDto);
         resumeRepository.save(resume);
-        resumeRepository.deleteAboutResumeById(resume.getId());
+        resumeRepository.deleteResumeDetailsById(resume.getId());
 
         return saveResumeDetails(resume, requestDto);
     }

@@ -52,7 +52,7 @@ public class ResumeRepositoryImpl implements ResumeRepositoryCustom {
 
     @Transactional
     @Override
-    public void deleteAboutResumeById(Long resumeId) {
+    public void deleteResumeDetailsById(Long resumeId) {
         queryFactory.delete(career)
                 .where(career.resume.id.eq(resumeId))
                 .execute();
