@@ -166,7 +166,6 @@ class ResumeControllerTest {
                 .isNewcomer(false)
                 .build();
         Resume saveResume = resumeRepository.save(newResume);
-
         List<Career> careerList = new ArrayList<>(List.of(
                 Career.builder()
                         .resume(saveResume)
@@ -456,6 +455,7 @@ class ResumeControllerTest {
                 .build();
         String content = objectMapper.writeValueAsString(requestDto);
         createAndSaveResumeV2();
+        setAuthenticationForTestUser(testUserLoginId);
 
         // When
         ResultActions result = mockMvc.perform(patch("/v2/resume", requestDto)

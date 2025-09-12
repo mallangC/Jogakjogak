@@ -602,6 +602,7 @@ class ResumeServiceTest {
                         "조각update", "조가악update"
                 )))
                 .build();
+        mockMember.setResume(resume);
         when(resumeRepository.findResumeWithCareerAndEducationAndSkill(mockMember.getId())).thenReturn(Optional.of(resume));
         when(careerRepository.saveAll(any())).thenReturn(List.of(
                 Career.builder()
