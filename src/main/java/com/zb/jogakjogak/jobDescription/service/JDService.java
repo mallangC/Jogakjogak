@@ -76,8 +76,10 @@ public class JDService {
      */
     public JDResponseDto llmAnalyze(JDRequestDto jdRequestDto, Member member) {
 
-        if (member.getResume() == null) {
-            throw new ResumeException(ResumeErrorCode.RESUME_NOT_FOUND_PLEASE_REGISTER);
+        long jdCount = jdRepository.findAllJdCountByMemberId(member.getId());
+
+        if (member.getResume() == null && jdCount > 0) {
+            throw new ResumeException(ResumeErrorCode.ANALYSIS_ALLOWED_ONCE_WITHOUT_RESUME);
         }
         //TODO: 테스트 후 갯수 변경 필요
         if (memberRepository.countJdByMemberId(member.getId()) >= 20) {

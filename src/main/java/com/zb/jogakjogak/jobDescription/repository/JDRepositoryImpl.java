@@ -131,6 +131,16 @@ public class JDRepositoryImpl implements JDRepositoryCustom{
     }
 
 
+    @Override
+    public Long findAllJdCountByMemberId(Long memberId) {
+        QJD jd = QJD.jD;
+        return queryFactory.select(jd.count())
+                .from(jd)
+                .where(jd.member.id.eq(memberId))
+                .fetchOne();
+    }
+
+
     /**
      * Pageable의 Sort 정보를 QueryDSL의 OrderSpecifier 리스트로 변환합니다.
      *
