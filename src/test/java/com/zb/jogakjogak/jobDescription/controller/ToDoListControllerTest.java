@@ -17,6 +17,7 @@ import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.entity.Member;
 import com.zb.jogakjogak.security.repository.MemberRepository;
 import jakarta.persistence.EntityManager;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,6 +30,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -597,5 +599,78 @@ class ToDoListControllerTest {
         List<Long> finalToDoListIds = finalToDoLists.stream().map(ToDoList::getId).collect(Collectors.toList());
 
         assertThat(finalToDoListIds).containsExactlyInAnyOrderElementsOf(initialToDoListIds);
+    }
+
+    @Test
+    @DisplayName("ToDoList 완료여부 일괄 수정 성공 - 여러 투두리스트를 완료 처리")
+    void updateIsDoneTodoLists_success_markAsDone() throws Exception {
+        // Given
+        JD jd = createAndSaveJd(
+                setupMember,
+                "완료여부 일괄 수정 JD",
+                "https://bulk-done.com",
+                "회사",
+                "내용",
+                "직무",
+                LocalDateTime.now(),
+                "",
+                false,
+                false,
+                null,
+                null
+        );
+        Long jdId = jd.getId();
+
+        ToDoList additionalTodo1 = ToDoList.builder()
+                .title("추가 투두 1")
+                .content("추가 내용 1")
+                .category(ToDoListType.CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL)
+                .isDone(false)
+                .jd(jd)
+                .build();
+        ToDoList additionalTodo2 = ToDoList.builder()
+                .title("추가 투두 2")
+                .content("추가 내용 2")
+                .category(ToDoListType.SCHEDULE_MISC_ERROR)
+                .isDone(false)
+                .jd(jd)
+                .build();
+        toDoListRepository.save(additionalTodo1);
+        toDoListRepository.save(additionalTodo2);
+
+        List<ToDoList> existingToDoLists = toDoListRepository.findAllByJdId(jdId);
+        List<Long> toDoListIdsToUpdate = existingToDoLists.stream()
+                .limit(3)
+                .map(ToDoList::getId)
+                .collect(Collectors.toList());
+
+        existingToDoLists.stream()
+                .limit(3)
+                .forEach(todo -> System.out.println("ID: " + todo.getId() + ", isDone: " + todo.isDone()));
+
+        UpdateTodoListsIsDoneRequestDto dto = UpdateTodoListsIsDoneRequestDto.builder()
+                .toDoListIds(toDoListIdsToUpdate)
+                .isDone(true)
+                .build();
+        String content = objectMapper.writeValueAsString(dto);
+
+        // When
+        ResultActions result = mockMvc.perform(put("/jds/{jdId}/to-do-lists/update-is-done", jdId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content));
+
+        // Then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("다중 투두리스트 완료여부 수정 성공"))
+                .andExpect(jsonPath("$.data.toDoLists").isArray())
+                .andDo(print());
+
+        // DB에서 실제로 수정되었는지 확인
+        List<ToDoList> updatedToDoLists = toDoListRepository.findAllById(toDoListIdsToUpdate);
+
+        updatedToDoLists.forEach(todo ->
+                System.out.println("ID: " + todo.getId() + ", isDone: " + todo.isDone()));
+
+        assertThat(updatedToDoLists).hasSize(3);
     }
 }

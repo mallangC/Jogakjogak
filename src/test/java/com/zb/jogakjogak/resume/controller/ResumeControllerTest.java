@@ -2,10 +2,21 @@ package com.zb.jogakjogak.resume.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
+import com.zb.jogakjogak.resume.domain.requestDto.EducationDto;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeAddRequestDto;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
+import com.zb.jogakjogak.resume.entity.Career;
+import com.zb.jogakjogak.resume.entity.Education;
 import com.zb.jogakjogak.resume.entity.Resume;
+import com.zb.jogakjogak.resume.entity.Skill;
+import com.zb.jogakjogak.resume.repository.CareerRepository;
+import com.zb.jogakjogak.resume.repository.EducationRepository;
 import com.zb.jogakjogak.resume.repository.ResumeRepository;
+import com.zb.jogakjogak.resume.repository.SkillRepository;
+import com.zb.jogakjogak.resume.type.EducationLevel;
+import com.zb.jogakjogak.resume.type.EducationStatus;
 import com.zb.jogakjogak.security.Role;
+import com.zb.jogakjogak.security.WithMockCustomUser;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.entity.Member;
 import com.zb.jogakjogak.security.repository.MemberRepository;
@@ -27,7 +38,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -52,6 +66,15 @@ class ResumeControllerTest {
 
     @Autowired
     private ResumeRepository resumeRepository;
+
+    @Autowired
+    private CareerRepository careerRepository;
+
+    @Autowired
+    private EducationRepository educationRepository;
+
+    @Autowired
+    private SkillRepository skillRepository;
 
     @Autowired
     private EntityManager entityManager;
@@ -131,6 +154,55 @@ class ResumeControllerTest {
         memberRepository.save(member);
         entityManager.clear();
         return newResume.getId();
+    }
+
+    private void createAndSaveResumeV2() {
+        Member member = memberRepository.findByUsername(testUserLoginId)
+                .orElseThrow(() -> new AssertionError("테스트 사용자를 찾을 수 없습니다."));
+        String generatedContent = generateLongContent(300);
+        Resume newResume = Resume.builder()
+                .content(generatedContent)
+                .member(member)
+                .isNewcomer(false)
+                .build();
+        Resume saveResume = resumeRepository.save(newResume);
+
+        List<Career> careerList = new ArrayList<>(List.of(
+                Career.builder()
+                        .resume(saveResume)
+                        .companyName("조각조각")
+                        .isWorking(true)
+                        .joinedAt(LocalDate.of(2020, 1, 1))
+                        .workPerformance(faker.lorem().paragraph(2))
+                        .build()
+        ));
+        List<Education> educationList = new ArrayList<>(List.of(
+                Education.builder()
+                        .resume(saveResume)
+                        .level(EducationLevel.HIGH_SCHOOL)
+                        .majorField("조각고등학교")
+                        .status(EducationStatus.GRADUATED)
+                        .build(),
+                Education.builder()
+                        .resume(saveResume)
+                        .level(EducationLevel.BACHELOR)
+                        .majorField("조각대학교 조각학과")
+                        .status(EducationStatus.GRADUATED)
+                        .build()));
+        List<Skill> skillList = new ArrayList<>(List.of(
+                Skill.builder()
+                        .resume(saveResume)
+                        .content("조각")
+                        .build(),
+                Skill.builder()
+                        .resume(saveResume)
+                        .content("조가악")
+                        .build()));
+        careerRepository.saveAll(careerList);
+        educationRepository.saveAll(educationList);
+        skillRepository.saveAll(skillList);
+
+        entityManager.clear();
     }
 
     @Test
@@ -236,6 +308,7 @@ class ResumeControllerTest {
                 .andExpect(status().isForbidden())
                 .andDo(print());
     }
+
     @Test
     @DisplayName("유효하지 않은 (무의미한) 이력서 내용 입력 시 유효성 검사 실패")
     void registerResume_invalidContent_meaningless() throws Exception {
@@ -264,7 +337,7 @@ class ResumeControllerTest {
         String testTitle = "유효한 제목";
         StringBuilder koreanGibberishBuilder = new StringBuilder();
         String pattern = "ㅁㄴㅇㄹㅂㅈㄱㄷㅅ";
-        while(koreanGibberishBuilder.length() < 300) {
+        while (koreanGibberishBuilder.length() < 300) {
             koreanGibberishBuilder.append(pattern);
         }
         String meaninglessKoreanContent = koreanGibberishBuilder.toString().substring(0, 300);
@@ -284,8 +357,76 @@ class ResumeControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    @DisplayName("(v2)이력서 등록 성공")
+    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail)
+    void registerResumeV2_success() throws Exception {
+        // Given
+        String testContent = generateLongContent(300);
+
+        ResumeAddRequestDto requestDto = ResumeAddRequestDto.builder()
+                .content(testContent)
+                .isNewcomer(true)
+                .educationList(new ArrayList<>(List.of(
+                        EducationDto.builder()
+                                .level(EducationLevel.HIGH_SCHOOL)
+                                .majorField("조각고등학교")
+                                .status(EducationStatus.GRADUATED)
+                                .build(),
+                        EducationDto.builder()
+                                .level(EducationLevel.BACHELOR)
+                                .majorField("조각대학교 조각학과")
+                                .status(EducationStatus.GRADUATED)
+                                .build()
+                )))
+                .skillList(new ArrayList<>(List.of(
+                        "조각", "조가악"
+                )))
+                .build();
+        String content = objectMapper.writeValueAsString(requestDto);
+
+        // When
+        ResultActions result = mockMvc.perform(post("/v2/resume")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content));
+
+        // Then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("이력서 등록 완료"))
+                .andExpect(jsonPath("$.data.content").value(testContent))
+                .andExpect(jsonPath("$.data.skillList[0]").value("조각"))
+                .andExpect(jsonPath("$.data.skillList[1]").value("조가악"))
+                .andExpect(jsonPath("$.data.educationDtoList[0].majorField").value("조각고등학교"))
+                .andExpect(jsonPath("$.data.newcomer").value("true"))
+                .andDo(print());
+
+        entityManager.clear();
+        Member memberAfterRegister = memberRepository.findByUsernameWithResume(testUserLoginId).orElseThrow();
+        assertThat(memberAfterRegister.getResume()).isNotNull();
+        assertThat(resumeRepository.findById(memberAfterRegister.getResume().getId())).isPresent();
+    }
+
+    @Test
+    @DisplayName("(v2)이력서 조회 성공")
+    void getResume_successV2() throws Exception {
+        //Given
+        createAndSaveResumeV2();
+        //When
+        ResultActions result = mockMvc.perform(get("/v2/resume"));
+
+        //Then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("이력서 조회 성공"))
+                .andExpect(jsonPath("$.data.content").isNotEmpty())
+                .andExpect(jsonPath("$.data.skillList[0]").value("조각"))
+                .andExpect(jsonPath("$.data.skillList[1]").value("조가악"))
+                .andDo(print());
+    }
+
+
     /**
      * Faker를 사용하여 지정된 길이 이상의 랜덤 텍스트를 생성하는 헬퍼 메서드
+     *
      * @param minLength 최소 길이
      * @return 생성된 랜덤 텍스트
      */

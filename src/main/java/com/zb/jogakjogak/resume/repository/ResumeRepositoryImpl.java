@@ -1,8 +1,7 @@
 package com.zb.jogakjogak.resume.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.zb.jogakjogak.resume.entity.QResume;
-import com.zb.jogakjogak.resume.entity.Resume;
+import com.zb.jogakjogak.resume.entity.*;
 import com.zb.jogakjogak.security.entity.QMember;
 import jakarta.persistence.EntityManager;
 
@@ -30,5 +29,22 @@ public class ResumeRepositoryImpl implements ResumeRepositoryCustom {
                 .fetchOne();
 
         return Optional.ofNullable(foundResume);
+    }
+
+    @Override
+    public Optional<Resume> findResumeWithCareerAndEducationAndSkill(Long memberId) {
+        QResume resume = QResume.resume;
+        QCareer career = QCareer.career;
+        QEducation education = QEducation.education;
+        QSkill skill = QSkill.skill;
+
+        Resume findResume = queryFactory.selectFrom(resume)
+                .join(resume.careerList, career).fetchJoin()
+                .join(resume.educationList, education).fetchJoin()
+                .join(resume.skillList, skill).fetchJoin()
+                .where(resume.member.id.eq(memberId))
+                .fetchOne();
+
+        return Optional.ofNullable(findResume);
     }
 }

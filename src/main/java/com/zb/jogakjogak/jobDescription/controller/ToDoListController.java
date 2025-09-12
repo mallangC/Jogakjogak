@@ -1,12 +1,10 @@
 package com.zb.jogakjogak.jobDescription.controller;
 
 import com.zb.jogakjogak.global.HttpApiResponse;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.BulkToDoListUpdateRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.CreateToDoListRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.ToggleTodolistRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.UpdateToDoListRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.*;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListGetByCategoryResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
+import com.zb.jogakjogak.jobDescription.domain.responseDto.UpdateIsDoneTodoListsResponseDto;
 import com.zb.jogakjogak.jobDescription.service.ToDoListService;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
@@ -158,6 +156,21 @@ public class ToDoListController {
                 new HttpApiResponse<>(
                         toDoListService.getToDoListsByJdAndCategory(jdId, dto.getCategory(), customUser.getMember()),
                         "다중 투두리스트 수정 성공",
+                        HttpStatus.OK
+                )
+        );
+    }
+
+    @Operation(summary = "여러 Todolist의 완료여부 일괄 수정", description = "jd_id를 통해 여러 Todolist의 완료여부를 일괄적으로 수정합니다")
+    @PutMapping("/update-is-done")
+    public ResponseEntity<HttpApiResponse<UpdateIsDoneTodoListsResponseDto>> updateIsDoneTodoLists(
+            @PathVariable("jd_id")  Long jdId,
+            @RequestBody UpdateTodoListsIsDoneRequestDto dto,
+            @AuthenticationPrincipal CustomOAuth2User customUser){
+        return ResponseEntity.ok().body(
+                new HttpApiResponse<>(
+                        toDoListService.updateIsDoneTodoLists(jdId, dto, customUser.getMember()),
+                        "다중 투두리스트 완료여부 수정 성공",
                         HttpStatus.OK
                 )
         );
