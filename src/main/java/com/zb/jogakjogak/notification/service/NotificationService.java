@@ -80,7 +80,7 @@ public class NotificationService {
 
         // 2. Thymeleaf Context 생성
         Context context = new Context();
-        context.setVariable("userName", templateData.getUserName());
+        context.setVariable("nickname", templateData.getNickname());
         context.setVariable("idleDays", 3);
         context.setVariable("jdList", templateData.getJdList());
         context.setVariable("ctaLink", templateData.getLink());
@@ -93,8 +93,7 @@ public class NotificationService {
      * 템플릿에 전달할 데이터를 준비하는 메서드
      */
     private EmailTemplateDto prepareTemplateData(NotificationDto notificationDto) {
-        String userName = notificationDto.getMember().getNickname();
-
+        String nickname = notificationDto.getMember().getNickname();
         // JD 목록을 이메일용 데이터로 변환
         List<JdEmailDto> jdEmailList = new ArrayList<>();
         for (JD jd : notificationDto.getJdList()) {
@@ -108,7 +107,7 @@ public class NotificationService {
         }
 
         return EmailTemplateDto.builder()
-                .userName(userName)
+                .nickname(nickname)
                 .jdList(jdEmailList)
                 .link("https://jogakjogak.com/dashboard")
                 .dailyMessage(getDailyMotivationMessage())

@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 @Builder
 public class EmailTemplateDto {
-    private String userName;
+    private String nickname;
     private List<JdEmailDto> jdList;
     private String link;
     private String dailyMessage;

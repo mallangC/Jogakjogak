@@ -72,13 +72,25 @@ public class JDRepositoryImpl implements JDRepositoryCustom{
                 break;
         }
 
-        // 쿼리 결과 리스트 조회
-        List<JD> content = queryFactory
-                .selectFrom(jd)
-                .leftJoin(jd.toDoLists, toDoList).fetchJoin()
+        // 1단계: 페이징을 적용하여 대상 JD의 ID 목록만 조회
+        List<Long> ids = queryFactory
+                .select(jd.id)
+                .from(jd)
                 .where(whereBuilder)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
+                .orderBy(getOrderSpecifiers(pageable.getSort(), jd).toArray(OrderSpecifier[]::new))
+                .fetch();
+
+        if (ids.isEmpty()) {
+            return new PageImpl<>(new ArrayList<>(), pageable, 0);
+        }
+
+        // 2단계: 조회된 ID 목록을 사용하여 연관된 ToDoList와 함께 JD 엔티티를 조회 (fetch join)
+        List<JD> content = queryFactory
+                .selectFrom(jd)
+                .leftJoin(jd.toDoLists, toDoList).fetchJoin()
+                .where(jd.id.in(ids))
                 .orderBy(getOrderSpecifiers(pageable.getSort(), jd).toArray(OrderSpecifier[]::new))
                 .fetch();
 

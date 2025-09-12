@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -133,6 +134,10 @@ public class JDService {
     public JDAlarmResponseDto alarm(Long jdId, JDAlarmRequestDto dto, Member member) {
 
         JD jd = getAuthorizedJd(jdId, member);
+        if(dto.isAlarmOn()){
+            member.setNotificationEnabled(true);
+        }
+        memberRepository.save(member);
         jd.isAlarmOn(dto.isAlarmOn());
         return JDAlarmResponseDto.builder()
                 .isAlarmOn(jd.isAlarmOn())
