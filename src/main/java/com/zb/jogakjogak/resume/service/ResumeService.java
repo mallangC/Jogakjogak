@@ -130,7 +130,7 @@ public class ResumeService {
 
         Resume saveResume = resumeRepository.save(newResume);
 
-        return addAllAboutResume(saveResume, requestDto);
+        return saveResumeDetails(saveResume, requestDto);
     }
 
     public ResumeGetResponseDto getResumeV2(Member member) {
@@ -156,11 +156,11 @@ public class ResumeService {
         resumeRepository.save(resume);
         resumeRepository.deleteAboutResumeById(resume.getId());
 
-        return addAllAboutResume(resume, requestDto);
+        return saveResumeDetails(resume, requestDto);
     }
 
     @Transactional
-    public ResumeGetResponseDto addAllAboutResume(Resume resume, ResumeAddRequestDto requestDto) {
+    public ResumeGetResponseDto saveResumeDetails(Resume resume, ResumeAddRequestDto requestDto) {
         List<Career> savedCareerList = new ArrayList<>();
         List<Education> savedEducationList = new ArrayList<>();
         List<Skill> savedSkillList = new ArrayList<>();
