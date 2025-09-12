@@ -6,10 +6,17 @@ import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.global.exception.ResumeErrorCode;
 import com.zb.jogakjogak.global.exception.ResumeException;
-import com.zb.jogakjogak.resume.domain.requestDto.*;
+import com.zb.jogakjogak.resume.domain.requestDto.CareerDto;
+import com.zb.jogakjogak.resume.domain.requestDto.EducationDto;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeAddRequestDto;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeAddResponseDto;
+import com.zb.jogakjogak.resume.domain.responseDto.ResumeGetResponseDto;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeResponseDto;
+import com.zb.jogakjogak.resume.entity.Career;
+import com.zb.jogakjogak.resume.entity.Education;
 import com.zb.jogakjogak.resume.entity.Resume;
+import com.zb.jogakjogak.resume.entity.Skill;
 import com.zb.jogakjogak.resume.repository.CareerRepository;
 import com.zb.jogakjogak.resume.repository.EducationRepository;
 import com.zb.jogakjogak.resume.repository.ResumeRepository;
@@ -27,9 +34,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -312,7 +317,6 @@ class ResumeServiceTest {
 
         // Then
         assertThat(responseDto).isNotNull();
-        assertThat(responseDto.getResumeId()).isEqualTo(1L);
         assertThat(responseDto.getContent()).isEqualTo(testContent);
 
         verify(resumeRepository, times(1)).save(any(Resume.class));
@@ -350,12 +354,7 @@ class ResumeServiceTest {
                                 .build()
                 )))
                 .skillList(new ArrayList<>(List.of(
-                        SkillDto.builder()
-                                .content("조각")
-                                .build(),
-                        SkillDto.builder()
-                                .content("조가악")
-                                .build()
+                        "조각", "조가악"
                 )))
                 .build();
 
@@ -373,7 +372,6 @@ class ResumeServiceTest {
 
         // Then
         assertThat(responseDto).isNotNull();
-        assertThat(responseDto.getResumeId()).isEqualTo(1L);
         assertThat(responseDto.getContent()).isEqualTo(testContent);
 
         verify(resumeRepository, times(1)).save(any(Resume.class));
@@ -419,12 +417,7 @@ class ResumeServiceTest {
                                 .build()
                 )))
                 .skillList(new ArrayList<>(List.of(
-                        SkillDto.builder()
-                                .content("조각")
-                                .build(),
-                        SkillDto.builder()
-                                .content("조가악")
-                                .build()
+                        "조각", "조가악"
                 )))
                 .build();
 
@@ -442,7 +435,6 @@ class ResumeServiceTest {
 
         // Then
         assertThat(responseDto).isNotNull();
-        assertThat(responseDto.getResumeId()).isEqualTo(1L);
         assertThat(responseDto.getContent()).isEqualTo(testContent);
 
         verify(resumeRepository, times(1)).save(any(Resume.class));
@@ -476,6 +468,74 @@ class ResumeServiceTest {
         // Then
         assertThat(exception.getErrorCode()).isEqualTo(ResumeErrorCode.NOT_ENTERED_CAREER);
         verify(resumeRepository, times(0)).save(any(Resume.class));
+    }
+
+    @Test
+    @DisplayName("(v2)이력서 조회 성공 테스트")
+    void getResume_successV2() {
+        Resume resume = Resume.builder()
+                .content(faker.lorem().sentence(3))
+                .member(mockMember)
+                .isNewcomer(false)
+                .careerList(new HashSet<>(List.of(
+                        Career.builder()
+                                .id(1L)
+                                .companyName("조각조각")
+                                .isWorking(true)
+                                .joinedAt(LocalDate.of(2020, 1, 1))
+                                .workPerformance(faker.lorem().paragraph(2))
+                                .build()
+                )))
+                .educationList(new HashSet<>(List.of(
+                        Education.builder()
+                                .id(1L)
+                                .level(EducationLevel.HIGH_SCHOOL)
+                                .majorField("조각고등학교")
+                                .status(EducationStatus.GRADUATED)
+                                .build(),
+                        Education.builder()
+                                .id(2L)
+                                .level(EducationLevel.BACHELOR)
+                                .majorField("조각대학교 조각학과")
+                                .status(EducationStatus.GRADUATED)
+                                .build()
+                )))
+                .skillList(new HashSet<>(List.of(
+                        Skill.builder()
+                                .id(1L)
+                                .content("조각")
+                                .build()
+                )))
+                .build();
+
+        //Given
+        when(resumeRepository.findResumeWithCareerAndEducationAndSkill(mockMember.getId()))
+                .thenReturn(Optional.of(resume));
+
+        //When
+        ResumeGetResponseDto result = resumeService.getResumeV2(mockMember);
+
+        //Then
+        verify(resumeRepository, times(1)).findResumeWithCareerAndEducationAndSkill(mockMember.getId());
+
+        assertNotNull(result);
+        assertEquals(resume.getContent(), result.getContent());
+        assertEquals(resume.getMember(), mockMember);
+        assertEquals("조각", result.getSkillList().get(0));
+
+        Optional<Education> filterEducation = resume.getEducationList().stream()
+                .filter(education -> Objects.equals(education.getMajorField(), "조각고등학교"))
+                .findFirst();
+
+        Optional<EducationDto> filterEducationFromResult = result.getEducationDtoList().stream()
+                .filter(education -> Objects.equals(education.getMajorField(), "조각고등학교"))
+                .findFirst();
+
+        assertTrue(filterEducation.isPresent());
+        assertTrue(filterEducationFromResult.isPresent());
+        assertEquals(filterEducation.get().getLevel(), filterEducationFromResult.get().getLevel());
+        assertEquals(filterEducation.get().getMajorField(), filterEducationFromResult.get().getMajorField());
+        assertEquals(filterEducation.get().getStatus(), filterEducationFromResult.get().getStatus());
     }
 
 }

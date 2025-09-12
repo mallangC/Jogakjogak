@@ -15,4 +15,6 @@ public interface ResumeRepositoryCustom {
      * @return 조회된 Resume 객체
      */
     Optional<Resume> findResumeWithMemberByIdAndMemberId(Long resumeId, Long memberId);
+
+    Optional<Resume> findResumeWithCareerAndEducationAndSkill(Long memberId);
 }

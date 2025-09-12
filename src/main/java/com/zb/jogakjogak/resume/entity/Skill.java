@@ -1,6 +1,5 @@
 package com.zb.jogakjogak.resume.entity;
 
-import com.zb.jogakjogak.resume.domain.requestDto.SkillDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,9 +22,9 @@ public class Skill {
     @JoinColumn(name = "resume_id", nullable = false)
     private Resume resume;
 
-    public static Skill of(SkillDto dto, Resume resume){
+    public static Skill of(String content, Resume resume){
         return Skill.builder()
-                .content(dto.getContent())
+                .content(content)
                 .resume(resume)
                 .build();
     }

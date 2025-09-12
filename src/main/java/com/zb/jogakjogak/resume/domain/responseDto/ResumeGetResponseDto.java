@@ -1,22 +1,28 @@
-package com.zb.jogakjogak.resume.domain.requestDto;
+package com.zb.jogakjogak.resume.domain.responseDto;
 
-import com.zb.jogakjogak.global.validation.MeaningfulText;
+import com.zb.jogakjogak.resume.domain.requestDto.CareerDto;
+import com.zb.jogakjogak.resume.domain.requestDto.EducationDto;
+import com.zb.jogakjogak.resume.entity.Career;
+import com.zb.jogakjogak.resume.entity.Education;
+import com.zb.jogakjogak.resume.entity.Resume;
+import com.zb.jogakjogak.resume.entity.Skill;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
-@Schema(description = "이력서 등록 요청 DTO")
-@Builder
+@Schema(description = "이력서 조회 응답 DTO")
 @Getter
-@NoArgsConstructor
+@Builder
 @AllArgsConstructor
-public class ResumeAddRequestDto {
+@NoArgsConstructor
+public class ResumeGetResponseDto {
     @Schema(description = "이력서 내용", example =
             " 핵심 역량" +
             "언어: Java, Python" +
@@ -51,16 +57,50 @@ public class ResumeAddRequestDto {
             "Swagger를 활용한 API 명세서 작성 경험으로 협업의 효율을 높입니다." +
             "학습 능력:" +
             "새로운 기술과 지식을 빠르게 습득하고 프로젝트에 적용하는 데 거부감이 없습니다." +
-            "오류 발생 시 로그를 분석하고 원인을 파악하여 해결하는 능력을 갖추고 있습니다.",
-            requiredMode=Schema.RequiredMode.NOT_REQUIRED)
-    @Size(min= 300, max = 5000, message = "이력서는 300자 이상 5000자 이내여야 합니다.")
-    @MeaningfulText(message = "이력서 내용이 유효하지 않거나 의미 없는 반복 문자를 포함합니다.")
+            "오류 발생 시 로그를 분석하고 원인을 파악하여 해결하는 능력을 갖추고 있습니다.")
     private String content;
-    @Schema(description = "신입 여부", example = "true", requiredMode =  Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "신입 여부를 입력해주세요.")
-    private Boolean isNewcomer;
-    private List<CareerDto> careerList;
-    private List<EducationDto> educationList;
+    @Schema(description = "신입 유무", example = "true")
+    private boolean isNewcomer;
+    @Schema(description = "이력서 생성 일시", example = "2025-06-22T10:30:00Z")
+    private LocalDateTime createdAt;
+    @Schema(description = "이력서 수정 일시", example = "2025-06-22T10:30:00Z")
+    private LocalDateTime updatedAt;
+    @Schema(description = "경력 리스트")
+    private List<CareerDto> careerDtoList;
+    @Schema(description = "학력 리스트")
+    private List<EducationDto> educationDtoList;
+    @Schema(description = "스킬 리스트")
     private List<String> skillList;
 
+    public static ResumeGetResponseDto of(Resume resume) {
+        List<Career> careerList = new ArrayList<>(resume.getCareerList());
+        List<Education> educationList = new ArrayList<>(resume.getEducationList());
+        List<Skill> skillList = new ArrayList<>(resume.getSkillList());
+
+        if (careerList.size() > 1){
+            careerList.sort(Comparator.comparing(Career::getId));
+        }
+        if (educationList.size() > 1){
+            educationList.sort(Comparator.comparing(Education::getId));
+        }
+        if (skillList.size() > 1){
+            skillList.sort(Comparator.comparing(Skill::getId));
+        }
+
+        return ResumeGetResponseDto.builder()
+                .isNewcomer(resume.isNewcomer())
+                .content(resume.getContent())
+                .createdAt(resume.getCreatedAt())
+                .updatedAt(resume.getUpdatedAt())
+                .careerDtoList(careerList.stream()
+                        .map(CareerDto::of)
+                        .toList())
+                .educationDtoList(educationList.stream()
+                        .map(EducationDto::of)
+                        .toList())
+                .skillList(skillList.stream()
+                        .map(Skill::getContent)
+                        .toList())
+                .build();
+    }
 }

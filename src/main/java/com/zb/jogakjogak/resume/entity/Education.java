@@ -19,10 +19,12 @@ public class Education {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private EducationLevel level;
     @Column(nullable = false)
     private String majorField;
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private EducationStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
