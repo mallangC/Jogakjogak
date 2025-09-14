@@ -206,6 +206,7 @@ class JDControllerTest {
                 "http://gemini.com/jd/1",
                 "테스트용 회사 이름",
                 "테스트용 직무 이름",
+                2L,
                 validContent,
                 LocalDateTime.now().plusDays(10)
         );
