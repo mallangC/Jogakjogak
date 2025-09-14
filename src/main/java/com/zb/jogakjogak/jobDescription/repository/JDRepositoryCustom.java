@@ -31,4 +31,7 @@ public interface JDRepositoryCustom {
      * @return 조건에 맞는 JD 목록
      */
     Page<JD> findNotUpdatedJdByQueryDsl(LocalDateTime oldDate, LocalDateTime todayStart, Pageable pageable);
+
+
+    Long findAllJdCountByMemberId(Long memberId);
 }
