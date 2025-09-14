@@ -57,6 +57,13 @@ public class LLMService {
                     당신은 마치 지원자의 '과외 선생님'처럼, 직접적이고 명확하며 행동을 유도하는 조언을 **"해요체로 존댓말을 사용하여 제공해야 합니다."
                     ** 비전문가도 쉽게 이해할 수 있는 언어를 사용하세요.
                     
+                    **[이력서 유무 규칙]**
+                    이력서 내용이 비어있거나 제공되지 않은 경우:
+                    "CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL" 카테고리는 절대 생성하지 마세요.
+                    오직 "STRUCTURAL_COMPLEMENT_PLAN" 과 "SCHEDULE_MISC_ERROR" 카테고리만 생성하세요.
+                    만약 이력서가 제공된 경우:
+                    세 카테고리("STRUCTURAL_COMPLEMENT_PLAN", "CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL", "SCHEDULE_MISC_ERROR") 모두 생성 가능.
+                    
                     **[최우선 규칙]**
                     만약 제공된 '이력서 내용' 또는 '채용 공고 내용'이 의미 없는 패턴(예: "ㄴㄴㄴㄴ", "asdasd", "...")이거나 내용이 너무 짧다면, **절대 투두리스트를 생성하지 마십시오. 어떠한 JSON 형식도 출력하지 마십시오.** 대신, 다음 문장만 정확히 출력하십시오:
                     "유효하지 않거나 분석하기 어려운 입력 내용입니다. 정확한 이력서와 채용 공고 내용을 다시 제공해주세요."
@@ -111,12 +118,21 @@ public class LLMService {
                     """;
 
             // 사용자 프롬프트 구성
-            String userPromptContent = String.format(
-                    "이력서: %s\n채용 공고: %s\n직무 이름: %s\n\n위 이력서, 채용 공고, 그리고 직무 이름을 기반으로, 지원자가 부족한 부분을 보완하고 해당 직무의 채용 공고에 더 잘 맞출 수 있도록 돕는 To-Do 리스트를 JSON 형식으로 생성해 주세요.",
-                    resumeContent,
-                    jobDescriptionContent,
-                    jobName
-            );
+            String userPromptContent;
+            if (resumeContent == null || resumeContent.trim().isEmpty()) {
+                userPromptContent = String.format(
+                        "이력서: 없음\n채용 공고: %s\n직무 이름: %s\n\n위 채용 공고와 직무 이름을 기반으로, 'CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL' 카테고리는 절대 생성하지 않고 나머지 두 카테고리만 포함하는 To-Do 리스트를 JSON 형식으로 생성해 주세요.",
+                        jobDescriptionContent,
+                        jobName
+                );
+            } else {
+                userPromptContent = String.format(
+                        "이력서: %s\n채용 공고: %s\n직무 이름: %s\n\n위 이력서, 채용 공고, 그리고 직무 이름을 기반으로, To-Do 리스트를 JSON 형식으로 생성해 주세요.",
+                        resumeContent,
+                        jobDescriptionContent,
+                        jobName
+                );
+            }
 
             // 메시지(Content) 구성
             List<Content> contents = List.of(

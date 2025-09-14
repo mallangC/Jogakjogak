@@ -185,7 +185,8 @@ public class ResumeService {
                     .toList();
             savedSkillList = skillRepository.saveAll(skillList);
         }
+        Long jdId = requestDto.getJdId();
 
-        return ResumeGetResponseDto.of(resume, savedCareerList, savedEducationList, savedSkillList);
+        return ResumeGetResponseDto.of(resume, savedCareerList, savedEducationList, savedSkillList, jdId);
     }
 }
