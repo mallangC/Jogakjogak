@@ -19,7 +19,8 @@ public enum JDErrorCode {
     INVALID_RESUME_CONTENT(HttpStatus.BAD_REQUEST,"이력서 내용이 유효하지 않거나 의미 없는 반복 문자를 포함합니다."),
     INVALID_JOB_DESCRIPTION_CONTENT(HttpStatus.BAD_REQUEST,"채용 공고 내용이 유효하지 않거나 의미 없는 반복 문자를 포함합니다."),
     INVALID_JOB_NAME(HttpStatus.BAD_REQUEST, "직무 이름이 유효하지 않습니다."),
-    AI_ANALYSIS_UNAVAILABLE(HttpStatus.BAD_REQUEST, "유효하지 않거나 분석하기 어려운 입력 내용입니다. 정확한 이력서와 채용 공고 내용을 다시 제공해주세요." );
+    AI_ANALYSIS_UNAVAILABLE(HttpStatus.BAD_REQUEST, "유효하지 않거나 분석하기 어려운 입력 내용입니다. 정확한 이력서와 채용 공고 내용을 다시 제공해주세요." ),
+    JD_LIMIT_EXCEEDED_WITHOUT_RESUME(HttpStatus.BAD_REQUEST, "이력서가 없는 경우 채용공고분석은 최대 1개까지 가능합니다." );
 
     private final HttpStatus httpStatus;
     private final String message;
