@@ -187,15 +187,21 @@ class JDServiceTest {
     @DisplayName("LLM 분석 서비스 실패 테스트 - JD 제한 20개 초과 시 JDException 발생")
     void llmAnalyze_failure_jdLimitExceeded() {
         // given
-        when(memberRepository.countJdByMemberId(mockMember.getId())).thenReturn(20L);
+        Resume mockResume = Resume.builder()
+                .content("테스트이력서")
+                .build();
+        mockMember.setResume(mockResume);
+
+        when(jdRepository.findAllJdCountByMemberId(mockMember.getId())).thenReturn(20L);
 
         // when & then
         JDException thrown = assertThrows(JDException.class, () ->
                 jdService.llmAnalyze(jdRequestDto, mockMember));
+
         assertEquals(JDErrorCode.JD_LIMIT_EXCEEDED, thrown.getErrorCode());
 
         // verify
-        verify(memberRepository, times(1)).countJdByMemberId(mockMember.getId());
+        verify(jdRepository, times(1)).findAllJdCountByMemberId(mockMember.getId());
         verify(llmService, never()).generateTodoListJson(anyString(), anyString(), anyString());
         verify(jdRepository, never()).save(any(JD.class));
     }
