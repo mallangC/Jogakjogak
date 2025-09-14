@@ -3,7 +3,6 @@ package com.zb.jogakjogak.resume.controller;
 import com.zb.jogakjogak.global.HttpApiResponse;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeAddRequestDto;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
-import com.zb.jogakjogak.resume.domain.responseDto.ResumeAddResponseDto;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeGetResponseDto;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeResponseDto;
 import com.zb.jogakjogak.resume.service.ResumeService;
@@ -113,7 +112,7 @@ public class ResumeController {
      */
     @Operation(summary = "(v2) 이력서 등록", description = "분석할 사용자의 이력서를 등록합니다")
     @PostMapping("/v2/resume")
-    public ResponseEntity<HttpApiResponse<ResumeAddResponseDto>> registerV2(
+    public ResponseEntity<HttpApiResponse<ResumeGetResponseDto>> registerV2(
             @Valid @RequestBody ResumeAddRequestDto requestDto,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
 
@@ -140,6 +139,27 @@ public class ResumeController {
                         new HttpApiResponse<>(
                                 resumeService.getResumeV2(customOAuth2User.getMember()),
                                 "이력서 조회 성공",
+                                HttpStatus.OK
+                        )
+                );
+    }
+
+    /**
+     * 이력서 수정을 위한 컨트롤러 메서드
+     *
+     * @param requestDto 수정할 이력서 이름, 수정할 이력서 내용
+     * @return data(수정한 이력서 id, 수정된 이력서 이름, 수정된 이력서 내용), 성공 여부 메세지, 상태코드
+     */
+    @Operation(summary = "이력서 수정", description = "사용자가 등록한 이력서를 수정합니다")
+    @PatchMapping("/v2/resume")
+    public ResponseEntity<HttpApiResponse<ResumeGetResponseDto>> modifyV2(
+            @Valid @RequestBody ResumeAddRequestDto requestDto,
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        return ResponseEntity.ok()
+                .body(
+                        new HttpApiResponse<>(
+                                resumeService.modifyV2(requestDto, customOAuth2User.getMember()),
+                                "이력서 수정 완료",
                                 HttpStatus.OK
                         )
                 );

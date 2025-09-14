@@ -4,8 +4,14 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.zb.jogakjogak.resume.entity.*;
 import com.zb.jogakjogak.security.entity.QMember;
 import jakarta.persistence.EntityManager;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+
+import static com.zb.jogakjogak.resume.entity.QCareer.career;
+import static com.zb.jogakjogak.resume.entity.QEducation.education;
+import static com.zb.jogakjogak.resume.entity.QResume.resume;
+import static com.zb.jogakjogak.resume.entity.QSkill.skill;
 
 public class ResumeRepositoryImpl implements ResumeRepositoryCustom {
 
@@ -33,10 +39,6 @@ public class ResumeRepositoryImpl implements ResumeRepositoryCustom {
 
     @Override
     public Optional<Resume> findResumeWithCareerAndEducationAndSkill(Long memberId) {
-        QResume resume = QResume.resume;
-        QCareer career = QCareer.career;
-        QEducation education = QEducation.education;
-        QSkill skill = QSkill.skill;
 
         Resume findResume = queryFactory.selectFrom(resume)
                 .join(resume.careerList, career).fetchJoin()
@@ -46,5 +48,19 @@ public class ResumeRepositoryImpl implements ResumeRepositoryCustom {
                 .fetchOne();
 
         return Optional.ofNullable(findResume);
+    }
+
+    @Transactional
+    @Override
+    public void deleteResumeDetailsById(Long resumeId) {
+        queryFactory.delete(career)
+                .where(career.resume.id.eq(resumeId))
+                .execute();
+        queryFactory.delete(education)
+                .where(education.resume.id.eq(resumeId))
+                .execute();
+        queryFactory.delete(skill)
+                .where(skill.resume.id.eq(resumeId))
+                .execute();
     }
 }
