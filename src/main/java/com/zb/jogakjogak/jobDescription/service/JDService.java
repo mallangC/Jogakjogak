@@ -77,17 +77,25 @@ public class JDService {
      */
     public JDResponseDto llmAnalyze(JDRequestDto jdRequestDto, Member member) {
 
+        if(jdRequestDto.getJdId() != null){
+            jdRepository.deleteById(jdRequestDto.getJdId());
+        }
+
         long jdCount = jdRepository.findAllJdCountByMemberId(member.getId());
 
-        if (member.getResume() == null && jdCount > 0) {
-            throw new ResumeException(ResumeErrorCode.ANALYSIS_ALLOWED_ONCE_WITHOUT_RESUME);
-        }
-        //TODO: 테스트 후 갯수 변경 필요
-        if (memberRepository.countJdByMemberId(member.getId()) >= 20) {
-            throw new JDException(JDErrorCode.JD_LIMIT_EXCEEDED);
+        boolean hasResume = member.getResume() != null && member.getResume().getContent() != null;
+        if (!hasResume) {
+            if (jdCount >= 1) {
+                throw new ResumeException(ResumeErrorCode.ANALYSIS_ALLOWED_ONCE_WITHOUT_RESUME);
+            }
+        } else {
+            if (jdCount >= 20) {
+                throw new JDException(JDErrorCode.JD_LIMIT_EXCEEDED);
+            }
         }
 
-        String analysisJsonString = llmService.generateTodoListJson(member.getResume().getContent(), jdRequestDto.getContent(), jdRequestDto.getJob());
+        String resumeContent = hasResume ? member.getResume().getContent() : "";
+        String analysisJsonString = llmService.generateTodoListJson(resumeContent, jdRequestDto.getContent(), jdRequestDto.getJob());
         List<ToDoListDto> parsedAnalysisResult;
         try {
             parsedAnalysisResult = objectMapper.readValue(analysisJsonString, new TypeReference<>() {

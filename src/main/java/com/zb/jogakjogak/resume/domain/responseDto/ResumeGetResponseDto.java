@@ -71,24 +71,25 @@ public class ResumeGetResponseDto {
     private List<EducationDto> educationDtoList;
     @Schema(description = "스킬 리스트")
     private List<String> skillList;
+    @Schema(description = "이력서 없을 때 분석한 채용공고 id")
+    private Long jdId;
 
     public static ResumeGetResponseDto of(Resume resume) {
         List<Career> careerList = new ArrayList<>(resume.getCareerList());
         List<Education> educationList = new ArrayList<>(resume.getEducationList());
         List<Skill> skillList = new ArrayList<>(resume.getSkillList());
-
-        return toResponseDto(resume, careerList, educationList, skillList);
+        Long jdId = null;
+        return toResponseDto(resume, careerList, educationList, skillList, jdId);
     }
 
-    public static ResumeGetResponseDto of(Resume resume, List<Career> careers, List<Education> educations, List<Skill> skills) {
+    public static ResumeGetResponseDto of(Resume resume, List<Career> careers, List<Education> educations, List<Skill> skills, Long jdId) {
         List<Career> careerList = new ArrayList<>(careers);
         List<Education> educationList = new ArrayList<>(educations);
         List<Skill> skillList = new ArrayList<>(skills);
-
-        return toResponseDto(resume, careerList, educationList, skillList);
+        return toResponseDto(resume, careerList, educationList, skillList, jdId);
     }
 
-    private static ResumeGetResponseDto toResponseDto(Resume resume, List<Career> careerList, List<Education> educationList, List<Skill> skillList) {
+    private static ResumeGetResponseDto toResponseDto(Resume resume, List<Career> careerList, List<Education> educationList, List<Skill> skillList, Long jdId) {
         if (careerList.size() > 1) {
             careerList.sort(Comparator.comparing(Career::getId));
         }
@@ -104,6 +105,7 @@ public class ResumeGetResponseDto {
                 .content(resume.getContent())
                 .createdAt(resume.getCreatedAt())
                 .updatedAt(resume.getUpdatedAt())
+                .jdId(jdId)
                 .careerDtoList(careerList.stream()
                         .map(CareerDto::of)
                         .toList())
