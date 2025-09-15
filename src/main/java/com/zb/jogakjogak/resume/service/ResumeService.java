@@ -5,7 +5,6 @@ import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.global.exception.ResumeException;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeAddRequestDto;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
-import com.zb.jogakjogak.resume.domain.responseDto.ResumeAddResponseDto;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeGetResponseDto;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeResponseDto;
 import com.zb.jogakjogak.resume.entity.Career;
@@ -110,7 +109,8 @@ public class ResumeService {
      * @param requestDto 이력서 내용, 신입 유무, 경력 리스트, 학력 리스트, 스킬 리스트
      * @return 이력서 id, 이력서 내용, 신입 유무, 경력 리스트, 학력 리스트, 스킬 리스트, 생성 일시, 수정 일시
      */
-    public ResumeAddResponseDto registerV2(ResumeAddRequestDto requestDto,Member member) {
+    @Transactional
+    public ResumeGetResponseDto registerV2(ResumeAddRequestDto requestDto, Member member) {
 
         Resume memberResume = member.getResume();
 
@@ -130,32 +130,7 @@ public class ResumeService {
 
         Resume saveResume = resumeRepository.save(newResume);
 
-        List<Career> careerList = new ArrayList<>();
-        List<Education> educationList = new ArrayList<>();
-        List<Skill> skillList = new ArrayList<>();
-
-        if (requestDto.getCareerList() != null) {
-            careerList = requestDto.getCareerList().stream()
-                    .map(dto -> Career.of(dto, saveResume))
-                    .toList();
-            careerRepository.saveAll(careerList);
-        }
-
-        if (requestDto.getEducationList() != null) {
-            educationList = requestDto.getEducationList().stream()
-                    .map(dto -> Education.of(dto, saveResume))
-                    .toList();
-            educationRepository.saveAll(educationList);
-        }
-
-        if (requestDto.getSkillList() != null) {
-            skillList = requestDto.getSkillList().stream()
-                    .map(dto -> Skill.of(dto, saveResume))
-                    .toList();
-            skillRepository.saveAll(skillList);
-        }
-
-        return ResumeAddResponseDto.of(saveResume, careerList, educationList, skillList);
+        return saveResumeDetails(saveResume, requestDto);
     }
 
     public ResumeGetResponseDto getResumeV2(Member member) {
@@ -163,5 +138,55 @@ public class ResumeService {
                 .orElseThrow(() -> new ResumeException(NOT_FOUND_RESUME));
 
         return ResumeGetResponseDto.of(resume);
+    }
+
+    @Transactional
+    public ResumeGetResponseDto modifyV2(ResumeAddRequestDto requestDto, Member member) {
+        if (member.getResume() == null) {
+            throw new ResumeException(NOT_FOUND_RESUME);
+        }
+
+        if (!requestDto.getIsNewcomer() && requestDto.getCareerList() == null) {
+            throw new ResumeException(NOT_ENTERED_CAREER);
+        }
+
+        Resume resume = resumeRepository.findResumeWithCareerAndEducationAndSkill(member.getId())
+                .orElseThrow(() -> new ResumeException(NOT_FOUND_RESUME));
+        resume.update(requestDto);
+        resumeRepository.save(resume);
+        resumeRepository.deleteResumeDetailsById(resume.getId());
+
+        return saveResumeDetails(resume, requestDto);
+    }
+
+    @Transactional
+    public ResumeGetResponseDto saveResumeDetails(Resume resume, ResumeAddRequestDto requestDto) {
+        List<Career> savedCareerList = new ArrayList<>();
+        List<Education> savedEducationList = new ArrayList<>();
+        List<Skill> savedSkillList = new ArrayList<>();
+
+        if (requestDto.getCareerList() != null) {
+            List<Career> careerList = requestDto.getCareerList().stream()
+                    .map(dto -> Career.of(dto, resume))
+                    .toList();
+            savedCareerList = careerRepository.saveAll(careerList);
+        }
+
+        if (requestDto.getEducationList() != null) {
+            List<Education> educationList = requestDto.getEducationList().stream()
+                    .map(dto -> Education.of(dto, resume))
+                    .toList();
+            savedEducationList = educationRepository.saveAll(educationList);
+        }
+
+        if (requestDto.getSkillList() != null) {
+            List<Skill> skillList = requestDto.getSkillList().stream()
+                    .map(dto -> Skill.of(dto, resume))
+                    .toList();
+            savedSkillList = skillRepository.saveAll(skillList);
+        }
+        Long jdId = requestDto.getJdId();
+
+        return ResumeGetResponseDto.of(resume, savedCareerList, savedEducationList, savedSkillList, jdId);
     }
 }
