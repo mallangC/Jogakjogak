@@ -4,12 +4,14 @@ package com.zb.jogakjogak.security.controller;
 import com.zb.jogakjogak.global.HttpApiResponse;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.dto.MemberResponseDto;
+import com.zb.jogakjogak.security.dto.UpdateIsOnboardedResponseDto;
 import com.zb.jogakjogak.security.dto.UpdateMemberRequestDto;
 import com.zb.jogakjogak.security.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -50,6 +52,20 @@ public class MemberController {
                 .body(
                         new HttpApiResponse<>(memberResponseDto,
                                 "회원정보 수정 완료",
+                                HttpStatus.OK)
+                );
+    }
+
+    @Operation(summary =  "회원 is_onboarded 수정", description = "회원의 is_onboarded 상태를 수정합니다.")
+    @PatchMapping("/update-is-onboarded")
+    public ResponseEntity<HttpApiResponse<UpdateIsOnboardedResponseDto>> updateIsOnboarded(@AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        String username = customOAuth2User.getName();
+        UpdateIsOnboardedResponseDto updateIsOnboardedResponseDto = memberService.updateIsOnboarded(username);
+
+        return ResponseEntity.ok()
+                .body(
+                        new HttpApiResponse<>(updateIsOnboardedResponseDto,
+                                "회원 is_onboarded를 " + updateIsOnboardedResponseDto.isOnboarded() + "로 수정 완료",
                                 HttpStatus.OK)
                 );
     }
