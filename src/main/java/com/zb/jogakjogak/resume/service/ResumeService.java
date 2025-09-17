@@ -16,6 +16,7 @@ import com.zb.jogakjogak.resume.repository.EducationRepository;
 import com.zb.jogakjogak.resume.repository.ResumeRepository;
 import com.zb.jogakjogak.resume.repository.SkillRepository;
 import com.zb.jogakjogak.security.entity.Member;
+import com.zb.jogakjogak.security.repository.MemberRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,7 @@ public class ResumeService {
     private final CareerRepository careerRepository;
     private final EducationRepository educationRepository;
     private final SkillRepository skillRepository;
+    private final MemberRepository memberRepository;
 
     /**
      * 이력서 등록을 위한 서비스 레이어 메서드
@@ -128,6 +130,9 @@ public class ResumeService {
                 .isNewcomer(requestDto.getIsNewcomer())
                 .build();
 
+        Member updateMember = memberRepository.findByUsername(member.getUsername())
+                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
+        updateMember.setOnboarded(true);
         Resume saveResume = resumeRepository.save(newResume);
 
         return saveResumeDetails(saveResume, requestDto);
@@ -185,8 +190,7 @@ public class ResumeService {
                     .toList();
             savedSkillList = skillRepository.saveAll(skillList);
         }
-        Long jdId = requestDto.getJdId();
 
-        return ResumeGetResponseDto.of(resume, savedCareerList, savedEducationList, savedSkillList, jdId);
+        return ResumeGetResponseDto.of(resume, savedCareerList, savedEducationList, savedSkillList);
     }
 }

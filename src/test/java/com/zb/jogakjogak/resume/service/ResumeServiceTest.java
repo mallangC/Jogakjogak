@@ -24,6 +24,7 @@ import com.zb.jogakjogak.resume.type.EducationLevel;
 import com.zb.jogakjogak.resume.type.EducationStatus;
 import com.zb.jogakjogak.security.Role;
 import com.zb.jogakjogak.security.entity.Member;
+import com.zb.jogakjogak.security.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -53,6 +54,9 @@ class ResumeServiceTest {
 
     @Mock
     private EducationRepository educationRepository;
+
+    @Mock
+    private MemberRepository memberRepository;
 
     @Mock
     private SkillRepository skillRepository;
@@ -308,6 +312,9 @@ class ResumeServiceTest {
                 .isNewcomer(isNewcomer)
                 .build();
 
+
+        given(memberRepository.findByUsername(fixedUserName))
+                .willReturn(Optional.of(mockMember));
         given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
 
         // When
@@ -363,6 +370,8 @@ class ResumeServiceTest {
                 .isNewcomer(isNewcomer)
                 .build();
 
+        given(memberRepository.findByUsername(fixedUserName))
+                .willReturn(Optional.of(mockMember));
         given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
 
         // When
@@ -426,6 +435,8 @@ class ResumeServiceTest {
                 .isNewcomer(isNewcomer)
                 .build();
 
+        given(memberRepository.findByUsername(fixedUserName))
+                .willReturn(Optional.of(mockMember));
         given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
 
         // When

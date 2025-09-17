@@ -62,7 +62,5 @@ public class ResumeAddRequestDto {
     private List<CareerDto> careerList;
     private List<EducationDto> educationList;
     private List<String> skillList;
-    @Schema(description = "이력서 없을 때 분석한 채용공고 id, 이력서 등록 후 다시 분석한 후 삭제해야 할 id이기 때문에 이력서가 있을 때 분석했다면 포함하지 않아야 합니다.")
-    private Long jdId;
 
 }

@@ -37,7 +37,6 @@ public class LLMService {
         if (API_KEY == null || API_KEY.isEmpty()) {
             throw new IllegalStateException("Gemini API 키가 이상합니다 확인해주세요.");
         }
-
         if (!meaningfulTextValidator.isValid(resumeContent, null)) {
             throw new JDException(JDErrorCode.INVALID_RESUME_CONTENT);
         }
