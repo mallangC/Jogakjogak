@@ -102,7 +102,6 @@ public class JDService {
             throw new JDException(JDErrorCode.FAILED_JSON_PROCESS);
         }
         JD jd = createdJd(jdRequestDto, member, hasResume);
-        System.out.println(hasResume);
         for (ToDoListDto dto : parsedAnalysisResult) {
             ToDoList toDoList = ToDoList.fromDto(dto, jd);
             jd.addToDoList(toDoList);
