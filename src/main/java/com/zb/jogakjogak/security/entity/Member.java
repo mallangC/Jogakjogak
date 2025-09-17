@@ -46,6 +46,8 @@ public class Member {
     //@Convert(converter = PhoneNumberEncryptor.class)
     private String phoneNumber;
 
+    private boolean isOnboarded;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 

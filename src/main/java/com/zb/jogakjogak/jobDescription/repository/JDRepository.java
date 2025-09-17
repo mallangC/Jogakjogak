@@ -23,4 +23,5 @@ public interface JDRepository extends JpaRepository<JD, Long>, JDRepositoryCusto
     @Query("SELECT j FROM JD j JOIN FETCH j.member")
     Page<JD> findAllJdsWithMember(Pageable pageable);
 
+    void deleteAllByMemberAndIsCreatedWithResumeFalse(Member member);
 }

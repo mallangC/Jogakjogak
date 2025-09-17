@@ -56,6 +56,9 @@ public class JD extends BaseEntity {
     private int notificationCount = 0;
 
     @Column
+    private boolean isCreatedWithResume;
+
+    @Column
     private LocalDateTime lastNotifiedAt;
 
     @Column(columnDefinition = "DATE")
