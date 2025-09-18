@@ -73,16 +73,37 @@ public class ResumeGetResponseDto {
     private List<String> skillList;
 
     public static ResumeGetResponseDto of(Resume resume) {
-        List<Career> careerList = new ArrayList<>(resume.getCareerList());
-        List<Education> educationList = new ArrayList<>(resume.getEducationList());
-        List<Skill> skillList = new ArrayList<>(resume.getSkillList());
+        List<Career> careerList = new ArrayList<>();
+        List<Education> educationList = new ArrayList<>();
+        List<Skill> skillList = new ArrayList<>();
+
+        if (resume.getCareerList() != null) {
+            careerList = new ArrayList<>(resume.getCareerList());
+        }
+        if (resume.getEducationList() != null) {
+            educationList = new ArrayList<>(resume.getEducationList());
+        }
+        if (resume.getSkillList() != null) {
+            skillList = new ArrayList<>(resume.getSkillList());
+        }
         return toResponseDto(resume, careerList, educationList, skillList);
     }
 
     public static ResumeGetResponseDto of(Resume resume, List<Career> careers, List<Education> educations, List<Skill> skills) {
-        List<Career> careerList = new ArrayList<>(careers);
-        List<Education> educationList = new ArrayList<>(educations);
-        List<Skill> skillList = new ArrayList<>(skills);
+        List<Career> careerList = new ArrayList<>();
+        List<Education> educationList = new ArrayList<>();
+        List<Skill> skillList = new ArrayList<>();
+
+        if (careers != null) {
+            careerList = new ArrayList<>(careers);
+        }
+        if (educations != null) {
+            educationList = new ArrayList<>(educations);
+        }
+        if (skills != null) {
+            skillList = new ArrayList<>(skills);
+        }
+
         return toResponseDto(resume, careerList, educationList, skillList);
     }
 
