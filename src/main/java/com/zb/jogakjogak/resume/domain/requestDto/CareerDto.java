@@ -18,7 +18,7 @@ public class CareerDto {
     private LocalDate joinedAt;
     private LocalDate quitAt;
     @NotBlank(message = "재직 여부를 입력해주세요.")
-    private boolean isWorking;
+    private Boolean isWorking;
     @NotBlank(message = "회사 이름을 입력해주세요.")
     private String companyName;
     @NotBlank(message = "담당 업무와 주요 성과를 입력해주세요.")
@@ -28,7 +28,7 @@ public class CareerDto {
         return CareerDto.builder()
                 .joinedAt(career.getJoinedAt())
                 .quitAt(career.getQuitAt())
-                .isWorking(career.isWorking())
+                .isWorking(career.getIsWorking())
                 .companyName(career.getCompanyName())
                 .workPerformance(career.getWorkPerformance())
                 .build();
