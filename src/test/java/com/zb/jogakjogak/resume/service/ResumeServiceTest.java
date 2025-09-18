@@ -617,8 +617,9 @@ class ResumeServiceTest {
                 .careerList(new ArrayList<>(List.of(
                         CareerDto.builder()
                                 .companyName("조각조각update")
-                                .isWorking(true)
+                                .isWorking(false)
                                 .joinedAt(LocalDate.of(2020, 1, 1))
+                                .quitAt(LocalDate.of(2020, 1, 1))
                                 .workPerformance(faker.lorem().paragraph(2))
                                 .build()
                 )))

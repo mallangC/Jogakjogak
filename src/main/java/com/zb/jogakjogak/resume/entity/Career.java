@@ -22,7 +22,7 @@ public class Career {
     private LocalDate joinedAt;
     private LocalDate quitAt;
     @Column(nullable = false)
-    private boolean isWorking;
+    private Boolean isWorking;
     @Column(nullable = false)
     private String companyName;
     @Column(nullable = false)
@@ -36,7 +36,7 @@ public class Career {
         return Career.builder()
                 .joinedAt(careerDto.getJoinedAt())
                 .quitAt(careerDto.getQuitAt())
-                .isWorking(careerDto.isWorking())
+                .isWorking(careerDto.getIsWorking())
                 .companyName(careerDto.getCompanyName())
                 .workPerformance(careerDto.getWorkPerformance())
                 .resume(resume)
