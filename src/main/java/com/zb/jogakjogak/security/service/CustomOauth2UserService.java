@@ -54,6 +54,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
             String nickname = nicknameCreator.createNickname();
             member = Member.builder()
                     .username(username)
+                    .isOnboarded(false)
                     .name(oAuth2ResponseDto.getName())
                     .nickname(nickname)
                     .isNotificationEnabled(true)

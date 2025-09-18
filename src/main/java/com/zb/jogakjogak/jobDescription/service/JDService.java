@@ -75,19 +75,25 @@ public class JDService {
     /**
      * gemini ai를 이용하여 JD와 이력서를 분석하여 To Do List를 만들어주는 서비스 메서드
      */
+    @Transactional
     public JDResponseDto llmAnalyze(JDRequestDto jdRequestDto, Member member) {
 
         long jdCount = jdRepository.findAllJdCountByMemberId(member.getId());
 
-        if (member.getResume() == null && jdCount > 0) {
-            throw new ResumeException(ResumeErrorCode.ANALYSIS_ALLOWED_ONCE_WITHOUT_RESUME);
-        }
-        //TODO: 테스트 후 갯수 변경 필요
-        if (memberRepository.countJdByMemberId(member.getId()) >= 20) {
-            throw new JDException(JDErrorCode.JD_LIMIT_EXCEEDED);
+        boolean hasResume = member.getResume() != null && member.getResume().getContent() != null;
+        if (!hasResume) {
+            if (jdCount >= 1) {
+                throw new ResumeException(ResumeErrorCode.ANALYSIS_ALLOWED_ONCE_WITHOUT_RESUME);
+            }
+        } else {
+            jdRepository.deleteAllByMemberAndIsCreatedWithResumeFalse(member);
+            if (jdCount >= 20) {
+                throw new JDException(JDErrorCode.JD_LIMIT_EXCEEDED);
+            }
         }
 
-        String analysisJsonString = llmService.generateTodoListJson(member.getResume().getContent(), jdRequestDto.getContent(), jdRequestDto.getJob());
+        String resumeContent = hasResume ? member.getResume().getContent() : "";
+        String analysisJsonString = llmService.generateTodoListJson(resumeContent, jdRequestDto.getContent(), jdRequestDto.getJob());
         List<ToDoListDto> parsedAnalysisResult;
         try {
             parsedAnalysisResult = objectMapper.readValue(analysisJsonString, new TypeReference<>() {
@@ -95,11 +101,22 @@ public class JDService {
         } catch (JsonProcessingException e) {
             throw new JDException(JDErrorCode.FAILED_JSON_PROCESS);
         }
+        JD jd = createdJd(jdRequestDto, member, hasResume);
+        for (ToDoListDto dto : parsedAnalysisResult) {
+            ToDoList toDoList = ToDoList.fromDto(dto, jd);
+            jd.addToDoList(toDoList);
+        }
+        JD savedJd = jdRepository.save(jd);
 
-        JD jd = JD.builder()
+        return JDResponseDto.fromEntity(savedJd, member);
+    }
+
+    private JD createdJd(JDRequestDto jdRequestDto, Member member, boolean isCreatedWithResume){
+        return JD.builder()
                 .title(jdRequestDto.getTitle())
                 .isBookmark(false)
                 .isAlarmOn(false)
+                .isCreatedWithResume(isCreatedWithResume)
                 .companyName(jdRequestDto.getCompanyName())
                 .job(jdRequestDto.getJob())
                 .content(jdRequestDto.getContent())
@@ -108,14 +125,6 @@ public class JDService {
                 .memo("")
                 .member(member)
                 .build();
-
-        for (ToDoListDto dto : parsedAnalysisResult) {
-            ToDoList toDoList = ToDoList.fromDto(dto, jd);
-            jd.addToDoList(toDoList);
-        }
-        JD savedJd = jdRepository.save(jd);
-
-        return JDResponseDto.fromEntity(savedJd, member);
     }
 
     public JDResponseDto getJd(Long jdId, Member member) {

@@ -4,6 +4,7 @@ import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.security.config.NicknameCreator;
 import com.zb.jogakjogak.security.dto.MemberResponseDto;
+import com.zb.jogakjogak.security.dto.UpdateIsOnboardedResponseDto;
 import com.zb.jogakjogak.security.dto.UpdateMemberRequestDto;
 import com.zb.jogakjogak.security.entity.Member;
 import com.zb.jogakjogak.security.repository.MemberRepository;
@@ -44,6 +45,18 @@ public class MemberService {
                 .nickname(member.getNickname())
                 .email(member.getEmail())
                 .isNotificationEnabled(member.isNotificationEnabled())
+                .build();
+    }
+
+    @Transactional
+    public UpdateIsOnboardedResponseDto updateIsOnboarded(String username) {
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
+
+        boolean toggleOnboarded = !member.isOnboarded();
+        member.setOnboarded(toggleOnboarded);
+        return UpdateIsOnboardedResponseDto.builder()
+                .isOnboarded(toggleOnboarded)
                 .build();
     }
 }

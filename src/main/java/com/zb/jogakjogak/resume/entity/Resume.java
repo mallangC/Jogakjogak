@@ -1,6 +1,7 @@
 package com.zb.jogakjogak.resume.entity;
 
 import com.zb.jogakjogak.global.BaseEntity;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeAddRequestDto;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
 import com.zb.jogakjogak.security.entity.Member;
 import jakarta.persistence.*;
@@ -47,6 +48,11 @@ public class Resume extends BaseEntity {
     public void modify(ResumeRequestDto requestDto) {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
+    }
+
+    public void update(ResumeAddRequestDto requestDto) {
+        this.content = requestDto.getContent();
+        this.isNewcomer = requestDto.getIsNewcomer();
     }
 
     public void setMember(Member member) {

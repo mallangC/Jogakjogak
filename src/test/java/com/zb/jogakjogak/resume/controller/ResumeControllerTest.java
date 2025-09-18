@@ -2,6 +2,7 @@ package com.zb.jogakjogak.resume.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
+import com.zb.jogakjogak.resume.domain.requestDto.CareerDto;
 import com.zb.jogakjogak.resume.domain.requestDto.EducationDto;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeAddRequestDto;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
@@ -16,7 +17,6 @@ import com.zb.jogakjogak.resume.repository.SkillRepository;
 import com.zb.jogakjogak.resume.type.EducationLevel;
 import com.zb.jogakjogak.resume.type.EducationStatus;
 import com.zb.jogakjogak.security.Role;
-import com.zb.jogakjogak.security.WithMockCustomUser;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.entity.Member;
 import com.zb.jogakjogak.security.repository.MemberRepository;
@@ -166,7 +166,6 @@ class ResumeControllerTest {
                 .isNewcomer(false)
                 .build();
         Resume saveResume = resumeRepository.save(newResume);
-
         List<Career> careerList = new ArrayList<>(List.of(
                 Career.builder()
                         .resume(saveResume)
@@ -372,7 +371,6 @@ class ResumeControllerTest {
 
     @Test
     @DisplayName("(v2)이력서 등록 성공")
-    @WithMockCustomUser(username = testUserLoginId, realName = testUserRealName, email = testUserEmail)
     void registerResumeV2_success() throws Exception {
         // Given
         String testContent = generateLongContent(300);
@@ -449,6 +447,64 @@ class ResumeControllerTest {
                 .andExpect(jsonPath("$.message").value("이력서 조회 성공"))
                 .andExpect(jsonPath("$.data.newcomer").value("true"))
                 .andDo(print());
+}
+  
+    @Test
+    @DisplayName("(v2)이력서 수정 성공")
+    void modifyResume_successV2() throws Exception {
+        // Given
+        String testContent = generateLongContent(300);
+        ResumeAddRequestDto requestDto = ResumeAddRequestDto.builder()
+                .content(testContent)
+                .isNewcomer(false)
+                .careerList(new ArrayList<>(List.of(
+                        CareerDto.builder()
+                                .joinedAt(LocalDate.now())
+                                .isWorking(true)
+                                .companyName("조각조각update")
+                                .workPerformance(faker.lorem().sentence(2))
+                                .build()
+                )))
+                .educationList(new ArrayList<>(List.of(
+                        EducationDto.builder()
+                                .level(EducationLevel.HIGH_SCHOOL)
+                                .majorField("조각고등학교update")
+                                .status(EducationStatus.GRADUATED)
+                                .build(),
+                        EducationDto.builder()
+                                .level(EducationLevel.BACHELOR)
+                                .majorField("조각대학교 update")
+                                .status(EducationStatus.GRADUATED)
+                                .build()
+                )))
+                .skillList(new ArrayList<>(List.of(
+                        "조각", "조가악", "조각조각"
+                )))
+                .build();
+        String content = objectMapper.writeValueAsString(requestDto);
+        createAndSaveResumeV2();
+        setAuthenticationForTestUser(testUserLoginId);
+
+        // When
+        ResultActions result = mockMvc.perform(patch("/v2/resume", requestDto)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content));
+        // Then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("이력서 수정 완료"))
+                .andExpect(jsonPath("$.data.content").value(testContent))
+                .andDo(print());
+
+        entityManager.clear();
+        Optional<Member> memberAfterModify = memberRepository.findByUsernameWithResume(testUserLoginId);
+
+        Optional<Resume> updatedResume = resumeRepository.findResumeWithCareerAndEducationAndSkill(memberAfterModify.get().getId());
+        List<String> educationMajorFieldList = updatedResume.get().getEducationList().stream()
+                .map(Education::getMajorField)
+                        .toList();
+        assertThat(updatedResume.get().getContent()).isEqualTo(testContent);
+        assertThat(educationMajorFieldList.contains("조각고등학교update")).isTrue();
+        assertThat(educationMajorFieldList.contains("조각대학교 update")).isTrue();
     }
 
 

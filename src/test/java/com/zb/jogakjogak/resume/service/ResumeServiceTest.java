@@ -10,7 +10,6 @@ import com.zb.jogakjogak.resume.domain.requestDto.CareerDto;
 import com.zb.jogakjogak.resume.domain.requestDto.EducationDto;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeAddRequestDto;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
-import com.zb.jogakjogak.resume.domain.responseDto.ResumeAddResponseDto;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeGetResponseDto;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeResponseDto;
 import com.zb.jogakjogak.resume.entity.Career;
@@ -319,7 +318,7 @@ class ResumeServiceTest {
         given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
 
         // When
-        ResumeAddResponseDto responseDto = resumeService.registerV2(requestDto, mockMember);
+        ResumeGetResponseDto responseDto = resumeService.registerV2(requestDto, mockMember);
 
         // Then
         assertThat(responseDto).isNotNull();
@@ -376,7 +375,7 @@ class ResumeServiceTest {
         given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
 
         // When
-        ResumeAddResponseDto responseDto = resumeService.registerV2(requestDto, mockMember);
+        ResumeGetResponseDto responseDto = resumeService.registerV2(requestDto, mockMember);
 
         // Then
         assertThat(responseDto).isNotNull();
@@ -441,7 +440,7 @@ class ResumeServiceTest {
         given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
 
         // When
-        ResumeAddResponseDto responseDto = resumeService.registerV2(requestDto, mockMember);
+        ResumeGetResponseDto responseDto = resumeService.registerV2(requestDto, mockMember);
 
         // Then
         assertThat(responseDto).isNotNull();
