@@ -201,7 +201,20 @@ class ResumeControllerTest {
         careerRepository.saveAll(careerList);
         educationRepository.saveAll(educationList);
         skillRepository.saveAll(skillList);
+        member.setResume(newResume);
+        entityManager.clear();
+    }
 
+    private void createAndSaveResumeV2_2() {
+        Member member = memberRepository.findByUsername(testUserLoginId)
+                .orElseThrow(() -> new AssertionError("테스트 사용자를 찾을 수 없습니다."));
+        Resume newResume = Resume.builder()
+                .content(null)
+                .member(member)
+                .isNewcomer(true)
+                .build();
+        resumeRepository.save(newResume);
+        member.setResume(newResume);
         entityManager.clear();
     }
 
@@ -420,6 +433,21 @@ class ResumeControllerTest {
                 .andExpect(jsonPath("$.data.content").isNotEmpty())
                 .andExpect(jsonPath("$.data.skillList[0]").value("조각"))
                 .andExpect(jsonPath("$.data.skillList[1]").value("조가악"))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("(v2)이력서 조회 성공")
+    void getResume_successV2_2() throws Exception {
+        //Given
+        createAndSaveResumeV2_2();
+        //When
+        ResultActions result = mockMvc.perform(get("/v2/resume"));
+
+        //Then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("이력서 조회 성공"))
+                .andExpect(jsonPath("$.data.newcomer").value("true"))
                 .andDo(print());
     }
 

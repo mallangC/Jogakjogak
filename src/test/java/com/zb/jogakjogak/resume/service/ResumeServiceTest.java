@@ -25,6 +25,7 @@ import com.zb.jogakjogak.resume.type.EducationLevel;
 import com.zb.jogakjogak.resume.type.EducationStatus;
 import com.zb.jogakjogak.security.Role;
 import com.zb.jogakjogak.security.entity.Member;
+import com.zb.jogakjogak.security.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -56,6 +57,9 @@ class ResumeServiceTest {
     private EducationRepository educationRepository;
 
     @Mock
+    private MemberRepository memberRepository;
+
+    @Mock
     private SkillRepository skillRepository;
 
     @InjectMocks
@@ -65,7 +69,6 @@ class ResumeServiceTest {
     private ResumeRequestDto sampleRequestDto;
     private Faker faker;
     private Member mockMember;
-
 
 
     @BeforeEach
@@ -310,6 +313,9 @@ class ResumeServiceTest {
                 .isNewcomer(isNewcomer)
                 .build();
 
+
+        given(memberRepository.findByUsername(fixedUserName))
+                .willReturn(Optional.of(mockMember));
         given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
 
         // When
@@ -365,6 +371,8 @@ class ResumeServiceTest {
                 .isNewcomer(isNewcomer)
                 .build();
 
+        given(memberRepository.findByUsername(fixedUserName))
+                .willReturn(Optional.of(mockMember));
         given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
 
         // When
@@ -428,6 +436,8 @@ class ResumeServiceTest {
                 .isNewcomer(isNewcomer)
                 .build();
 
+        given(memberRepository.findByUsername(fixedUserName))
+                .willReturn(Optional.of(mockMember));
         given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
 
         // When
@@ -536,6 +546,254 @@ class ResumeServiceTest {
         assertEquals(filterEducation.get().getLevel(), filterEducationFromResult.get().getLevel());
         assertEquals(filterEducation.get().getMajorField(), filterEducationFromResult.get().getMajorField());
         assertEquals(filterEducation.get().getStatus(), filterEducationFromResult.get().getStatus());
+    }
+
+    @Test
+    @DisplayName("(v2)이력서 조회 성공 테스트 - 신입이고 이력서 상세가 아무것도 없을 경우")
+    void getResume_successV2_2() {
+        Resume resume = Resume.builder()
+                .content(null)
+                .member(mockMember)
+                .isNewcomer(true)
+                .build();
+
+        //Given
+        when(resumeRepository.findResumeWithCareerAndEducationAndSkill(mockMember.getId()))
+                .thenReturn(Optional.of(resume));
+
+        //When
+        ResumeGetResponseDto result = resumeService.getResumeV2(mockMember);
+
+        //Then
+        verify(resumeRepository, times(1)).findResumeWithCareerAndEducationAndSkill(mockMember.getId());
+
+        assertNotNull(result);
+        assertEquals(resume.getContent(), result.getContent());
+        assertEquals(resume.getMember(), mockMember);
+        assertTrue(result.isNewcomer());
+    }
+
+    @Test
+    @DisplayName("(v2)이력서 수정 성공 테스트")
+    void modifyV2_success() {
+        //Given
+        Resume resume = Resume.builder()
+                .content(faker.lorem().sentence(3))
+                .member(mockMember)
+                .isNewcomer(false)
+                .careerList(new HashSet<>(List.of(
+                        Career.builder()
+                                .id(1L)
+                                .companyName("조각조각")
+                                .isWorking(true)
+                                .joinedAt(LocalDate.of(2020, 1, 1))
+                                .workPerformance(faker.lorem().paragraph(2))
+                                .build()
+                )))
+                .educationList(new HashSet<>(List.of(
+                        Education.builder()
+                                .id(1L)
+                                .level(EducationLevel.HIGH_SCHOOL)
+                                .majorField("조각고등학교")
+                                .status(EducationStatus.GRADUATED)
+                                .build(),
+                        Education.builder()
+                                .id(2L)
+                                .level(EducationLevel.BACHELOR)
+                                .majorField("조각대학교 조각학과")
+                                .status(EducationStatus.GRADUATED)
+                                .build()
+                )))
+                .skillList(new HashSet<>(List.of(
+                        Skill.builder()
+                                .id(1L)
+                                .content("조각")
+                                .build()
+                )))
+                .build();
+
+        ResumeAddRequestDto requestDto = ResumeAddRequestDto.builder()
+                .content(faker.lorem().sentence(3))
+                .isNewcomer(false)
+                .careerList(new ArrayList<>(List.of(
+                        CareerDto.builder()
+                                .companyName("조각조각update")
+                                .isWorking(true)
+                                .joinedAt(LocalDate.of(2020, 1, 1))
+                                .workPerformance(faker.lorem().paragraph(2))
+                                .build()
+                )))
+                .educationList(new ArrayList<>(List.of(
+                        EducationDto.builder()
+                                .level(EducationLevel.HIGH_SCHOOL)
+                                .majorField("조각고등학교update")
+                                .status(EducationStatus.GRADUATED)
+                                .build(),
+                        EducationDto.builder()
+                                .level(EducationLevel.BACHELOR)
+                                .majorField("조각대학교 조각학과update")
+                                .status(EducationStatus.GRADUATED)
+                                .build()
+                )))
+                .skillList(new ArrayList<>(List.of(
+                        "조각update", "조가악update"
+                )))
+                .build();
+        mockMember.setResume(resume);
+        when(resumeRepository.findResumeWithCareerAndEducationAndSkill(mockMember.getId())).thenReturn(Optional.of(resume));
+        when(careerRepository.saveAll(any())).thenReturn(List.of(
+                Career.builder()
+                        .id(1L)
+                        .companyName("조각조각update")
+                        .isWorking(true)
+                        .joinedAt(LocalDate.of(2020, 1, 1))
+                        .workPerformance(faker.lorem().paragraph(2))
+                        .build()));
+        when(educationRepository.saveAll(any())).thenReturn(List.of(
+                Education.builder()
+                        .id(1L)
+                        .level(EducationLevel.HIGH_SCHOOL)
+                        .majorField("조각고등학교update")
+                        .status(EducationStatus.GRADUATED)
+                        .build(),
+                Education.builder()
+                        .id(2L)
+                        .level(EducationLevel.BACHELOR)
+                        .majorField("조각대학교 조각학과update")
+                        .status(EducationStatus.GRADUATED)
+                        .build()));
+        when(skillRepository.saveAll(any())).thenReturn(List.of(
+                Skill.builder()
+                        .id(1L)
+                        .content("조각update")
+                        .build(),
+                Skill.builder()
+                        .id(2L)
+                        .content("조가악update")
+                        .build()));
+
+        //When
+        ResumeGetResponseDto result = resumeService.modifyV2(requestDto, mockMember);
+
+        //Then
+        verify(resumeRepository, times(1)).findResumeWithCareerAndEducationAndSkill(mockMember.getId());
+
+        assertNotNull(result);
+        assertEquals(requestDto.getContent(), result.getContent());
+        assertEquals(requestDto.getEducationList().get(0).getMajorField(), result.getEducationDtoList().get(0).getMajorField());
+        assertEquals(requestDto.getSkillList().get(0), result.getSkillList().get(0));
+        assertEquals(requestDto.getCareerList().get(0).getCompanyName(), result.getCareerDtoList().get(0).getCompanyName());
+    }
+
+
+    @Test
+    @DisplayName("(v2)이력서 수정 실패 테스트 - resume을 찾을 수 없음")
+    void modifyV2_failure1() {
+        //Given
+        ResumeAddRequestDto requestDto = ResumeAddRequestDto.builder()
+                .content(faker.lorem().sentence(3))
+                .isNewcomer(false)
+                .careerList(new ArrayList<>(List.of(
+                        CareerDto.builder()
+                                .companyName("조각조각update")
+                                .isWorking(true)
+                                .joinedAt(LocalDate.of(2020, 1, 1))
+                                .workPerformance(faker.lorem().paragraph(2))
+                                .build()
+                )))
+                .educationList(new ArrayList<>(List.of(
+                        EducationDto.builder()
+                                .level(EducationLevel.HIGH_SCHOOL)
+                                .majorField("조각고등학교update")
+                                .status(EducationStatus.GRADUATED)
+                                .build(),
+                        EducationDto.builder()
+                                .level(EducationLevel.BACHELOR)
+                                .majorField("조각대학교 조각학과update")
+                                .status(EducationStatus.GRADUATED)
+                                .build()
+                )))
+                .skillList(new ArrayList<>(List.of(
+                        "조각update", "조가악update"
+                )))
+                .build();
+
+        //When
+        ResumeException exception = assertThrows(ResumeException.class, () ->
+                resumeService.modifyV2(requestDto, mockMember));
+
+        //Then
+        verify(resumeRepository, times(0)).findResumeWithCareerAndEducationAndSkill(mockMember.getId());
+        assertThat(exception.getErrorCode()).isEqualTo(ResumeErrorCode.NOT_FOUND_RESUME);
+    }
+
+    @Test
+    @DisplayName("(v2)이력서 수정 실패 테스트 - 신입이 아닌데 경력을 작성안함")
+    void modifyV2_failure2() {
+        //Given
+        Resume resume = Resume.builder()
+                .content(faker.lorem().sentence(3))
+                .member(mockMember)
+                .isNewcomer(false)
+                .careerList(new HashSet<>(List.of(
+                        Career.builder()
+                                .id(1L)
+                                .companyName("조각조각")
+                                .isWorking(true)
+                                .joinedAt(LocalDate.of(2020, 1, 1))
+                                .workPerformance(faker.lorem().paragraph(2))
+                                .build()
+                )))
+                .educationList(new HashSet<>(List.of(
+                        Education.builder()
+                                .id(1L)
+                                .level(EducationLevel.HIGH_SCHOOL)
+                                .majorField("조각고등학교")
+                                .status(EducationStatus.GRADUATED)
+                                .build(),
+                        Education.builder()
+                                .id(2L)
+                                .level(EducationLevel.BACHELOR)
+                                .majorField("조각대학교 조각학과")
+                                .status(EducationStatus.GRADUATED)
+                                .build()
+                )))
+                .skillList(new HashSet<>(List.of(
+                        Skill.builder()
+                                .id(1L)
+                                .content("조각")
+                                .build()
+                )))
+                .build();
+        mockMember.setResume(resume);
+
+        ResumeAddRequestDto requestDto = ResumeAddRequestDto.builder()
+                .content(faker.lorem().sentence(3))
+                .isNewcomer(false)
+                .educationList(new ArrayList<>(List.of(
+                        EducationDto.builder()
+                                .level(EducationLevel.HIGH_SCHOOL)
+                                .majorField("조각고등학교update")
+                                .status(EducationStatus.GRADUATED)
+                                .build(),
+                        EducationDto.builder()
+                                .level(EducationLevel.BACHELOR)
+                                .majorField("조각대학교 조각학과update")
+                                .status(EducationStatus.GRADUATED)
+                                .build()
+                )))
+                .skillList(new ArrayList<>(List.of(
+                        "조각update", "조가악update"
+                )))
+                .build();
+
+        //When
+        ResumeException exception = assertThrows(ResumeException.class, () ->
+                resumeService.modifyV2(requestDto, mockMember));
+
+        //Then
+        verify(resumeRepository, times(0)).findResumeWithCareerAndEducationAndSkill(mockMember.getId());
+        assertThat(exception.getErrorCode()).isEqualTo(ResumeErrorCode.NOT_ENTERED_CAREER);
     }
 
 }
