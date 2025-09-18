@@ -94,13 +94,13 @@ public class ResumeGetResponseDto {
         List<Education> educationList = new ArrayList<>();
         List<Skill> skillList = new ArrayList<>();
 
-        if (resume.getCareerList() != null) {
+        if (careers != null) {
             careerList = new ArrayList<>(careers);
         }
-        if (resume.getEducationList() != null) {
+        if (educations != null) {
             educationList = new ArrayList<>(educations);
         }
-        if (resume.getSkillList() != null) {
+        if (skills != null) {
             skillList = new ArrayList<>(skills);
         }
 
