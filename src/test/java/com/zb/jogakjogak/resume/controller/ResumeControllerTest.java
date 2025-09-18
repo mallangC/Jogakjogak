@@ -170,8 +170,9 @@ class ResumeControllerTest {
                 Career.builder()
                         .resume(saveResume)
                         .companyName("조각조각")
-                        .isWorking(true)
+                        .isWorking(false)
                         .joinedAt(LocalDate.of(2020, 1, 1))
+                        .quitAt(LocalDate.of(2020, 1, 1))
                         .workPerformance(faker.lorem().paragraph(2))
                         .build()
         ));
@@ -447,8 +448,8 @@ class ResumeControllerTest {
                 .andExpect(jsonPath("$.message").value("이력서 조회 성공"))
                 .andExpect(jsonPath("$.data.newcomer").value("true"))
                 .andDo(print());
-}
-  
+    }
+
     @Test
     @DisplayName("(v2)이력서 수정 성공")
     void modifyResume_successV2() throws Exception {
@@ -460,6 +461,7 @@ class ResumeControllerTest {
                 .careerList(new ArrayList<>(List.of(
                         CareerDto.builder()
                                 .joinedAt(LocalDate.now())
+                                .quitAt(LocalDate.now())
                                 .isWorking(true)
                                 .companyName("조각조각update")
                                 .workPerformance(faker.lorem().sentence(2))
@@ -501,7 +503,7 @@ class ResumeControllerTest {
         Optional<Resume> updatedResume = resumeRepository.findResumeWithCareerAndEducationAndSkill(memberAfterModify.get().getId());
         List<String> educationMajorFieldList = updatedResume.get().getEducationList().stream()
                 .map(Education::getMajorField)
-                        .toList();
+                .toList();
         assertThat(updatedResume.get().getContent()).isEqualTo(testContent);
         assertThat(educationMajorFieldList.contains("조각고등학교update")).isTrue();
         assertThat(educationMajorFieldList.contains("조각대학교 update")).isTrue();
