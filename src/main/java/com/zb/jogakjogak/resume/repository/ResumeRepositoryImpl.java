@@ -41,9 +41,9 @@ public class ResumeRepositoryImpl implements ResumeRepositoryCustom {
     public Optional<Resume> findResumeWithCareerAndEducationAndSkill(Long memberId) {
 
         Resume findResume = queryFactory.selectFrom(resume)
-                .join(resume.careerList, career).fetchJoin()
-                .join(resume.educationList, education).fetchJoin()
-                .join(resume.skillList, skill).fetchJoin()
+                .leftJoin(resume.careerList, career).fetchJoin()
+                .leftJoin(resume.educationList, education).fetchJoin()
+                .leftJoin(resume.skillList, skill).fetchJoin()
                 .where(resume.member.id.eq(memberId))
                 .fetchOne();
 

@@ -548,6 +548,31 @@ class ResumeServiceTest {
     }
 
     @Test
+    @DisplayName("(v2)이력서 조회 성공 테스트 - 신입이고 이력서 상세가 아무것도 없을 경우")
+    void getResume_successV2_2() {
+        Resume resume = Resume.builder()
+                .content(null)
+                .member(mockMember)
+                .isNewcomer(true)
+                .build();
+
+        //Given
+        when(resumeRepository.findResumeWithCareerAndEducationAndSkill(mockMember.getId()))
+                .thenReturn(Optional.of(resume));
+
+        //When
+        ResumeGetResponseDto result = resumeService.getResumeV2(mockMember);
+
+        //Then
+        verify(resumeRepository, times(1)).findResumeWithCareerAndEducationAndSkill(mockMember.getId());
+
+        assertNotNull(result);
+        assertEquals(resume.getContent(), result.getContent());
+        assertEquals(resume.getMember(), mockMember);
+        assertTrue(result.isNewcomer());
+    }
+
+    @Test
     @DisplayName("(v2)이력서 수정 성공 테스트")
     void modifyV2_success() {
         //Given
