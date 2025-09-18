@@ -9,6 +9,6 @@ import java.util.List;
 
 @Repository
 public interface SkillWordRepository extends JpaRepository<SkillWord, Long> {
-    @Query(value = "SELECT sw.content FROM skill_word sw WHERE sw.content LIKE CONCAT('%, '?1, '%')", nativeQuery = true)
+    @Query(value = "SELECT sw.content FROM skill_word sw WHERE sw.content LIKE CONCAT('%', ?1, '%')", nativeQuery = true)
     List<String> findContentsByContentLike(String query);
 }
