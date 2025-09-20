@@ -2,7 +2,10 @@ package com.zb.jogakjogak.jobDescription.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.*;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.BookmarkRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.MemoRequestDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repository.JDRepository;
@@ -16,7 +19,6 @@ import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.entity.Member;
 import com.zb.jogakjogak.security.repository.MemberRepository;
 import jakarta.persistence.EntityManager;
-import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -398,6 +400,7 @@ class JDControllerTest {
                 .andExpect(jsonPath("$.data.totalElements").value(15)) // 총 15개 중
                 .andExpect(jsonPath("$.data.totalPages").value(2))   // 2 페이지
                 .andExpect(jsonPath("$.data.currentPage").value(0))  // 0 페이지
+                .andExpect(jsonPath("$.data.isOnboarded").value(false))
                 .andDo(print());
     }
 
