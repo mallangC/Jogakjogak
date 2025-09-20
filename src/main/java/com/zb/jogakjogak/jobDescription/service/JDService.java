@@ -194,7 +194,7 @@ public class JDService {
 
         Page<AllGetJDResponseDto> page = new PageImpl<>(dtos, pageable, jdEntitiesPage.getTotalElements());
 
-        return new PagedJdResponseDto(page, member.getResume(), allJdCount, applyJdCount,
+        return new PagedJdResponseDto(page, member, allJdCount, applyJdCount,
                 completedPiecesCount, totalPiecesCount, perfectJdCount);
     }
 
