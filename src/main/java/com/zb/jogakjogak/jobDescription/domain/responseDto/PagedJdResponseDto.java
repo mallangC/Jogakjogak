@@ -42,15 +42,15 @@ public class PagedJdResponseDto {
     @Schema(description = "지원 완료된 채용공고 갯수", example = "2")
     private int applyJdCount;
     @Schema(description = "모든 채용공고의 완료된 조각 갯수", example = "10")
-    private int completedPiecesCount;
+    private int allCompletedPieces;
     @Schema(description = "모든 채용공고의 조각 갯수", example = "100")
-    private int totalPiecesCount;
+    private int allTotalPieces;
     @Schema(description = "모든 조각을 완료한 채용공고 갯수", example = "1")
     private int perfectJdCount;
     @Schema(description = "첫 접속 유무", example = "true")
     private Boolean isOnboarded;
 
-    public PagedJdResponseDto(Page<AllGetJDResponseDto> page, Member member, int postedJdCount, int applyCount, int completedPiecesCount, int totalPiecesCount, int perfectJdCount) {
+    public PagedJdResponseDto(Page<AllGetJDResponseDto> page, Member member, int postedJdCount, int applyCount, int allCompletedPieces, int allTotalPieces, int perfectJdCount) {
         this.jds = page.getContent();
         this.totalPages = page.getTotalPages();
         this.totalElements = page.getTotalElements();
@@ -63,8 +63,8 @@ public class PagedJdResponseDto {
         this.resume = (member.getResume() != null) ? new ResumeResponseDto(member.getResume()) : null;
         this.postedJdCount = postedJdCount;
         this.applyJdCount = applyCount;
-        this.completedPiecesCount = completedPiecesCount;
-        this.totalPiecesCount = totalPiecesCount;
+        this.allCompletedPieces = allCompletedPieces;
+        this.allTotalPieces = allTotalPieces;
         this.perfectJdCount = perfectJdCount;
         this.isOnboarded = member.isOnboarded();
     }

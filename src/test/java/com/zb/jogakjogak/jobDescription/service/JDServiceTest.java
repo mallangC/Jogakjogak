@@ -459,8 +459,8 @@ class JDServiceTest {
 
         assertEquals(2, resultPage.getPostedJdCount());
         assertEquals(0, resultPage.getApplyJdCount());
-        assertEquals(2, resultPage.getCompletedPiecesCount());
-        assertEquals(3, resultPage.getTotalPiecesCount());
+        assertEquals(2, resultPage.getAllCompletedPieces());
+        assertEquals(3, resultPage.getAllTotalPieces());
         assertEquals(1, resultPage.getPerfectJdCount());
 
         assertNotNull(resultPage.getResume());
@@ -470,13 +470,13 @@ class JDServiceTest {
 
         AllGetJDResponseDto dto1 = resultPage.getJds().get(0);
         assertEquals(101L, dto1.getJd_id());
-        assertEquals(2L, dto1.getTotal_pieces());
-        assertEquals(1L, dto1.getCompleted_pieces());
+        assertEquals(2L, dto1.getTotalPieces());
+        assertEquals(1L, dto1.getCompletedPieces());
 
         AllGetJDResponseDto dto2 = resultPage.getJds().get(1);
         assertEquals(102L, dto2.getJd_id());
-        assertEquals(1L, dto2.getTotal_pieces());
-        assertEquals(1L, dto2.getCompleted_pieces());
+        assertEquals(1L, dto2.getTotalPieces());
+        assertEquals(1L, dto2.getCompletedPieces());
 
         assertFalse(resultPage.getIsOnboarded());
     }
