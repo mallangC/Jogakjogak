@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -214,8 +213,8 @@ public class JDService {
                 .isBookmark(jd.isBookmark())
                 .isAlarmOn(jd.isAlarmOn())
                 .companyName(jd.getCompanyName())
-                .completed_pieces(completedPieces)
-                .total_pieces(totalPieces)
+                .completedPieces(completedPieces)
+                .totalPieces(totalPieces)
                 .applyAt(jd.getApplyAt())
                 .createdAt(jd.getCreatedAt())
                 .updatedAt(jd.getUpdatedAt())

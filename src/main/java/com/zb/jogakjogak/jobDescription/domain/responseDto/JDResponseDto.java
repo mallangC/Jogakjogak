@@ -69,9 +69,9 @@ public class JDResponseDto {
     @Schema(description = "수정 일시", example = "2025-06-22T10:30:00Z")
     private LocalDateTime updatedAt;
     @Schema(description = "채용공고의 완료된 조각 갯수", example = "10")
-    private int completedPiecesCount;
+    private int completedPieces;
     @Schema(description = "채용공고의 조각 갯수", example = "10")
-    private int totalPiecesCount;
+    private int totalPieces;
 
     @Schema(description = "전체 todolist 리스트")
     private List<ToDoListResponseDto> toDoLists;
@@ -106,8 +106,8 @@ public class JDResponseDto {
                 .createdAt(jd.getCreatedAt())
                 .updatedAt(jd.getUpdatedAt())
                 .toDoLists(mappedToDoLists)
-                .completedPiecesCount(completedPiecesCount)
-                .totalPiecesCount(totalPiecesCount)
+                .completedPieces(completedPiecesCount)
+                .totalPieces(totalPiecesCount)
                 .memberId(member.getId())
                 .build();
     }
