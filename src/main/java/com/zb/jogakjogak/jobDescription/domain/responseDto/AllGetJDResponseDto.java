@@ -17,8 +17,8 @@ public class AllGetJDResponseDto {
     private boolean isBookmark;
     private boolean isAlarmOn;
     private String companyName;
-    private Long total_pieces;
-    private Long completed_pieces;
+    private Long totalPieces;
+    private Long completedPieces;
     private LocalDateTime applyAt;
     private LocalDateTime endedAt;
     private LocalDateTime createdAt;
