@@ -83,6 +83,7 @@ class JDServiceTest {
                 .password("password123")
                 .role(Role.USER)
                 .resume(mockResume)
+                .isOnboarded(false)
                 .build();
 
         jdRequestDto = JDRequestDto.builder()
@@ -476,6 +477,8 @@ class JDServiceTest {
         assertEquals(102L, dto2.getJd_id());
         assertEquals(1L, dto2.getTotal_pieces());
         assertEquals(1L, dto2.getCompleted_pieces());
+
+        assertFalse(resultPage.getIsOnboarded());
     }
 
     @Test
