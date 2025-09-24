@@ -1,5 +1,6 @@
 package com.zb.jogakjogak.jobDescription.domain.requestDto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,5 +19,6 @@ public class UpdateTodoListsIsDoneRequestDto {
     @Schema(description = "수정할 todolist id")
     private List<Long> toDoListIds;
     @Schema(description = "일괄처리할 완료여부", example = "true")
+    @JsonProperty("done")
     private boolean isDone;
 }

@@ -172,6 +172,7 @@ public class ToDoListService {
             toDoList.updateToDoListIsDone(dto.isDone());
             updatedLists.add(toDoList);
         }
+        toDoListRepository.saveAll(updatedLists);
 
         List<ToDoListResponseDto> responseDtoList = updatedLists.stream()
                 .map(ToDoListResponseDto::fromEntity)

@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 @Entity
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
