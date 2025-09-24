@@ -168,6 +168,7 @@ public class ToDoListService {
         List<ToDoList> updatedLists = new ArrayList<>();
         List<ToDoList> toDoLists = toDoListRepository.findAllById(dto.getToDoListIds());
 
+
         for (ToDoList toDoList : toDoLists) {
             toDoList.updateToDoListIsDone(dto.isDone());
             updatedLists.add(toDoList);
