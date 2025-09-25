@@ -39,7 +39,7 @@ public class JDRepositoryImpl implements JDRepositoryCustom{
                 .selectFrom(jd)
                 .join(jd.member, member).fetchJoin()
                 .leftJoin(jd.toDoLists, toDoList).fetchJoin()
-                .join(member.resume, resume).fetchJoin()
+                .leftJoin(member.resume, resume).fetchJoin()
                 .where(jd.id.eq(jdId)
                         .and(member.id.eq(memberId)))
                 .fetchOne();
