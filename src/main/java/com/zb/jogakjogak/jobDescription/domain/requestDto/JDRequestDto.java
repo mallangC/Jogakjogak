@@ -1,7 +1,6 @@
 package com.zb.jogakjogak.jobDescription.domain.requestDto;
 
 import com.zb.jogakjogak.global.validation.MeaningfulText;
-import com.zb.jogakjogak.global.validation.ValidUrl;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -9,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.URL;
 
 import java.time.LocalDateTime;
 
@@ -23,7 +23,7 @@ public class JDRequestDto {
     @Size(max = 30, message = "제목의 최대 길이는 30자입니다.")
     private String title;
     @Schema(description = "채용 공고의 URL", example = "https://jogakjogak.com", requiredMode = Schema.RequiredMode.REQUIRED)
-//    @ValidUrl
+    @URL
     private String jdUrl;
     @Schema(description = "채용 공고의 회사명", example = "Jogakjogak", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "회사 이름은 필수 항목입니다.")
