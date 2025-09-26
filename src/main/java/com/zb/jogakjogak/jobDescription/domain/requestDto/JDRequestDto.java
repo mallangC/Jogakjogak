@@ -23,7 +23,7 @@ public class JDRequestDto {
     @Size(max = 30, message = "제목의 최대 길이는 30자입니다.")
     private String title;
     @Schema(description = "채용 공고의 URL", example = "https://jogakjogak.com", requiredMode = Schema.RequiredMode.REQUIRED)
-    @ValidUrl
+//    @ValidUrl
     private String jdUrl;
     @Schema(description = "채용 공고의 회사명", example = "Jogakjogak", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "회사 이름은 필수 항목입니다.")
