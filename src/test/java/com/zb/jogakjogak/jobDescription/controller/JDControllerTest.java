@@ -2,6 +2,9 @@ package com.zb.jogakjogak.jobDescription.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
+import com.zb.jogakjogak.event.entity.Event;
+import com.zb.jogakjogak.event.repository.EventRepository;
+import com.zb.jogakjogak.event.type.EventType;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.BookmarkRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
@@ -39,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -69,6 +73,9 @@ class JDControllerTest {
 
     @Autowired
     private ResumeRepository resumeRepository;
+
+    @Autowired
+    private EventRepository eventRepository;
 
     @Autowired
     private EntityManager entityManager;
@@ -238,6 +245,14 @@ class JDControllerTest {
         List<JD> jds = jdRepository.findAllByMember(setupMember);
         assertThat(jds).hasSize(1);
         assertThat(jds.get(0).getTitle()).isEqualTo("Gemini 테스트 JD");
+
+        Optional<Event> findEvent = eventRepository.findByMemberIdAndType(setupMember.getId(), EventType.NEW_MEMBER);
+        if (findEvent.isPresent()){
+            System.out.println("find event id : "+findEvent.get().getId());
+            System.out.println("find event code : "+findEvent.get().getCode());
+            System.out.println("find event type : "+findEvent.get().getType());
+            System.out.println("find event is first? : "+findEvent.get().getIsFirst());
+        }
     }
 
     @Test
