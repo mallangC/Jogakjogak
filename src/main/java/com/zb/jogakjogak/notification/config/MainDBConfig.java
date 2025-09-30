@@ -21,7 +21,8 @@ import java.util.HashMap;
         basePackages = {"com.zb.jogakjogak.security.repository",
                         "com.zb.jogakjogak.jobDescription.repository",
                         "com.zb.jogakjogak.resume.repository",
-                        "com.zb.jogakjogak.notification.repository"
+                        "com.zb.jogakjogak.notification.repository",
+                        "com.zb.jogakjogak.event.repository"
         },
         entityManagerFactoryRef = "dataEntityManager",
         transactionManagerRef = "dataTransactionManager"
@@ -43,7 +44,8 @@ public class MainDBConfig {
         em.setPackagesToScan(new String[]{"com.zb.jogakjogak.security.entity",
                                             "com.zb.jogakjogak.jobDescription.entity",
                                             "com.zb.jogakjogak.resume.entity",
-                                            "com.zb.jogakjogak.notification.entity"
+                                            "com.zb.jogakjogak.notification.entity",
+                                            "com.zb.jogakjogak.event.entity"
         });
         em. setJpaVendorAdapter(new HibernateJpaVendorAdapter());
 

@@ -28,6 +28,26 @@ public class GlobalExceptionHandler {
     private final GaMeasurementProtocolService gaService;
 
 
+    @ExceptionHandler(EventException.class)
+    public ResponseEntity<ErrorResponse> handleJDException(EventException e, HttpServletRequest request) {
+        EventErrorCode eventErrorCode = e.getErrorCode();
+        ErrorResponse response = new ErrorResponse(eventErrorCode.name(), eventErrorCode.getMessage());
+
+        log.error("EventException occurred: {} - {}", eventErrorCode.name(), eventErrorCode.getMessage(), e);
+
+        sendGaErrorEvent(
+                request,
+                getUserIdFromSecurityContext(),
+                "event_exception",
+                eventErrorCode.name(),
+                eventErrorCode.getMessage(),
+                eventErrorCode.getHttpStatus().value(),
+                e
+        );
+
+        return new ResponseEntity<>(response, eventErrorCode.getHttpStatus());
+    }
+
     @ExceptionHandler(JDException.class)
     public ResponseEntity<ErrorResponse> handleJDException(JDException e, HttpServletRequest request) {
         JDErrorCode jdErrorCode = e.getErrorCode();

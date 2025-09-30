@@ -3,6 +3,9 @@ package com.zb.jogakjogak.jobDescription.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
+import com.zb.jogakjogak.event.entity.Event;
+import com.zb.jogakjogak.event.repository.EventRepository;
+import com.zb.jogakjogak.event.type.EventType;
 import com.zb.jogakjogak.global.exception.JDErrorCode;
 import com.zb.jogakjogak.global.exception.JDException;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.*;
@@ -55,6 +58,9 @@ class JDServiceTest {
 
     @Mock
     private MemberRepository memberRepository;
+
+    @Mock
+    private EventRepository eventRepository;
 
     private JDRequestDto jdRequestDto;
     private String mockLLMAnalysisJsonString;
@@ -153,6 +159,14 @@ class JDServiceTest {
                     .toDoLists(originalJd.getToDoLists())
                     .build();
         });
+        when(eventRepository.findByMemberIdAndType(anyLong(), any()))
+                .thenReturn(Optional.of(Event.builder()
+                        .id(1L)
+                        .member(mockMember)
+                        .code("TEST10")
+                        .isFirst(true)
+                        .type(EventType.NEW_MEMBER)
+                        .build()));
 
         // when
         JDResponseDto result = jdService.llmAnalyze(jdRequestDto, mockMember);
@@ -449,7 +463,7 @@ class JDServiceTest {
 
 
         // Then
-        verify(jdRepository, times(1)).findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable,"normal");
+        verify(jdRepository, times(1)).findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "normal");
 
         assertNotNull(resultPage);
         assertNotNull(resultPage.getJds());
@@ -493,7 +507,7 @@ class JDServiceTest {
 
 
         // Then
-        verify(jdRepository, times(1)).findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable,"normal");
+        verify(jdRepository, times(1)).findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "normal");
 
         assertNotNull(resultPage);
         assertNotNull(resultPage.getJds());
@@ -509,7 +523,7 @@ class JDServiceTest {
     void updateBookmarkStatus_success_toTrue() {
         // Given
         BookmarkRequestDto dto = BookmarkRequestDto.builder().isBookmark(true).build();
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(),mockMember.getId())).thenReturn(Optional.of(testJd));
+        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), mockMember.getId())).thenReturn(Optional.of(testJd));
 
         // When
         BookmarkResponseDto response = jdService.updateBookmarkStatus(testJd.getId(), dto, mockMember);
@@ -521,7 +535,7 @@ class JDServiceTest {
         assertTrue(testJd.isBookmark());
 
         // Mock 객체의 메서드 호출 검증
-        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(),mockMember.getId());
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), mockMember.getId());
     }
 
     @Test
@@ -567,7 +581,7 @@ class JDServiceTest {
         BookmarkRequestDto dto = BookmarkRequestDto.builder().isBookmark(true).build();
         Member requestMember = Member.builder().id(200L).username("otherUser").build();
 
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(),requestMember.getId())).thenReturn(Optional.empty());
+        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), requestMember.getId())).thenReturn(Optional.empty());
 
 
         // When & Then
@@ -657,7 +671,7 @@ class JDServiceTest {
                 .build();
 
         // Mock repository calls
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(),mockMember.getId())).thenReturn(Optional.of(testJd));
+        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), mockMember.getId())).thenReturn(Optional.of(testJd));
 
         // When
         MemoResponseDto result = jdService.updateMemo(testJd.getId(), memoRequestDto, mockMember);
@@ -668,7 +682,7 @@ class JDServiceTest {
         assertEquals(memoRequestDto.getMemo(), result.getMemo());
         assertEquals(memoRequestDto.getMemo(), testJd.getMemo());
 
-        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(),mockMember.getId());
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), mockMember.getId());
 
     }
 
@@ -717,7 +731,7 @@ class JDServiceTest {
         // Verify interactions
         verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), unauthorizedMember.getId());
     }
-    
+
     @DisplayName("JD 업데이트 성공")
     void updateJd_Success() {
         // Given
@@ -731,7 +745,7 @@ class JDServiceTest {
                 .build();
 
         // Mock repository calls
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(),mockMember.getId())).thenReturn(Optional.of(testJd));
+        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), mockMember.getId())).thenReturn(Optional.of(testJd));
 
         // When
         JDResponseDto result = jdService.updateJd(testJd.getId(), dto, mockMember);
@@ -741,7 +755,7 @@ class JDServiceTest {
         assertEquals(now, result.getEndedAt());
         assertEquals(dto.getJdUrl(), result.getJdUrl());
     }
-  
+
     @Test
     @DisplayName("알람 설정 된 JD 목록 성공적으로 조회")
     void getAllJds_Success_toFilterByAlarmOn_ReturnsOnlyAlarmOnJds() {
@@ -774,7 +788,7 @@ class JDServiceTest {
 
 
         // Then
-        verify(jdRepository, times(1)).findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable,"alarm");
+        verify(jdRepository, times(1)).findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "alarm");
 
         assertNotNull(resultPage);
         assertNotNull(resultPage.getJds());
@@ -813,7 +827,7 @@ class JDServiceTest {
 
 
         // Then
-        verify(jdRepository, times(1)).findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable,"bookmark");
+        verify(jdRepository, times(1)).findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "bookmark");
 
         assertNotNull(resultPage);
         assertNotNull(resultPage.getJds());
@@ -851,11 +865,11 @@ class JDServiceTest {
 
 
         // Then
-        verify(jdRepository, times(1)).findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable,"completed");
+        verify(jdRepository, times(1)).findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "completed");
 
         assertNotNull(resultPage);
         assertNotNull(resultPage.getJds());
-        assertTrue(resultPage.getJds().stream().allMatch(jd-> jd.getApplyAt() != null));
+        assertTrue(resultPage.getJds().stream().allMatch(jd -> jd.getApplyAt() != null));
 
     }
 }

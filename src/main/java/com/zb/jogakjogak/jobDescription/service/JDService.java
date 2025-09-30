@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
+import com.zb.jogakjogak.event.entity.Event;
+import com.zb.jogakjogak.event.repository.EventRepository;
+import com.zb.jogakjogak.event.type.EventType;
 import com.zb.jogakjogak.global.exception.*;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.*;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.*;
@@ -13,6 +16,7 @@ import com.zb.jogakjogak.jobDescription.repository.JDRepository;
 import com.zb.jogakjogak.security.entity.Member;
 import com.zb.jogakjogak.security.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,6 +35,7 @@ public class JDService {
     private final ObjectMapper objectMapper;
     private final JDRepository jdRepository;
     private final MemberRepository memberRepository;
+    private final EventRepository eventRepository;
     private final LLMService llmService;
 
     /**
@@ -107,10 +113,30 @@ public class JDService {
         }
         JD savedJd = jdRepository.save(jd);
 
+        // 이벤트 코드 추가
+        Optional<Event> findEvent = eventRepository.findByMemberIdAndType(member.getId(), EventType.NEW_MEMBER);
+        if (jdCount == 0 && findEvent.isEmpty()) {
+            String code;
+            while (true) {
+                code = RandomStringUtils.random(6, true, true).toUpperCase();
+                boolean isExists = eventRepository.existsByCode(code);
+                if (!isExists) {
+                    break;
+                }
+            }
+            Event event = Event.builder()
+                    .code(code)
+                    .member(member)
+                    .type(EventType.NEW_MEMBER)
+                    .isFirst(true)
+                    .build();
+            eventRepository.save(event);
+        }
+
         return JDResponseDto.fromEntity(savedJd, member);
     }
 
-    private JD createdJd(JDRequestDto jdRequestDto, Member member, boolean isCreatedWithResume){
+    private JD createdJd(JDRequestDto jdRequestDto, Member member, boolean isCreatedWithResume) {
         return JD.builder()
                 .title(jdRequestDto.getTitle())
                 .isBookmark(false)
@@ -142,7 +168,7 @@ public class JDService {
     public JDAlarmResponseDto alarm(Long jdId, JDAlarmRequestDto dto, Member member) {
 
         JD jd = getAuthorizedJd(jdId, member);
-        if(dto.isAlarmOn()){
+        if (dto.isAlarmOn()) {
             member.setNotificationEnabled(true);
         }
         memberRepository.save(member);
