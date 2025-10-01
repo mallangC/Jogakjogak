@@ -1,5 +1,6 @@
 package com.zb.jogakjogak.security.entity;
 
+import com.zb.jogakjogak.event.entity.Event;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.notification.entity.Notification;
 import com.zb.jogakjogak.resume.entity.Resume;
@@ -66,8 +67,11 @@ public class Member {
     @Builder.Default
     private List<JD> jdList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notification> notification;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Event> eventList;
 
     @PrePersist
     public void prePersist() {
